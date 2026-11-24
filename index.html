@@ -43,19 +43,7 @@
     <header class="sticky top-0 z-30 bg-[#111312]/95 backdrop-blur-md">
       <!-- Top Bar -->
       <div class="flex items-center justify-between px-4 h-14">
-        <!-- Left Back / Quick Menu Button -->
-        <button
-          id="btnOpenSettingsLeft"
-          type="button"
-          aria-label="Pengaturan & Data"
-          class="w-10 h-10 -ml-2 flex items-center justify-center rounded-full text-[#D1D5DB] hover:bg-[#181B19] active:scale-95 transition"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-
-        <!-- Center Title -->
+        <!-- Left Title -->
         <h1 class="text-[16px] font-semibold tracking-tight text-[#F3F4F6]">Performance</h1>
 
         <!-- Right Quick Action, Cloud Sync Status & Settings -->
@@ -2533,7 +2521,6 @@ function doPost(e) {
           updateCloudBadgeUI();
           document.getElementById('settingsModalBackdrop').classList.remove('hidden');
         };
-        document.getElementById('btnOpenSettingsLeft').addEventListener('click', openSettings);
         document.getElementById('btnOpenSettingsRight').addEventListener('click', openSettings);
         document.getElementById('btnSyncStatusHeader').addEventListener('click', openSettings);
         document.getElementById('btnCloseSettingsModal').addEventListener('click', () => {
