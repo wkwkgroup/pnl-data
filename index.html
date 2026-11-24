@@ -859,8 +859,25 @@ function doPost(e) {
       };
 
       // ==================== UTILITY & FORMATTING HELPERS ====================
+      function normalizeToIsoDate(rawVal) {
+        if (!rawVal) return '';
+        const str = String(rawVal).trim();
+        // Sudah format YYYY-MM-DD
+        const isoMatch = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if (isoMatch) {
+          return `${isoMatch[1]}-${isoMatch[2].padStart(2, '0')}-${isoMatch[3].padStart(2, '0')}`;
+        }
+        // Format Date string JS dari Google Sheets, misal "Mon Nov 23 2026 ..." atau "23 Nov 2026"
+        const parsed = new Date(str);
+        if (!isNaN(parsed.getTime())) {
+          return toIsoDateLocal(parsed);
+        }
+        return str.slice(0, 10);
+      }
+
       function parseDateLocal(isoStr) {
-        const parts = String(isoStr).split('-');
+        const cleanIso = normalizeToIsoDate(isoStr);
+        const parts = String(cleanIso).split('-');
         if (parts.length !== 3) return new Date();
         return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
       }
@@ -979,7 +996,8 @@ function doPost(e) {
       function computeMonthlyMetrics(computedList) {
         const map = new Map();
         computedList.forEach(item => {
-          const monthKey = item.date.slice(0, 7);
+          const cleanIso = normalizeToIsoDate(item.date);
+          const monthKey = cleanIso.slice(0, 7);
           if (!map.has(monthKey)) {
             map.set(monthKey, {
               monthKey,
@@ -999,7 +1017,9 @@ function doPost(e) {
           const base = g.startPrevEquity > 0 ? g.startPrevEquity : 1;
           const pnlPct = (g.totalPnl / base) * 100;
           const [yyyy, mm] = g.monthKey.split('-');
-          const label = `${MONTHS_SHORT[Number(mm) - 1]} ${yyyy}`;
+          const monthIdx = Number(mm) - 1;
+          const monthName = MONTHS_SHORT[monthIdx] || mm;
+          const label = yyyy ? `${monthName} ${yyyy}` : g.monthKey;
           return {
             ...g,
             label,
@@ -1352,11 +1372,14 @@ function doPost(e) {
           const data = await res.json();
           if (data && Array.isArray(data.entries)) {
             if (data.entries.length > 0) {
-              state.entries = data.entries.map(item => ({
-                date: String(item.date).slice(0, 10),
-                equity: Number(item.equity) || 0,
-                netFlow: Number(item.netFlow) || 0
-              }));
+              state.entries = data.entries
+                .map(item => ({
+                  date: normalizeToIsoDate(item.date),
+                  equity: Number(item.equity) || 0,
+                  netFlow: Number(item.netFlow) || 0
+                }))
+                .filter(item => /^\d{4}-\d{2}-\d{2}$/.test(item.date))
+                .sort((a, b) => a.date.localeCompare(b.date));
               if (data.currency === 'USD' || data.currency === 'IDR') {
                 state.settings.currency = data.currency;
               }
@@ -1924,7 +1947,13 @@ function doPost(e) {
           const savedCloud = localStorage.getItem(STORAGE_KEY_CLOUD);
 
           if (savedEntries !== null) {
-            state.entries = JSON.parse(savedEntries);
+            const rawList = JSON.parse(savedEntries);
+            state.entries = Array.isArray(rawList)
+              ? rawList.map(item => ({
+                  ...item,
+                  date: normalizeToIsoDate(item.date)
+                }))
+              : [...SAMPLE_ENTRIES];
           } else {
             state.entries = [...SAMPLE_ENTRIES];
           }
