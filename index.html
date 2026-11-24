@@ -1843,50 +1843,6 @@ function doPost(e) {
         document.getElementById('btnEmptyAddFirst').addEventListener('click', () => openEntryModal(null));
         document.getElementById('btnAddCashflowShortcut').addEventListener('click', () => openEntryModal(null, true));
 
-        // Refresh & Pull-to-Refresh for iOS Add-to-Home-Screen Mode
-        async function triggerManualRefresh() {
-          const icon = document.getElementById('refreshIconSvg');
-          const pullBox = document.getElementById('pullRefreshIndicator');
-          const pullText = document.getElementById('pullRefreshText');
-          if (icon) icon.classList.add('animate-spin', 'text-[#22C55E]');
-          if (pullBox && pullText) {
-            pullText.textContent = 'Menyinkronkan data terbaru...';
-            pullBox.classList.remove('hidden');
-          }
-
-          if (state.cloud.url) {
-            await pullEntriesFromCloud(false);
-          } else {
-            renderAll();
-            showToast('Tampilan diperbarui');
-          }
-
-          setTimeout(() => {
-            if (icon) icon.classList.remove('animate-spin', 'text-[#22C55E]');
-            if (pullBox) pullBox.classList.add('hidden');
-          }, 450);
-        }
-
-        document.getElementById('btnRefreshApp').addEventListener('click', triggerManualRefresh);
-
-        // Touch Pull-to-Refresh Gesture on iOS Standalone PWA
-        let touchStartY = 0;
-        let isPulling = false;
-        const appShell = document.getElementById('appShell');
-        appShell.addEventListener('touchstart', (e) => {
-          if (window.scrollY <= 0 && e.touches && e.touches.length === 1) {
-            touchStartY = e.touches[0].clientY;
-            isPulling = true;
-          } else {
-            isPulling = false;
-          }
-        }, { passive: true });
-
-        appShell.addEventListener('touchmove', (e) => {
-          if (!isPulling || !e.touches || !e.touches[0]) return;
-          const deltaY = e.touches[0].clientY - touchStartY;
-          const pullBox = document.getElementById('pullRefreshIndicator');
-          const pullText = document.getElementById('pullRefreshText');
         // Refresh Button for iOS Add-to-Home-Screen Mode
         async function triggerManualRefresh() {
           const icon = document.getElementById('refreshIconSvg');
@@ -1905,6 +1861,88 @@ function doPost(e) {
         }
 
         document.getElementById('btnRefreshApp').addEventListener('click', triggerManualRefresh);
+
+        // Entry Modal Controls & Form Submission
+        document.getElementById('btnCloseEntryModal').addEventListener('click', closeEntryModal);
+        document.getElementById('entryModalBackdrop').addEventListener('click', (e) => {
+          if (e.target.id === 'entryModalBackdrop') closeEntryModal();
+        });
+
+        document.getElementById('inputDate').addEventListener('change', (e) => {
+          updateModalDateBadge(e.target.value);
+          updateLivePnlPreview();
+        });
+        document.getElementById('btnSuggestNextTradingDay').addEventListener('click', () => {
+          const nextIso = getNextTradingDayIso();
+          document.getElementById('inputDate').value = nextIso;
+          updateModalDateBadge(nextIso);
+          updateLivePnlPreview();
+        });
+        document.getElementById('btnSuggestToday').addEventListener('click', () => {
+          const todayIso = toIsoDateLocal(new Date());
+          document.getElementById('inputDate').value = todayIso;
+          updateModalDateBadge(todayIso);
+          updateLivePnlPreview();
+        });
+
+        document.getElementById('btnToggleCashflowSection').addEventListener('click', () => {
+          const container = document.getElementById('cashflowInputContainer');
+          const chevron = document.getElementById('cashflowChevron');
+          container.classList.toggle('hidden');
+          chevron.classList.toggle('rotate-180');
+        });
+
+        document.getElementById('btnFlowDeposit').addEventListener('click', () => {
+          state.cashflowSign = 1;
+          syncCashflowSignButtons();
+          updateLivePnlPreview();
+        });
+        document.getElementById('btnFlowWithdraw').addEventListener('click', () => {
+          state.cashflowSign = -1;
+          syncCashflowSignButtons();
+          updateLivePnlPreview();
+        });
+
+        document.getElementById('inputEquity').addEventListener('input', updateLivePnlPreview);
+        document.getElementById('inputCashflowAmount').addEventListener('input', updateLivePnlPreview);
+        document.getElementById('chkAutoAdjustEquity').addEventListener('change', updateLivePnlPreview);
+
+        document.getElementById('entryForm').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const dateVal = normalizeToIsoDate(document.getElementById('inputDate').value);
+          const origDate = document.getElementById('editingOriginalDate').value;
+          const eqVal = parseFloat(document.getElementById('inputEquity').value);
+          const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
+          const netFlow = cfRaw * state.cashflowSign;
+
+          if (!dateVal || isNaN(eqVal)) return;
+
+          state.entries = state.entries.filter(item => item.date !== origDate && item.date !== dateVal);
+          state.entries.push({ date: dateVal, equity: eqVal, netFlow });
+          state.entries.sort((a, b) => a.date.localeCompare(b.date));
+
+          saveLocal();
+          renderAll();
+          closeEntryModal();
+          showToast('Data berhasil disimpan');
+          pushEntriesToCloud(true);
+        });
+
+        document.getElementById('btnDeleteEntry').addEventListener('click', () => {
+          document.getElementById('inlineDeleteConfirm').classList.remove('hidden');
+        });
+        document.getElementById('btnCancelDelete').addEventListener('click', () => {
+          document.getElementById('inlineDeleteConfirm').classList.add('hidden');
+        });
+        document.getElementById('btnConfirmDelete').addEventListener('click', () => {
+          const origDate = document.getElementById('editingOriginalDate').value;
+          state.entries = state.entries.filter(item => item.date !== origDate);
+          saveLocal();
+          renderAll();
+          closeEntryModal();
+          showToast('Catatan dihapus');
+          pushEntriesToCloud(true);
+        });
 
         // Settings & Cloud Modal
         const settingsModal = document.getElementById('settingsModalBackdrop');
