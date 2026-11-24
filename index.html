@@ -70,6 +70,17 @@
             <span id="headerCloudLabel">Local</span>
           </button>
           <button
+            id="btnRefreshApp"
+            type="button"
+            aria-label="Refresh & Sinkron Data"
+            title="Refresh & Sinkron Data"
+            class="w-8 h-8 flex items-center justify-center rounded-full text-[#8E9591] hover:text-[#22C55E] hover:bg-[#181B19] active:scale-95 transition"
+          >
+            <svg id="refreshIconSvg" class="w-4 h-4 transition-transform duration-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+          <button
             id="btnQuickAddHeader"
             type="button"
             aria-label="Tambah Data Harian"
@@ -91,6 +102,15 @@
             </svg>
           </button>
         </div>
+      </div>
+
+      <!-- Pull-to-Refresh Indicator for iOS Home Screen PWA -->
+      <div id="pullRefreshIndicator" class="hidden overflow-hidden flex items-center justify-center gap-2 text-[11px] text-[#22C55E] bg-[#141715] border-b border-[#222624] py-2 transition-all">
+        <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        <span id="pullRefreshText">Tarik untuk menyinkronkan...</span>
+      </div>
       </div>
 
       <!-- Primary Navigation Tabs: PORTFOLIO | TRADE -->
@@ -1832,145 +1852,67 @@ function doPost(e) {
         document.getElementById('btnEmptyAddFirst').addEventListener('click', () => openEntryModal(null));
         document.getElementById('btnAddCashflowShortcut').addEventListener('click', () => openEntryModal(null, true));
 
-        // Close Entry Modal
-        document.getElementById('btnCloseEntryModal').addEventListener('click', closeEntryModal);
-        document.getElementById('entryModalBackdrop').addEventListener('click', (e) => {
-          if (e.target === document.getElementById('entryModalBackdrop')) closeEntryModal();
-        });
-
-        // Form Inputs & Quick Chips
-        document.getElementById('inputDate').addEventListener('change', (e) => {
-          updateModalDateBadge(e.target.value);
-          updateLivePnlPreview();
-        });
-        document.getElementById('inputEquity').addEventListener('input', updateLivePnlPreview);
-        document.getElementById('inputCashflowAmount').addEventListener('input', updateLivePnlPreview);
-        document.getElementById('chkAutoAdjustEquity').addEventListener('change', () => {
-          const dateVal = document.getElementById('inputDate').value;
-          const origDate = document.getElementById('editingOriginalDate').value;
-          const prevEq = getPreviousEquityForDate(dateVal, origDate);
-          const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
-          if (prevEq !== null && document.getElementById('chkAutoAdjustEquity').checked) {
-            document.getElementById('inputEquity').value = Math.max(0, prevEq + cfRaw * state.cashflowSign);
-          }
-          updateLivePnlPreview();
-        });
-        document.getElementById('btnSuggestToday').addEventListener('click', () => {
-          const todayIso = toIsoDateLocal(new Date());
-          document.getElementById('inputDate').value = todayIso;
-          updateModalDateBadge(todayIso);
-          updateLivePnlPreview();
-        });
-
-        document.getElementById('btnToggleCashflowSection').addEventListener('click', () => {
-          document.getElementById('cashflowInputContainer').classList.toggle('hidden');
-          document.getElementById('cashflowChevron').classList.toggle('rotate-180');
-        });
-        document.getElementById('btnFlowDeposit').addEventListener('click', () => {
-          state.cashflowSign = 1;
-          syncCashflowSignButtons();
-          const dateVal = document.getElementById('inputDate').value;
-          const origDate = document.getElementById('editingOriginalDate').value;
-          const prevEq = getPreviousEquityForDate(dateVal, origDate);
-          const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
-          if (prevEq !== null && document.getElementById('chkAutoAdjustEquity').checked && cfRaw > 0) {
-            document.getElementById('inputEquity').value = Math.max(0, prevEq + cfRaw);
-          }
-          updateLivePnlPreview();
-        });
-        document.getElementById('btnFlowWithdraw').addEventListener('click', () => {
-          state.cashflowSign = -1;
-          syncCashflowSignButtons();
-          const dateVal = document.getElementById('inputDate').value;
-          const origDate = document.getElementById('editingOriginalDate').value;
-          const prevEq = getPreviousEquityForDate(dateVal, origDate);
-          const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
-          if (prevEq !== null && document.getElementById('chkAutoAdjustEquity').checked && cfRaw > 0) {
-            document.getElementById('inputEquity').value = Math.max(0, prevEq - cfRaw);
-          }
-          updateLivePnlPreview();
-        });
-        document.getElementById('btnFlowWithdraw').addEventListener('click', () => {
-          state.cashflowSign = -1;
-          syncCashflowSignButtons();
-          updateLivePnlPreview();
-        });
-
-        // Submit Entry Form
-        document.getElementById('entryForm').addEventListener('submit', (e) => {
-          e.preventDefault();
-          const origDate = document.getElementById('editingOriginalDate').value;
-          const dateVal = document.getElementById('inputDate').value;
-          const eqVal = parseFloat(document.getElementById('inputEquity').value);
-          const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
-          const netFlow = cfRaw * state.cashflowSign;
-
-          if (!dateVal || isNaN(eqVal)) {
-            showToast('Mohon isi tanggal dan nilai equity', true);
-            return;
+        // Refresh & Pull-to-Refresh for iOS Add-to-Home-Screen Mode
+        async function triggerManualRefresh() {
+          const icon = document.getElementById('refreshIconSvg');
+          const pullBox = document.getElementById('pullRefreshIndicator');
+          const pullText = document.getElementById('pullRefreshText');
+          if (icon) icon.classList.add('animate-spin', 'text-[#22C55E]');
+          if (pullBox && pullText) {
+            pullText.textContent = 'Menyinkronkan data terbaru...';
+            pullBox.classList.remove('hidden');
           }
 
-          state.entries = state.entries.filter(item => item.date !== origDate && item.date !== dateVal);
-          state.entries.push({
-            date: dateVal,
-            equity: eqVal,
-            netFlow
-          });
-          state.entries.sort((a, b) => a.date.localeCompare(b.date));
-
-          saveLocal();
-          renderAll();
-          closeEntryModal();
-          showToast(`Data ${formatDisplayDate(dateVal)} disimpan`);
-          pushEntriesToCloud(true);
-        });
-
-        // Delete Entry Flow
-        document.getElementById('btnDeleteEntry').addEventListener('click', () => {
-          document.getElementById('inlineDeleteConfirm').classList.remove('hidden');
-        });
-        document.getElementById('btnCancelDelete').addEventListener('click', () => {
-          document.getElementById('inlineDeleteConfirm').classList.add('hidden');
-        });
-        document.getElementById('btnConfirmDelete').addEventListener('click', () => {
-          const origDate = document.getElementById('editingOriginalDate').value;
-          state.entries = state.entries.filter(item => item.date !== origDate);
-          saveLocal();
-          renderAll();
-          closeEntryModal();
-          showToast('Catatan tanggal dihapus');
-          pushEntriesToCloud(true);
-        });
-
-        // Interactive Sparkline Scrubbing (Touch & Mouse)
-        const sparkWrap = document.getElementById('sparklineWrapper');
-        function scrubSparkline(clientX) {
-          const pts = window.__sparklinePoints;
-          if (!pts || !pts.length) return;
-          const rect = sparkWrap.getBoundingClientRect();
-          const relX = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-          const idx = Math.round(relX * (pts.length - 1));
-          const pt = pts[idx];
-          if (!pt) return;
-
-          document.getElementById('chartActiveEquity').textContent = formatNumber(pt.item.equity);
-          document.getElementById('chartActiveDate').textContent = formatDisplayDate(pt.item.date);
-          const pnlEl = document.getElementById('chartActivePnl');
-          pnlEl.textContent = formatPnlCombined(pt.item.pnl, pt.item.pnlPct);
-          pnlEl.className = `text-xs font-medium ${getPnlColorClass(pt.item.pnl)} [font-variant-numeric:tabular-nums]`;
-
-          const line = document.getElementById('chartHoverLine');
-          const dot = document.getElementById('chartHoverDot');
-          if (line && dot) {
-            line.setAttribute('x1', pt.x);
-            line.setAttribute('x2', pt.x);
-            dot.setAttribute('cx', pt.x);
-            dot.setAttribute('cy', pt.y);
+          if (state.cloud.url) {
+            await pullEntriesFromCloud(false);
+          } else {
+            renderAll();
+            showToast('Tampilan diperbarui');
           }
+
+          setTimeout(() => {
+            if (icon) icon.classList.remove('animate-spin', 'text-[#22C55E]');
+            if (pullBox) pullBox.classList.add('hidden');
+          }, 450);
         }
-        sparkWrap.addEventListener('mousemove', (e) => scrubSparkline(e.clientX));
-        sparkWrap.addEventListener('touchmove', (e) => {
-          if (e.touches && e.touches[0]) scrubSparkline(e.touches[0].clientX);
+
+        document.getElementById('btnRefreshApp').addEventListener('click', triggerManualRefresh);
+
+        // Touch Pull-to-Refresh Gesture on iOS Standalone PWA
+        let touchStartY = 0;
+        let isPulling = false;
+        const appShell = document.getElementById('appShell');
+        appShell.addEventListener('touchstart', (e) => {
+          if (window.scrollY <= 0 && e.touches && e.touches.length === 1) {
+            touchStartY = e.touches[0].clientY;
+            isPulling = true;
+          } else {
+            isPulling = false;
+          }
+        }, { passive: true });
+
+        appShell.addEventListener('touchmove', (e) => {
+          if (!isPulling || !e.touches || !e.touches[0]) return;
+          const deltaY = e.touches[0].clientY - touchStartY;
+          const pullBox = document.getElementById('pullRefreshIndicator');
+          const pullText = document.getElementById('pullRefreshText');
+          if (deltaY > 45 && window.scrollY <= 0) {
+            pullBox.classList.remove('hidden');
+            pullText.textContent = deltaY > 95 ? 'Lepaskan untuk refresh data' : 'Tarik ke bawah untuk refresh...';
+          }
+        }, { passive: true });
+
+        appShell.addEventListener('touchend', (e) => {
+          if (!isPulling) return;
+          isPulling = false;
+          const endY = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientY : touchStartY;
+          const deltaY = endY - touchStartY;
+          const pullBox = document.getElementById('pullRefreshIndicator');
+          if (deltaY > 95 && window.scrollY <= 0) {
+            triggerManualRefresh();
+          } else if (pullBox) {
+            pullBox.classList.add('hidden');
+          }
         }, { passive: true });
 
         // Settings & Cloud Modal
