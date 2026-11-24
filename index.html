@@ -966,7 +966,8 @@ function doPost(e) {
           const prev = sorted[idx - 1].equity;
           const netFlow = Number(item.netFlow) || 0;
           const pnl = item.equity - prev - netFlow;
-          const base = prev > 0 ? prev : 1;
+          const adjustedBase = prev + (netFlow > 0 ? netFlow : 0);
+          const base = adjustedBase > 0 ? adjustedBase : (prev > 0 ? prev : 1);
           const pnlPct = (pnl / base) * 100;
           return {
             ...item,
@@ -1472,7 +1473,8 @@ function doPost(e) {
         }
 
         const pnl = eqVal - prevEq - netFlow;
-        const pnlPct = prevEq > 0 ? (pnl / prevEq) * 100 : 0;
+        const adjustedBase = prevEq + (netFlow > 0 ? netFlow : 0);
+        const pnlPct = adjustedBase > 0 ? (pnl / adjustedBase) * 100 : 0;
         previewEl.textContent = formatPnlCombined(pnl, pnlPct);
         previewEl.className = `text-sm font-semibold ${getPnlColorClass(pnl)} [font-variant-numeric:tabular-nums]`;
       }
