@@ -104,15 +104,6 @@
         </div>
       </div>
 
-      <!-- Pull-to-Refresh Indicator for iOS Home Screen PWA -->
-      <div id="pullRefreshIndicator" class="hidden overflow-hidden flex items-center justify-center gap-2 text-[11px] text-[#22C55E] bg-[#141715] border-b border-[#222624] py-2 transition-all">
-        <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-        <span id="pullRefreshText">Tarik untuk menyinkronkan...</span>
-      </div>
-      </div>
-
       <!-- Primary Navigation Tabs: PORTFOLIO | TRADE -->
       <nav class="grid grid-cols-2 border-b border-[#222624]" role="tablist">
         <button
@@ -1896,24 +1887,24 @@ function doPost(e) {
           const deltaY = e.touches[0].clientY - touchStartY;
           const pullBox = document.getElementById('pullRefreshIndicator');
           const pullText = document.getElementById('pullRefreshText');
-          if (deltaY > 45 && window.scrollY <= 0) {
-            pullBox.classList.remove('hidden');
-            pullText.textContent = deltaY > 95 ? 'Lepaskan untuk refresh data' : 'Tarik ke bawah untuk refresh...';
-          }
-        }, { passive: true });
+        // Refresh Button for iOS Add-to-Home-Screen Mode
+        async function triggerManualRefresh() {
+          const icon = document.getElementById('refreshIconSvg');
+          if (icon) icon.classList.add('animate-spin', 'text-[#22C55E]');
 
-        appShell.addEventListener('touchend', (e) => {
-          if (!isPulling) return;
-          isPulling = false;
-          const endY = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientY : touchStartY;
-          const deltaY = endY - touchStartY;
-          const pullBox = document.getElementById('pullRefreshIndicator');
-          if (deltaY > 95 && window.scrollY <= 0) {
-            triggerManualRefresh();
-          } else if (pullBox) {
-            pullBox.classList.add('hidden');
+          if (state.cloud.url) {
+            await pullEntriesFromCloud(false);
+          } else {
+            renderAll();
+            showToast('Tampilan diperbarui');
           }
-        }, { passive: true });
+
+          setTimeout(() => {
+            if (icon) icon.classList.remove('animate-spin', 'text-[#22C55E]');
+          }, 450);
+        }
+
+        document.getElementById('btnRefreshApp').addEventListener('click', triggerManualRefresh);
 
         // Settings & Cloud Modal
         const settingsModal = document.getElementById('settingsModalBackdrop');
