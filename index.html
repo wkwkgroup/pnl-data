@@ -152,6 +152,22 @@
         </span>
       </div>
 
+      <!-- Total Portfolio Summary Card -->
+      <div class="mb-4 p-4 rounded-2xl bg-[#181B19] border border-[#262B28] flex items-center justify-between gap-3">
+        <div>
+          <span class="text-[11px] text-[#8E9591] block mb-0.5">Total Portfolio</span>
+          <span id="heroTotalPortfolio" class="text-xl font-bold text-[#F3F4F6] block [font-variant-numeric:tabular-nums]">1,596,000</span>
+          <span class="text-[11px] text-[#8E9591] mt-1 block [font-variant-numeric:tabular-nums]">
+            Modal Bersih: <strong id="heroTotalInvested" class="font-medium text-[#D1D5DB]">1,440,000</strong>
+          </span>
+        </div>
+        <div class="text-right">
+          <span class="text-[11px] text-[#8E9591] block mb-0.5">Total Return</span>
+          <span id="heroTotalPnl" class="text-sm font-semibold text-[#22C55E] block [font-variant-numeric:tabular-nums]">+156,000</span>
+          <span id="heroTotalPnlPct" class="text-xs font-medium text-[#22C55E] block [font-variant-numeric:tabular-nums]">+10.83%</span>
+        </div>
+      </div>
+
       <!-- Collapsible Formula Tooltip Card -->
       <div id="infoTooltipCard" class="hidden mb-4 p-3.5 rounded-xl bg-[#181B19] border border-[#2A302D] text-xs text-[#D1D5DB] space-y-1.5 shadow-lg">
         <div class="flex items-center justify-between">
@@ -1120,7 +1136,41 @@ function doPost(e) {
 
         renderPerformanceTable(filtered);
         renderTradeAnalytics(filtered, allComputed);
+        updatePortfolioHeroSummary(allComputed);
         updateCloudStatusUI();
+      }
+
+      function updatePortfolioHeroSummary(allComputed) {
+        const elPort = document.getElementById('heroTotalPortfolio');
+        const elInv = document.getElementById('heroTotalInvested');
+        const elPnl = document.getElementById('heroTotalPnl');
+        const elPct = document.getElementById('heroTotalPnlPct');
+        if (!elPort || !elInv || !elPnl || !elPct) return;
+
+        if (!allComputed.length) {
+          elPort.textContent = formatNumber(0);
+          elInv.textContent = formatNumber(0);
+          elPnl.textContent = formatNumber(0);
+          elPnl.className = 'text-sm font-semibold text-[#D1D5DB] block [font-variant-numeric:tabular-nums]';
+          elPct.textContent = '0.00%';
+          elPct.className = 'text-xs font-medium text-[#D1D5DB] block [font-variant-numeric:tabular-nums]';
+          return;
+        }
+
+        const latest = allComputed[allComputed.length - 1];
+        const initialEq = allComputed[0].equity;
+        const totalNetTopUp = allComputed.reduce((acc, item) => acc + (Number(item.netFlow) || 0), 0);
+        const totalInvested = initialEq + totalNetTopUp;
+        const totalReturnNominal = latest.equity - totalInvested;
+        const totalReturnPct = totalInvested > 0 ? (totalReturnNominal / totalInvested) * 100 : 0;
+        const colorCls = getPnlColorClass(totalReturnNominal);
+
+        elPort.textContent = formatNumber(latest.equity);
+        elInv.textContent = formatNumber(totalInvested);
+        elPnl.textContent = formatNumber(totalReturnNominal, true);
+        elPnl.className = `text-sm font-semibold ${colorCls} block [font-variant-numeric:tabular-nums]`;
+        elPct.textContent = `${totalReturnNominal >= 0 ? '+' : ''}${totalReturnPct.toFixed(2)}%`;
+        elPct.className = `text-xs font-medium ${colorCls} block [font-variant-numeric:tabular-nums]`;
       }
 
       function renderPerformanceTable(filteredList) {
