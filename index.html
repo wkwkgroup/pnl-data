@@ -249,8 +249,8 @@
       <!-- Table Header Row -->
       <div class="grid grid-cols-12 items-center pb-2.5 text-xs font-normal text-[#8E9591] select-none">
         <div class="col-span-4 text-left">Date</div>
-        <div class="col-span-4 text-right pr-2">Equity</div>
-        <div class="col-span-4 text-right">P&amp;L</div>
+        <div class="col-span-3 text-center">Equity</div>
+        <div class="col-span-5 text-right">P&amp;L</div>
       </div>
 
       <!-- Performance Rows Container -->
@@ -1324,10 +1324,10 @@ function doPost(e) {
                 <span class="font-medium text-[#F3F4F6] block">${m.label}</span>
                 <span class="text-[11px] text-[#8E9591]">${m.daysCount} hari bursa</span>
               </div>
-              <div class="col-span-4 text-right pr-2 font-medium text-[#F3F4F6] [font-variant-numeric:tabular-nums]">
+              <div class="col-span-3 text-center font-medium text-[#F3F4F6] [font-variant-numeric:tabular-nums]">
                 ${formatCurrency(m.equity)}
               </div>
-              <div class="col-span-4 text-right font-medium ${getPnlColorClass(m.pnl)} [font-variant-numeric:tabular-nums]">
+              <div class="col-span-5 text-right font-medium ${getPnlColorClass(m.pnl)} [font-variant-numeric:tabular-nums]">
                 ${formatSignedPnl(m.pnl, m.pnlPct)}
               </div>
             </div>
@@ -1341,19 +1341,19 @@ function doPost(e) {
 
         if (remaining > 0) {
           loadMoreBox.classList.remove('hidden');
-          document.getElementById('remainingRowsCount').textContent = String(remaining);
+          document.getElementById('remainingRowsCount').textContent = remaining;
         } else {
           loadMoreBox.classList.add('hidden');
         }
 
         tbody.innerHTML = visibleRows.map(row => {
           const cfBadge = row.netFlow > 0
-            ? `<span class="ml-1.5 text-[10px] px-1.5 py-0.5 rounded bg-[#22C55E]/15 text-[#22C55E]">+TopUp</span>`
+            ? `<span class="ml-1.5 px-1.5 py-0.5 rounded bg-[#22C55E]/15 text-[#22C55E] text-[10px] font-medium">+TopUp</span>`
             : row.netFlow < 0
-              ? `<span class="ml-1.5 text-[10px] px-1.5 py-0.5 rounded bg-amber-400/15 text-amber-400">-Tarik</span>`
+              ? `<span class="ml-1.5 px-1.5 py-0.5 rounded bg-[#E05252]/15 text-[#E05252] text-[10px] font-medium">-Tarik</span>`
               : '';
           const noteHtml = row.note
-            ? `<span class="text-[11px] text-[#8E9591] block truncate mt-0.5">${escapeHtml(row.note)}</span>`
+            ? `<span class="block text-[11px] text-[#8E9591] truncate mt-0.5">${escapeHtml(row.note)}</span>`
             : '';
 
           return `
@@ -1369,10 +1369,10 @@ function doPost(e) {
                 </div>
                 ${noteHtml}
               </div>
-              <div class="col-span-4 text-right pr-2 font-medium text-[#F3F4F6] [font-variant-numeric:tabular-nums]">
+              <div class="col-span-3 text-center font-medium text-[#F3F4F6] [font-variant-numeric:tabular-nums]">
                 ${formatCurrency(row.equity)}
               </div>
-              <div class="col-span-4 text-right font-medium ${getPnlColorClass(row.pnl)} [font-variant-numeric:tabular-nums]">
+              <div class="col-span-5 text-right font-medium ${getPnlColorClass(row.pnl)} [font-variant-numeric:tabular-nums]">
                 ${formatSignedPnl(row.pnl, row.pnlPct)}
               </div>
             </button>
@@ -1380,18 +1380,26 @@ function doPost(e) {
         }).join('');
       }
 
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
       function renderTradeAnalytics(computedList) {
         const filtered = filterEntriesByPeriod(computedList, state.settings.period);
-        const periodMap = {
+        const periodLabels = {
           MTD: 'This Month',
           '1M': 'Last 1 Month',
           '3M': 'Last 3 Months',
           '6M': 'Last 6 Months',
-          '1Y': '1 Year',
+          '1Y': '1 Year (252 Hari)',
           YTD: 'YTD',
           ALL: 'All Time'
         };
-        document.getElementById('tradePeriodTag').textContent = periodMap[state.settings.period] || 'All Time';
+        document.getElementById('tradePeriodTag').textContent = periodLabels[state.settings.period] || 'All Time';
 
         if (!filtered.length) {
           document.getElementById('chartActiveEquity').textContent = formatCurrency(0);
@@ -1408,102 +1416,96 @@ function doPost(e) {
         activePnlEl.textContent = formatSignedPnl(latest.pnl, latest.pnlPct);
         activePnlEl.className = `text-xs font-medium ${getPnlColorClass(latest.pnl)} [font-variant-numeric:tabular-nums]`;
 
-        // Calculate stats (skip very first entry of entire dataset for win/loss rate since day 1 is initial capital)
-        const globalFirstDate = computedList[0].date;
-        const activeDays = filtered.filter(x => x.date !== globalFirstDate);
+        // Trade days excluding day 0 if it's the very first entry
+        const tradeRows = filtered.filter((item, idx) => !(idx === 0 && item.date === computedList[0].date));
+        const activeDays = tradeRows.length ? tradeRows : filtered;
+
         let wins = 0;
         let losses = 0;
-        let flat = 0;
-        let maxProfitItem = null;
-        let maxLossItem = null;
-        let maxProfitPctItem = null;
-        let maxLossPctItem = null;
+        let draws = 0;
+        let totalNetPnl = 0;
+        let maxProfitRow = activeDays[0];
+        let maxLossRow = activeDays[0];
+        let maxProfitPctRow = activeDays[0];
+        let maxLossPctRow = activeDays[0];
 
-        activeDays.forEach(item => {
-          if (item.pnl > 0.005) wins++;
-          else if (item.pnl < -0.005) losses++;
-          else flat++;
+        activeDays.forEach(r => {
+          totalNetPnl += r.pnl;
+          if (r.pnl > 0.005) wins++;
+          else if (r.pnl < -0.005) losses++;
+          else draws++;
 
-          if (!maxProfitItem || item.pnl > maxProfitItem.pnl) maxProfitItem = item;
-          if (!maxLossItem || item.pnl < maxLossItem.pnl) maxLossItem = item;
-          if (!maxProfitPctItem || item.pnlPct > maxProfitPctItem.pnlPct) maxProfitPctItem = item;
-          if (!maxLossPctItem || item.pnlPct < maxLossPctItem.pnlPct) maxLossPctItem = item;
+          if (r.pnl > maxProfitRow.pnl) maxProfitRow = r;
+          if (r.pnl < maxLossRow.pnl) maxLossRow = r;
+          if (r.pnlPct > maxProfitPctRow.pnlPct) maxProfitPctRow = r;
+          if (r.pnlPct < maxLossPctRow.pnlPct) maxLossPctRow = r;
         });
 
-        const totalNetPnl = activeDays.reduce((sum, x) => sum + x.pnl, 0);
         const startCap = filtered[0].prevEquity + (filtered[0].netFlow > 0 ? filtered[0].netFlow : 0);
-        const totalNetPnlPct = startCap > 0 ? (totalNetPnl / startCap) * 100 : 0;
+        const totalNetPct = startCap > 0 ? (totalNetPnl / startCap) * 100 : 0;
 
-        const elTotalPnl = document.getElementById('statTotalPnl');
-        elTotalPnl.textContent = `${totalNetPnl > 0.005 ? '+' : totalNetPnl < -0.005 ? '-' : ''}${formatCurrency(Math.abs(totalNetPnl), false)}`;
-        elTotalPnl.className = `text-sm font-semibold ${getPnlColorClass(totalNetPnl)} block [font-variant-numeric:tabular-nums]`;
-        const elTotalPct = document.getElementById('statTotalPnlPct');
-        elTotalPct.textContent = `${totalNetPnlPct > 0.005 ? '+' : ''}${totalNetPnlPct.toFixed(2)}%`;
-        elTotalPct.className = `text-xs ${getPnlColorClass(totalNetPnl)} [font-variant-numeric:tabular-nums]`;
+        const elStatTotalPnl = document.getElementById('statTotalPnl');
+        const elStatTotalPct = document.getElementById('statTotalPnlPct');
+        const sign = totalNetPnl > 0.005 ? '+' : totalNetPnl < -0.005 ? '-' : '';
+        elStatTotalPnl.textContent = `${sign}${formatCurrency(Math.abs(totalNetPnl), false)}`;
+        elStatTotalPnl.className = `text-sm font-semibold ${getPnlColorClass(totalNetPnl)} block [font-variant-numeric:tabular-nums]`;
+        elStatTotalPct.textContent = `${totalNetPct > 0.005 ? '+' : ''}${totalNetPct.toFixed(2)}%`;
+        elStatTotalPct.className = `text-xs ${getPnlColorClass(totalNetPnl)} [font-variant-numeric:tabular-nums]`;
 
-        const decided = wins + losses;
-        const winRate = decided > 0 ? (wins / decided) * 100 : 0;
+        const decidedDays = wins + losses;
+        const winRate = decidedDays > 0 ? (wins / decidedDays) * 100 : 0;
         document.getElementById('statWinRate').textContent = `${winRate.toFixed(1)}%`;
-        document.getElementById('statWinCounts').textContent = `${wins}W • ${losses}L • ${flat}D`;
+        document.getElementById('statWinCounts').textContent = `${wins}W • ${losses}L • ${draws}D`;
 
-        document.getElementById('statMaxProfit').textContent = maxProfitItem && maxProfitItem.pnl > 0
-          ? `+${formatCurrency(maxProfitItem.pnl, false)}`
-          : formatCurrency(0, false);
-        document.getElementById('statMaxProfitDate').textContent = maxProfitItem && maxProfitItem.pnl > 0
-          ? formatDisplayDate(maxProfitItem.date)
-          : '-';
+        // Max Profit & Loss (Nominal & %)
+        const mpVal = Math.max(0, maxProfitRow.pnl);
+        document.getElementById('statMaxProfit').textContent = `${mpVal > 0 ? '+' : ''}${formatCurrency(mpVal, false)}`;
+        document.getElementById('statMaxProfitDate').textContent = mpVal > 0 ? formatDisplayDate(maxProfitRow.date) : '-';
 
-        document.getElementById('statMaxLoss').textContent = maxLossItem && maxLossItem.pnl < 0
-          ? `-${formatCurrency(Math.abs(maxLossItem.pnl), false)}`
-          : formatCurrency(0, false);
-        document.getElementById('statMaxLossDate').textContent = maxLossItem && maxLossItem.pnl < 0
-          ? formatDisplayDate(maxLossItem.date)
-          : '-';
+        const mlVal = Math.min(0, maxLossRow.pnl);
+        document.getElementById('statMaxLoss').textContent = `${mlVal < 0 ? '-' : ''}${formatCurrency(Math.abs(mlVal), false)}`;
+        document.getElementById('statMaxLossDate').textContent = mlVal < 0 ? formatDisplayDate(maxLossRow.date) : '-';
 
-        document.getElementById('statMaxProfitPct').textContent = maxProfitPctItem && maxProfitPctItem.pnlPct > 0
-          ? `+${maxProfitPctItem.pnlPct.toFixed(2)}%`
-          : '0.00%';
-        document.getElementById('statMaxProfitPctDate').textContent = maxProfitPctItem && maxProfitPctItem.pnlPct > 0
-          ? formatDisplayDate(maxProfitPctItem.date)
-          : '-';
+        const mpPct = Math.max(0, maxProfitPctRow.pnlPct);
+        document.getElementById('statMaxProfitPct').textContent = `${mpPct > 0 ? '+' : ''}${mpPct.toFixed(2)}%`;
+        document.getElementById('statMaxProfitPctDate').textContent = mpPct > 0 ? formatDisplayDate(maxProfitPctRow.date) : '-';
 
-        document.getElementById('statMaxLossPct').textContent = maxLossPctItem && maxLossPctItem.pnlPct < 0
-          ? `${maxLossPctItem.pnlPct.toFixed(2)}%`
-          : '0.00%';
-        document.getElementById('statMaxLossPctDate').textContent = maxLossPctItem && maxLossPctItem.pnlPct < 0
-          ? formatDisplayDate(maxLossPctItem.date)
-          : '-';
+        const mlPct = Math.min(0, maxLossPctRow.pnlPct);
+        document.getElementById('statMaxLossPct').textContent = `${mlPct.toFixed(2)}%`;
+        document.getElementById('statMaxLossPctDate').textContent = mlPct < 0 ? formatDisplayDate(maxLossPctRow.date) : '-';
 
+        // Avg Daily & Cashflow
         const avgDaily = activeDays.length > 0 ? totalNetPnl / activeDays.length : 0;
-        document.getElementById('statAvgDaily').textContent = `${avgDaily > 0.005 ? '+' : avgDaily < -0.005 ? '-' : ''}${formatCurrency(Math.abs(avgDaily), false)}`;
+        const avgSign = avgDaily > 0.005 ? '+' : avgDaily < -0.005 ? '-' : '';
+        document.getElementById('statAvgDaily').textContent = `${avgSign}${formatCurrency(Math.abs(avgDaily), false)}`;
         document.getElementById('statTradingDays').textContent = `${activeDays.length} hari bursa`;
 
-        const netCashflow = activeDays.reduce((sum, x) => sum + (x.netFlow || 0), 0);
-        document.getElementById('statNetCashflow').textContent = `${netCashflow > 0 ? '+' : netCashflow < 0 ? '-' : ''}${formatCurrency(Math.abs(netCashflow))}`;
+        const totalFlow = filtered.reduce((sum, x) => sum + (x.netFlow || 0), 0);
+        const flowSign = totalFlow > 0.005 ? '+' : totalFlow < -0.005 ? '-' : '';
+        document.getElementById('statNetCashflow').textContent = `${flowSign}${formatCurrency(Math.abs(totalFlow))}`;
         document.getElementById('statInitialEquity').textContent = formatCurrency(computedList[0].equity);
 
-        // Max Drawdown (%) on cumulative pure return index (immune to top-ups)
+        // Max Drawdown (%) using pure cumulative return index (cashflow-neutral)
         let peakIndex = 1;
-        let currentIndex = 1;
+        let curIndex = 1;
         let peakDate = filtered[0].date;
-        let peakEq = filtered[0].equity;
+        let peakEquity = filtered[0].equity;
         let maxDdPct = 0;
-        let maxDdDrop = 0;
+        let maxDdNom = 0;
         let ddRangeText = 'Belum ada drawdown';
 
         filtered.forEach(item => {
-          if (item.date !== globalFirstDate) {
-            currentIndex = currentIndex * (1 + (item.pnlPct / 100));
-          }
-          if (currentIndex >= peakIndex) {
-            peakIndex = currentIndex;
+          const dailyFactor = 1 + (item.pnlPct / 100);
+          curIndex = curIndex * (dailyFactor > 0 ? dailyFactor : 0);
+          if (curIndex >= peakIndex) {
+            peakIndex = curIndex;
             peakDate = item.date;
-            peakEq = item.equity;
+            peakEquity = item.equity;
           } else {
-            const dd = ((currentIndex - peakIndex) / peakIndex) * 100;
-            if (dd < maxDdPct) {
-              maxDdPct = dd;
-              maxDdDrop = Math.max(0, peakEq - item.equity);
+            const ddPct = ((curIndex - peakIndex) / peakIndex) * 100;
+            if (ddPct < maxDdPct) {
+              maxDdPct = ddPct;
+              maxDdNom = Math.abs(peakEquity * (ddPct / 100));
               ddRangeText = `${formatDisplayDate(peakDate)} → ${formatDisplayDate(item.date)}`;
             }
           }
@@ -1511,119 +1513,118 @@ function doPost(e) {
 
         document.getElementById('statMaxDrawdownPct').textContent = `${maxDdPct.toFixed(2)}%`;
         document.getElementById('statMaxDrawdownRange').textContent = ddRangeText;
-        document.getElementById('statMaxDrawdownNominal').textContent = `Drop nominal: ${formatCurrency(maxDdDrop)}`;
+        document.getElementById('statMaxDrawdownNominal').textContent = `Drop nominal: ${formatCurrency(maxDdNom)}`;
 
-        // Cashflow history list
-        const cfList = document.getElementById('cashflowListContainer');
-        const cfEntries = computedList.filter(x => Math.abs(x.netFlow) > 0).reverse();
-        if (!cfEntries.length) {
-          cfList.innerHTML = `<p class="text-[#8E9591] text-center py-2">Belum ada catatan Top-Up atau penarikan dana.</p>`;
+        // Cashflow History List
+        const cfRows = [...computedList].filter(x => Math.abs(x.netFlow) > 0.005).reverse();
+        const cfContainer = document.getElementById('cashflowListContainer');
+        if (!cfRows.length) {
+          cfContainer.innerHTML = `<p class="text-[#8E9591] text-center py-3">Belum ada riwayat Top-Up atau penarikan dana.</p>`;
         } else {
-          cfList.innerHTML = cfEntries.map(cf => `
-            <div class="flex items-center justify-between py-1.5 border-b border-[#222624] last:border-0">
-              <div>
-                <span class="text-[#F3F4F6] font-medium">${formatDisplayDate(cf.date)}</span>
-                <span class="text-[#8E9591] ml-2">${cf.netFlow > 0 ? 'Top-Up Modal' : 'Tarik Dana'}</span>
+          cfContainer.innerHTML = cfRows.map(r => {
+            const isDep = r.netFlow > 0;
+            return `
+              <div class="flex items-center justify-between py-2 border-b border-[#222624] last:border-0">
+                <div>
+                  <span class="text-[#F3F4F6] font-medium">${formatDisplayDate(r.date)}</span>
+                  <span class="ml-2 text-[11px] ${isDep ? 'text-[#22C55E]' : 'text-[#E05252]'}">${isDep ? 'Top-Up Modal' : 'Tarik Dana'}</span>
+                </div>
+                <span class="font-semibold ${isDep ? 'text-[#22C55E]' : 'text-[#E05252]'} [font-variant-numeric:tabular-nums]">
+                  ${isDep ? '+' : '-'}${formatCurrency(Math.abs(r.netFlow))}
+                </span>
               </div>
-              <span class="font-semibold ${cf.netFlow > 0 ? 'text-[#22C55E]' : 'text-amber-400'} [font-variant-numeric:tabular-nums]">
-                ${cf.netFlow > 0 ? '+' : '-'}${formatCurrency(Math.abs(cf.netFlow))}
-              </span>
-            </div>
-          `).join('');
+            `;
+          }).join('');
         }
 
         renderSparklineChart(filtered);
       }
 
-      function renderSparklineChart(items) {
+      function renderSparklineChart(series) {
         const svg = document.getElementById('equitySparklineSvg');
-        if (!svg || items.length < 2) {
-          if (svg) svg.innerHTML = '';
-          return;
-        }
-        const width = 400;
-        const height = 140;
-        const padX = 6;
-        const padY = 12;
+        if (!svg || !series.length) return;
 
-        const values = items.map(i => i.equity);
+        const w = 400;
+        const h = 150;
+        svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+
+        const values = series.map(s => s.equity);
         const minVal = Math.min(...values);
         const maxVal = Math.max(...values);
-        const span = maxVal - minVal || 1;
+        const range = maxVal - minVal || 1;
+        const padY = 14;
 
-        const coords = items.map((item, idx) => {
-          const x = padX + (idx / (items.length - 1)) * (width - padX * 2);
-          const y = height - padY - ((item.equity - minVal) / span) * (height - padY * 2);
-          return { x, y, item };
+        const points = series.map((s, i) => {
+          const x = series.length === 1 ? w / 2 : (i / (series.length - 1)) * w;
+          const y = h - padY - ((s.equity - minVal) / range) * (h - padY * 2);
+          return { x, y, data: s };
         });
 
-        const linePoints = coords.map(c => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
-        const areaPoints = `${coords[0].x.toFixed(1)},${height} ${linePoints} ${coords[coords.length - 1].x.toFixed(1)},${height}`;
-        const lastCoord = coords[coords.length - 1];
+        const isPositive = series[series.length - 1].equity >= series[0].equity;
+        const strokeColor = isPositive ? '#22C55E' : '#E05252';
+        const linePath = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+        const areaPath = `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${h} L ${points[0].x.toFixed(1)} ${h} Z`;
+        const lastPt = points[points.length - 1];
 
-        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
         svg.innerHTML = `
           <defs>
-            <linearGradient id="eqGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#22C55E" stop-opacity="0.28" />
-              <stop offset="100%" stop-color="#22C55E" stop-opacity="0.0" />
+            <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="${strokeColor}" stop-opacity="0.28" />
+              <stop offset="100%" stop-color="${strokeColor}" stop-opacity="0.0" />
             </linearGradient>
           </defs>
-          <polygon points="${areaPoints}" fill="url(#eqGrad)" />
-          <polyline fill="none" stroke="#22C55E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" points="${linePoints}" />
-          <circle id="sparkActiveDot" cx="${lastCoord.x.toFixed(1)}" cy="${lastCoord.y.toFixed(1)}" r="4.5" fill="#22C55E" stroke="#111312" stroke-width="2" />
+          <path d="${areaPath}" fill="url(#sparkGrad)" />
+          <path d="${linePath}" fill="none" stroke="${strokeColor}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+          <line id="sparkHoverLine" x1="${lastPt.x}" y1="0" x2="${lastPt.x}" y2="${h}" stroke="#4B5563" stroke-width="1" stroke-dasharray="3 3" opacity="0" />
+          <circle id="sparkHoverDot" cx="${lastPt.x}" cy="${lastPt.y}" r="4.5" fill="${strokeColor}" stroke="#111312" stroke-width="2" />
         `;
 
-        const updateHoverPoint = (clientX) => {
+        const handlePointer = (clientX) => {
           const rect = svg.getBoundingClientRect();
           if (!rect.width) return;
           const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-          const idx = Math.round(ratio * (coords.length - 1));
-          const target = coords[idx];
-          if (!target) return;
-          const dot = document.getElementById('sparkActiveDot');
-          if (dot) {
-            dot.setAttribute('cx', target.x.toFixed(1));
-            dot.setAttribute('cy', target.y.toFixed(1));
+          const idx = Math.round(ratio * (points.length - 1));
+          const pt = points[idx];
+          if (!pt) return;
+
+          const hoverLine = document.getElementById('sparkHoverLine');
+          const hoverDot = document.getElementById('sparkHoverDot');
+          if (hoverLine) {
+            hoverLine.setAttribute('x1', pt.x);
+            hoverLine.setAttribute('x2', pt.x);
+            hoverLine.setAttribute('opacity', '1');
           }
-          document.getElementById('chartActiveEquity').textContent = formatCurrency(target.item.equity);
-          document.getElementById('chartActiveDate').textContent = formatDisplayDate(target.item.date);
+          if (hoverDot) {
+            hoverDot.setAttribute('cx', pt.x);
+            hoverDot.setAttribute('cy', pt.y);
+          }
+
+          document.getElementById('chartActiveEquity').textContent = formatCurrency(pt.data.equity);
+          document.getElementById('chartActiveDate').textContent = formatDisplayDate(pt.data.date);
           const pnlEl = document.getElementById('chartActivePnl');
-          pnlEl.textContent = formatSignedPnl(target.item.pnl, target.item.pnlPct);
-          pnlEl.className = `text-xs font-medium ${getPnlColorClass(target.item.pnl)} [font-variant-numeric:tabular-nums]`;
+          pnlEl.textContent = formatSignedPnl(pt.data.pnl, pt.data.pnlPct);
+          pnlEl.className = `text-xs font-medium ${getPnlColorClass(pt.data.pnl)} [font-variant-numeric:tabular-nums]`;
         };
 
-        svg.onmousemove = (e) => updateHoverPoint(e.clientX);
-        svg.ontouchmove = (e) => {
-          if (e.touches && e.touches[0]) updateHoverPoint(e.touches[0].clientX);
-        };
+        svg.onpointermove = (e) => handlePointer(e.clientX);
+        svg.onpointerdown = (e) => handlePointer(e.clientX);
       }
 
-      function renderAll() {
-        const computedList = computeAllEntries();
-
-        // Sync Tab UI
+      function syncControlsUI() {
         const isPortfolio = state.settings.tab === 'portfolio';
         document.getElementById('viewPortfolio').classList.toggle('hidden', !isPortfolio);
         document.getElementById('viewTrade').classList.toggle('hidden', isPortfolio);
-        document.getElementById('tabPortfolio').className = isPortfolio
-          ? 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors'
-          : 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] border-b-2 border-transparent hover:text-[#D1D5DB] transition-colors';
-        document.getElementById('tabTrade').className = !isPortfolio
-          ? 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors'
-          : 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] border-b-2 border-transparent hover:text-[#D1D5DB] transition-colors';
 
-        // Sync Daily / Monthly Pills
+        const tabPort = document.getElementById('tabPortfolio');
+        const tabTrd = document.getElementById('tabTrade');
+        tabPort.className = `py-3 text-[13px] font-semibold tracking-wider uppercase text-center border-b-2 transition-colors ${isPortfolio ? 'text-[#22C55E] border-[#22C55E]' : 'text-[#8E9591] border-transparent hover:text-[#D1D5DB]'}`;
+        tabTrd.className = `py-3 text-[13px] font-semibold tracking-wider uppercase text-center border-b-2 transition-colors ${!isPortfolio ? 'text-[#22C55E] border-[#22C55E]' : 'text-[#8E9591] border-transparent hover:text-[#D1D5DB]'}`;
+
         const isDaily = state.settings.mode === 'daily';
-        document.getElementById('btnModeDaily').className = isDaily
-          ? 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition'
-          : 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
-        document.getElementById('btnModeMonthly').className = !isDaily
-          ? 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition'
-          : 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
+        document.getElementById('btnModeDaily').className = `px-4 py-1.5 rounded-full text-xs font-medium border transition ${isDaily ? 'border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E]' : 'border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB]'}`;
+        document.getElementById('btnModeMonthly').className = `px-4 py-1.5 rounded-full text-xs font-medium border transition ${!isDaily ? 'border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E]' : 'border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB]'}`;
 
-        // Sync Period Dropdown Label & Highlight
-        const periodLabels = {
+        const periodNames = {
           MTD: 'This Month',
           '1M': 'Last 1 Month',
           '3M': 'Last 3 Months',
@@ -1632,219 +1633,201 @@ function doPost(e) {
           YTD: 'YTD',
           ALL: 'All Time'
         };
-        document.getElementById('selectedPeriodLabel').textContent = periodLabels[state.settings.period] || 'Last 1 Month';
+        document.getElementById('selectedPeriodLabel').textContent = periodNames[state.settings.period] || 'Last 1 Month';
         document.querySelectorAll('.period-option').forEach(btn => {
           const active = btn.dataset.period === state.settings.period;
-          btn.className = active
-            ? 'period-option w-full text-left px-3.5 py-2 text-xs text-[#22C55E] font-medium bg-[#222724]/60'
-            : 'period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]';
+          btn.className = `period-option w-full text-left px-3.5 py-2 text-xs ${active ? 'text-[#22C55E] font-medium bg-[#222724]/60' : 'text-[#D1D5DB] hover:bg-[#222724]'}`;
         });
 
-        // Sync Privacy Eye Icons
+        // Privacy icon toggle
         document.getElementById('iconEyeOpen').classList.toggle('hidden', state.settings.hideBalances);
         document.getElementById('iconEyeClosed').classList.toggle('hidden', !state.settings.hideBalances);
 
-        // Sync Currency Buttons in Settings
-        const isUsd = state.settings.currency === 'USD';
-        document.getElementById('btnCurrencyIDR').className = !isUsd
-          ? 'py-2.5 px-3 rounded-xl text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] text-center transition'
-          : 'py-2.5 px-3 rounded-xl text-xs font-medium border border-[#2F3532] bg-[#111312] text-[#8E9591] text-center transition';
-        document.getElementById('btnCurrencyUSD').className = isUsd
-          ? 'py-2.5 px-3 rounded-xl text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] text-center transition'
-          : 'py-2.5 px-3 rounded-xl text-xs font-medium border border-[#2F3532] bg-[#111312] text-[#8E9591] text-center transition';
-
-        updateCloudStatusUI();
-        renderHeroSummary(computedList);
-        renderPerformanceTable(computedList);
-        renderTradeAnalytics(computedList);
+        // Currency buttons
+        const isIDR = state.settings.currency === 'IDR';
+        document.getElementById('btnCurrencyIDR').className = `py-2.5 px-3 rounded-xl text-xs font-medium border text-center transition ${isIDR ? 'border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E]' : 'border-[#2F3532] bg-[#111312] text-[#8E9591]'}`;
+        document.getElementById('btnCurrencyUSD').className = `py-2.5 px-3 rounded-xl text-xs font-medium border text-center transition ${!isIDR ? 'border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E]' : 'border-[#2F3532] bg-[#111312] text-[#8E9591]'}`;
+        document.getElementById('equityInputPrefix').classList.toggle('hidden', isIDR);
       }
 
-      // ==================== ENTRY MODAL & CALENDAR HELPERS ====================
-      function escapeHtml(str) {
-        return String(str)
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;');
+      function renderAll() {
+        syncControlsUI();
+        const computed = computeAllEntries();
+        renderHeroSummary(computed);
+        renderPerformanceTable(computed);
+        renderTradeAnalytics(computed);
       }
 
-      let toastTimer = null;
-      function showToast(msg, isError = false) {
-        const banner = document.getElementById('toastBanner');
-        const dot = document.getElementById('toastDot');
-        const text = document.getElementById('toastMessage');
-        text.textContent = msg;
-        dot.className = isError ? 'w-2 h-2 rounded-full bg-[#E05252]' : 'w-2 h-2 rounded-full bg-[#22C55E]';
-        banner.classList.remove('hidden');
-        if (toastTimer) clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => banner.classList.add('hidden'), 2600);
-      }
-
-      function updateModalDateBadge(isoStr) {
-        const clean = normalizeToIsoDate(isoStr);
-        const d = parseIsoLocal(clean);
-        const dayIdx = d.getDay();
+      // ==================== CUSTOM CALENDAR & ENTRY MODAL ====================
+      function updateModalDateBadge() {
+        const iso = document.getElementById('inputDate').value;
+        const dt = parseIsoLocal(iso);
+        const dayIdx = dt.getDay();
         const badge = document.getElementById('dayNameBadge');
         const warn = document.getElementById('weekendWarning');
-        const calText = document.getElementById('calendarSelectedText');
+        const selText = document.getElementById('calendarSelectedText');
 
+        if (selText) selText.textContent = formatDisplayDate(iso);
+        if (badge) badge.textContent = DAYS_ID[dayIdx] || 'Senin';
+
+        const isWeekend = dayIdx === 0 || dayIdx === 6;
+        if (warn) warn.classList.toggle('hidden', !isWeekend);
         if (badge) {
-          badge.textContent = DAYS_ID[dayIdx] || 'Senin';
-          const isWeekend = dayIdx === 0 || dayIdx === 6;
           badge.className = isWeekend
             ? 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-400'
             : 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]';
-          if (warn) warn.classList.toggle('hidden', !isWeekend);
         }
-        if (calText) {
-          calText.textContent = formatDisplayDate(clean);
-        }
-        state.calViewYear = d.getFullYear();
-        state.calViewMonth = d.getMonth();
-        renderCustomCalendar();
       }
 
       function renderCustomCalendar() {
-        const grid = document.getElementById('customCalendarDays');
-        const title = document.getElementById('calMonthYearTitle');
-        if (!grid || !title) return;
+        const titleEl = document.getElementById('calMonthYearTitle');
+        const gridEl = document.getElementById('customCalendarDays');
+        if (!titleEl || !gridEl) return;
 
         const year = state.calViewYear;
         const month = state.calViewMonth;
-        title.textContent = `${MONTHS_FULL_ID[month]} ${year}`;
+        titleEl.textContent = `${MONTHS_FULL_ID[month]} ${year}`;
 
-        const selectedIso = normalizeToIsoDate(document.getElementById('inputDate').value);
+        const selectedIso = document.getElementById('inputDate').value;
         const todayIso = toIsoDateLocal(new Date());
         const existingSet = new Set(state.entries.map(e => e.date));
 
         const firstDayOfWeek = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-        let cellsHtml = '';
+        let html = '';
         for (let i = 0; i < firstDayOfWeek; i++) {
-          cellsHtml += `<div class="h-9"></div>`;
+          html += `<div></div>`;
         }
 
-        for (let day = 1; day <= daysInMonth; day++) {
-          const cellDate = new Date(year, month, day, 12, 0, 0);
-          const cellIso = toIsoDateLocal(cellDate);
-          const dow = cellDate.getDay();
+        for (let d = 1; d <= daysInMonth; d++) {
+          const iso = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          const dow = new Date(year, month, d).getDay();
           const isWeekend = dow === 0 || dow === 6;
-          const isSelected = cellIso === selectedIso;
-          const isToday = cellIso === todayIso;
-          const hasData = existingSet.has(cellIso);
+          const isSelected = iso === selectedIso;
+          const isToday = iso === todayIso;
+          const hasEntry = existingSet.has(iso);
 
-          let btnClass = 'h-9 rounded-xl text-xs font-medium flex flex-col items-center justify-center relative transition ';
+          let btnCls = 'h-8 w-full rounded-lg text-xs font-medium flex flex-col items-center justify-center relative transition ';
           if (isSelected) {
-            btnClass += 'bg-[#22C55E] text-[#090D0B] font-bold shadow-sm';
-          } else if (isWeekend) {
-            btnClass += 'text-[#525A56] hover:bg-[#181B19]';
+            btnCls += 'bg-[#22C55E] text-[#090D0B] font-bold shadow-sm';
           } else if (isToday) {
-            btnClass += 'border border-[#22C55E]/60 text-[#22C55E] hover:bg-[#181B19]';
+            btnCls += 'ring-1 ring-[#22C55E]/70 text-[#F3F4F6] hover:bg-[#1F2421]';
+          } else if (isWeekend) {
+            btnCls += 'text-[#525855] hover:bg-[#181B19]';
           } else {
-            btnClass += 'text-[#F3F4F6] hover:bg-[#181B19]';
+            btnCls += 'text-[#D1D5DB] hover:bg-[#1F2421]';
           }
 
-          const dotHtml = hasData
-            ? `<span class="w-1 h-1 rounded-full ${isSelected ? 'bg-[#090D0B]' : 'bg-[#22C55E]'} mt-0.5"></span>`
-            : `<span class="w-1 h-1 mt-0.5"></span>`;
+          const dotHtml = hasEntry
+            ? `<span class="w-1 h-1 rounded-full ${isSelected ? 'bg-[#090D0B]' : 'bg-[#22C55E]'} absolute bottom-1"></span>`
+            : '';
 
-          cellsHtml += `
-            <button type="button" data-cal-date="${cellIso}" class="${btnClass}">
-              <span>${day}</span>
-              ${dotHtml}
-            </button>
-          `;
+          html += `<button type="button" data-cal-date="${iso}" class="${btnCls}"><span>${d}</span>${dotHtml}</button>`;
         }
 
-        grid.innerHTML = cellsHtml;
+        gridEl.innerHTML = html;
       }
 
-      function syncCashflowSignButtons() {
-        const isDep = state.cashflowSign === 1;
-        document.getElementById('btnFlowDeposit').className = isDep
-          ? 'py-1.5 rounded-lg text-xs font-medium bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition'
-          : 'py-1.5 rounded-lg text-xs font-medium bg-[#181B19] text-[#8E9591] border border-[#2F3532] transition';
-        document.getElementById('btnFlowWithdraw').className = !isDep
-          ? 'py-1.5 rounded-lg text-xs font-medium bg-amber-400/15 text-amber-400 border border-amber-400/40 transition'
-          : 'py-1.5 rounded-lg text-xs font-medium bg-[#181B19] text-[#8E9591] border border-[#2F3532] transition';
+      function setSelectedCalendarDate(iso) {
+        const clean = normalizeToIsoDate(iso);
+        document.getElementById('inputDate').value = clean;
+        const dt = parseIsoLocal(clean);
+        state.calViewYear = dt.getFullYear();
+        state.calViewMonth = dt.getMonth();
+        updateModalDateBadge();
+        renderCustomCalendar();
+        updateLivePnlPreview();
       }
 
-      function getPreviousEquityForDate(targetIso, ignoreOrigDate = '') {
-        const prior = state.entries
-          .filter(e => e.date < targetIso && e.date !== ignoreOrigDate)
-          .sort((a, b) => a.date.localeCompare(b.date));
-        return prior.length > 0 ? prior[prior.length - 1].equity : null;
+      function getReferencePrevEquityForDate(targetDate, originalEditDate) {
+        const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
+        const prior = sorted.filter(e => e.date < targetDate && e.date !== originalEditDate);
+        if (prior.length > 0) return prior[prior.length - 1].equity;
+        return null;
       }
 
-      function updateLivePnlPreview(fromCashflowInput = false) {
-        const targetIso = normalizeToIsoDate(document.getElementById('inputDate').value);
+      function updateLivePnlPreview() {
+        const targetDate = document.getElementById('inputDate').value;
         const origDate = document.getElementById('editingOriginalDate').value;
-        const prevEq = getPreviousEquityForDate(targetIso, origDate);
-        const hintEl = document.getElementById('prevEquityHint');
-        hintEl.textContent = prevEq !== null ? `Sebelumnya: ${formatCurrency(prevEq)}` : 'Modal Awal';
-
+        const equityVal = parseFloat(document.getElementById('inputEquity').value);
         const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
-        const netFlow = cfRaw * state.cashflowSign;
-        const autoAdj = document.getElementById('chkAutoAdjustEquity').checked;
+        const netFlow = state.cashflowSign * Math.abs(cfRaw);
 
-        if (fromCashflowInput && autoAdj && prevEq !== null && !origDate) {
-          document.getElementById('inputEquity').value = Math.max(0, prevEq + netFlow);
-        }
-
-        const eqVal = parseFloat(document.getElementById('inputEquity').value);
+        const prevEq = getReferencePrevEquityForDate(targetDate, origDate);
+        const hintEl = document.getElementById('prevEquityHint');
         const previewEl = document.getElementById('livePnlPreview');
-        if (isNaN(eqVal) || prevEq === null) {
+
+        if (prevEq === null) {
+          hintEl.textContent = 'Hari pertama (Modal awal)';
           previewEl.textContent = '0 (0.00%)';
           previewEl.className = 'text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]';
           return;
         }
 
-        const pnl = (eqVal - prevEq) - netFlow;
+        hintEl.textContent = `Sebelumnya: ${formatCurrency(prevEq, false)}`;
+        if (isNaN(equityVal)) {
+          previewEl.textContent = '0 (0.00%)';
+          previewEl.className = 'text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]';
+          return;
+        }
+
+        const pnl = (equityVal - prevEq) - netFlow;
         const capBase = prevEq + (netFlow > 0 ? netFlow : 0);
         const pct = capBase > 0 ? (pnl / capBase) * 100 : 0;
         previewEl.textContent = formatSignedPnl(pnl, pct);
         previewEl.className = `text-sm font-semibold ${getPnlColorClass(pnl)} [font-variant-numeric:tabular-nums]`;
       }
 
-      function openEntryModal(editDate = null, expandCashflow = false) {
+      function openEntryModal(editDateIso = null, expandCashflow = false) {
         const backdrop = document.getElementById('entryModalBackdrop');
-        const existing = editDate ? state.entries.find(e => e.date === editDate) : null;
-        const defaultDate = existing ? existing.date : getNextTradingDayIso();
-        const prevEq = getPreviousEquityForDate(defaultDate, existing ? existing.date : '');
+        const titleEl = document.getElementById('entryModalTitle');
+        const origInput = document.getElementById('editingOriginalDate');
+        const eqInput = document.getElementById('inputEquity');
+        const cfInput = document.getElementById('inputCashflowAmount');
+        const noteInput = document.getElementById('inputNote');
+        const delBtn = document.getElementById('btnDeleteEntry');
+        const delConfirm = document.getElementById('inlineDeleteConfirm');
 
-        document.getElementById('entryModalTitle').textContent = existing ? 'Edit Data Harian' : 'Update Equity Harian';
-        document.getElementById('editingOriginalDate').value = existing ? existing.date : '';
-        document.getElementById('inputDate').value = defaultDate;
-        document.getElementById('inputEquity').value = existing ? existing.equity : (prevEq !== null ? prevEq : '');
-        document.getElementById('inputNote').value = existing && existing.note ? existing.note : '';
-
+        delConfirm.classList.add('hidden');
         document.getElementById('customCalendarBox').classList.add('hidden');
         document.getElementById('calendarChevron').classList.remove('rotate-180');
-        document.getElementById('inlineDeleteConfirm').classList.add('hidden');
-        document.getElementById('btnDeleteEntry').classList.toggle('hidden', !existing);
 
-        const cfContainer = document.getElementById('cashflowInputContainer');
-        const hasCf = existing && Math.abs(existing.netFlow) > 0;
-        if (hasCf || expandCashflow) {
-          cfContainer.classList.remove('hidden');
-          document.getElementById('cashflowChevron').classList.add('rotate-180');
-        } else {
-          cfContainer.classList.add('hidden');
-          document.getElementById('cashflowChevron').classList.remove('rotate-180');
-        }
+        const existing = editDateIso ? state.entries.find(e => e.date === editDateIso) : null;
 
-        if (hasCf) {
-          state.cashflowSign = existing.netFlow >= 0 ? 1 : -1;
-          document.getElementById('inputCashflowAmount').value = Math.abs(existing.netFlow);
+        if (existing) {
+          titleEl.textContent = 'Edit Data Harian';
+          origInput.value = existing.date;
+          setSelectedCalendarDate(existing.date);
+          eqInput.value = existing.equity;
+          noteInput.value = existing.note || '';
+          delBtn.classList.remove('hidden');
+
+          if (Math.abs(existing.netFlow) > 0.005) {
+            state.cashflowSign = existing.netFlow >= 0 ? 1 : -1;
+            cfInput.value = Math.abs(existing.netFlow);
+            document.getElementById('cashflowInputContainer').classList.remove('hidden');
+          } else {
+            state.cashflowSign = 1;
+            cfInput.value = '';
+            document.getElementById('cashflowInputContainer').classList.toggle('hidden', !expandCashflow);
+          }
         } else {
+          titleEl.textContent = 'Update Equity Harian';
+          origInput.value = '';
+          const nextIso = getNextTradingDayIso();
+          setSelectedCalendarDate(nextIso);
+          const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
+          eqInput.value = sorted.length > 0 ? sorted[sorted.length - 1].equity : '';
+          noteInput.value = '';
           state.cashflowSign = 1;
-          document.getElementById('inputCashflowAmount').value = '';
+          cfInput.value = '';
+          delBtn.classList.add('hidden');
+          document.getElementById('cashflowInputContainer').classList.toggle('hidden', !expandCashflow);
         }
 
-        syncCashflowSignButtons();
-        updateModalDateBadge(defaultDate);
-        updateLivePnlPreview(false);
+        syncCashflowButtonsUI();
+        updateLivePnlPreview();
         backdrop.classList.remove('hidden');
       }
 
@@ -1852,9 +1835,69 @@ function doPost(e) {
         document.getElementById('entryModalBackdrop').classList.add('hidden');
       }
 
-      // ==================== EVENT BINDINGS ====================
+      function syncCashflowButtonsUI() {
+        const isDep = state.cashflowSign === 1;
+        document.getElementById('btnFlowDeposit').className = `py-1.5 rounded-lg text-xs font-medium border transition ${isDep ? 'bg-[#22C55E]/15 text-[#22C55E] border-[#22C55E]/40' : 'bg-[#181B19] text-[#8E9591] border-[#2F3532]'}`;
+        document.getElementById('btnFlowWithdraw').className = `py-1.5 rounded-lg text-xs font-medium border transition ${!isDep ? 'bg-[#E05252]/15 text-[#E05252] border-[#E05252]/40' : 'bg-[#181B19] text-[#8E9591] border-[#2F3532]'}`;
+      }
+
+      function applyAutoCashflowToEquity() {
+        if (!document.getElementById('chkAutoAdjustEquity').checked) return;
+        const targetDate = document.getElementById('inputDate').value;
+        const origDate = document.getElementById('editingOriginalDate').value;
+        const prevEq = getReferencePrevEquityForDate(targetDate, origDate);
+        if (prevEq === null) return;
+        const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
+        const newEq = Math.max(0, prevEq + (state.cashflowSign * Math.abs(cfRaw)));
+        document.getElementById('inputEquity').value = newEq;
+      }
+
+      // ==================== TOAST HELPER ====================
+      let toastTimer = null;
+      function showToast(msg, isError = false) {
+        const banner = document.getElementById('toastBanner');
+        const dot = document.getElementById('toastDot');
+        const text = document.getElementById('toastMessage');
+        text.textContent = msg;
+        dot.className = `w-2 h-2 rounded-full ${isError ? 'bg-[#E05252]' : 'bg-[#22C55E]'}`;
+        banner.classList.remove('hidden');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => banner.classList.add('hidden'), 2800);
+      }
+
+      // ==================== EXPORT / SIMULATOR HELPERS ====================
+      function downloadFile(filename, content, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      function generate1YearSampleEntries() {
+        const list = [];
+        let eq = 1200000;
+        const d = new Date();
+        d.setDate(d.getDate() - 365);
+        while (list.length < 252) {
+          const dow = d.getDay();
+          if (dow !== 0 && dow !== 6) {
+            const pctMove = (Math.random() - 0.455) * 0.024;
+            eq = Math.max(100000, Math.round(eq * (1 + pctMove)));
+            list.push({ date: toIsoDateLocal(d), equity: eq, netFlow: 0, note: '' });
+          }
+          d.setDate(d.getDate() + 1);
+        }
+        return list;
+      }
+
+      // ==================== EVENT LISTENERS ====================
       function bindEvents() {
-        // Primary Navigation Tabs
+        // Tabs
         document.getElementById('tabPortfolio').addEventListener('click', () => {
           state.settings.tab = 'portfolio';
           saveLocal();
@@ -1866,39 +1909,7 @@ function doPost(e) {
           renderAll();
         });
 
-        // Header Quick Controls
-        document.getElementById('btnTogglePrivacy').addEventListener('click', () => {
-          state.settings.hideBalances = !state.settings.hideBalances;
-          saveLocal();
-          renderAll();
-        });
-
-        document.getElementById('btnRefreshApp').addEventListener('click', async () => {
-          const icon = document.getElementById('refreshIconSvg');
-          icon.classList.add('animate-spin');
-          if (state.cloud.url) {
-            await pullEntriesFromCloud(false);
-          } else {
-            renderAll();
-            showToast('Tampilan diperbarui');
-          }
-          setTimeout(() => icon.classList.remove('animate-spin'), 500);
-        });
-
-        document.getElementById('btnQuickAddHeader').addEventListener('click', () => openEntryModal(null, false));
-        document.getElementById('btnFloatingUpdate').addEventListener('click', () => openEntryModal(null, false));
-        document.getElementById('btnEmptyAddFirst').addEventListener('click', () => openEntryModal(null, false));
-        document.getElementById('btnAddCashflowShortcut').addEventListener('click', () => openEntryModal(null, true));
-
-        // Info Card Toggle
-        document.getElementById('btnToggleInfo').addEventListener('click', () => {
-          document.getElementById('infoTooltipCard').classList.toggle('hidden');
-        });
-        document.getElementById('btnCloseInfo').addEventListener('click', () => {
-          document.getElementById('infoTooltipCard').classList.add('hidden');
-        });
-
-        // Daily / Monthly Switch
+        // Daily / Monthly Toggle
         document.getElementById('btnModeDaily').addEventListener('click', () => {
           state.settings.mode = 'daily';
           saveLocal();
@@ -1911,72 +1922,95 @@ function doPost(e) {
         });
 
         // Period Dropdown
-        const periodMenu = document.getElementById('periodDropdownMenu');
-        document.getElementById('btnPeriodDropdown').addEventListener('click', (e) => {
+        const btnPeriod = document.getElementById('btnPeriodDropdown');
+        const menuPeriod = document.getElementById('periodDropdownMenu');
+        btnPeriod.addEventListener('click', (e) => {
           e.stopPropagation();
-          periodMenu.classList.toggle('hidden');
+          menuPeriod.classList.toggle('hidden');
         });
         document.querySelectorAll('.period-option').forEach(btn => {
           btn.addEventListener('click', () => {
             state.settings.period = btn.dataset.period;
             state.visibleRowLimit = INITIAL_VISIBLE_ROWS;
-            periodMenu.classList.add('hidden');
+            menuPeriod.classList.add('hidden');
             saveLocal();
             renderAll();
           });
         });
-        document.addEventListener('click', (e) => {
-          if (!periodMenu.contains(e.target) && e.target.id !== 'btnPeriodDropdown') {
-            periodMenu.classList.add('hidden');
+        document.addEventListener('click', () => menuPeriod.classList.add('hidden'));
+
+        // Info Card
+        document.getElementById('btnToggleInfo').addEventListener('click', () => {
+          document.getElementById('infoTooltipCard').classList.toggle('hidden');
+        });
+        document.getElementById('btnCloseInfo').addEventListener('click', () => {
+          document.getElementById('infoTooltipCard').classList.add('hidden');
+        });
+
+        // Privacy Toggle
+        document.getElementById('btnTogglePrivacy').addEventListener('click', () => {
+          state.settings.hideBalances = !state.settings.hideBalances;
+          saveLocal();
+          renderAll();
+        });
+
+        // Manual Refresh Button (iOS Home Screen)
+        document.getElementById('btnRefreshApp').addEventListener('click', async () => {
+          const icon = document.getElementById('refreshIconSvg');
+          icon.classList.add('rotate-180');
+          setTimeout(() => icon.classList.remove('rotate-180'), 550);
+          if (state.cloud.url) {
+            await pullEntriesFromCloud(false);
+          } else {
+            renderAll();
+            showToast('Tampilan diperbarui');
           }
         });
 
         // Table Row Click Delegation (Edit Entry)
         document.getElementById('performanceTableBody').addEventListener('click', (e) => {
-          const rowBtn = e.target.closest('.entry-row-btn');
-          if (!rowBtn || !rowBtn.dataset.editDate) return;
-          openEntryModal(rowBtn.dataset.editDate, false);
+          const rowBtn = e.target.closest('[data-edit-date]');
+          if (rowBtn) {
+            openEntryModal(rowBtn.dataset.editDate);
+          }
         });
 
-        // Load More Pagination
+        // Load More Rows
         document.getElementById('btnLoadMoreRows').addEventListener('click', () => {
-          state.visibleRowLimit += INITIAL_VISIBLE_ROWS;
+          state.visibleRowLimit += 60;
           renderPerformanceTable(computeAllEntries());
         });
 
-        // Entry Modal Controls
+        // Open Entry Modal Triggers
+        document.getElementById('btnQuickAddHeader').addEventListener('click', () => openEntryModal(null));
+        document.getElementById('btnFloatingUpdate').addEventListener('click', () => openEntryModal(null));
+        document.getElementById('btnEmptyAddFirst').addEventListener('click', () => openEntryModal(null));
+        document.getElementById('btnAddCashflowShortcut').addEventListener('click', () => openEntryModal(null, true));
         document.getElementById('btnCloseEntryModal').addEventListener('click', closeEntryModal);
-        document.getElementById('entryModalBackdrop').addEventListener('click', (e) => {
-          if (e.target.id === 'entryModalBackdrop') closeEntryModal();
-        });
 
-        document.getElementById('inputDate').addEventListener('change', (e) => {
-          updateModalDateBadge(e.target.value);
-          updateLivePnlPreview(false);
-        });
-
+        // Custom Calendar Controls
         document.getElementById('btnOpenCustomCalendar').addEventListener('click', () => {
           const box = document.getElementById('customCalendarBox');
           const chev = document.getElementById('calendarChevron');
           box.classList.toggle('hidden');
           chev.classList.toggle('rotate-180');
-          renderCustomCalendar();
+          if (!box.classList.contains('hidden')) renderCustomCalendar();
         });
 
         document.getElementById('btnCalPrevMonth').addEventListener('click', () => {
-          state.calViewMonth -= 1;
+          state.calViewMonth--;
           if (state.calViewMonth < 0) {
             state.calViewMonth = 11;
-            state.calViewYear -= 1;
+            state.calViewYear--;
           }
           renderCustomCalendar();
         });
 
         document.getElementById('btnCalNextMonth').addEventListener('click', () => {
-          state.calViewMonth += 1;
+          state.calViewMonth++;
           if (state.calViewMonth > 11) {
             state.calViewMonth = 0;
-            state.calViewYear += 1;
+            state.calViewYear++;
           }
           renderCustomCalendar();
         });
@@ -1984,33 +2018,25 @@ function doPost(e) {
         document.getElementById('customCalendarDays').addEventListener('click', (e) => {
           const dayBtn = e.target.closest('[data-cal-date]');
           if (!dayBtn) return;
-          const pickedIso = dayBtn.dataset.calDate;
-          document.getElementById('inputDate').value = pickedIso;
-          updateModalDateBadge(pickedIso);
-          updateLivePnlPreview(false);
+          setSelectedCalendarDate(dayBtn.dataset.calDate);
           document.getElementById('customCalendarBox').classList.add('hidden');
           document.getElementById('calendarChevron').classList.remove('rotate-180');
         });
 
         document.getElementById('btnSuggestNextTradingDay').addEventListener('click', () => {
-          const cur = parseIsoLocal(document.getElementById('inputDate').value || getNextTradingDayIso());
+          const cur = parseIsoLocal(document.getElementById('inputDate').value);
           cur.setDate(cur.getDate() + 1);
           while (cur.getDay() === 0 || cur.getDay() === 6) {
             cur.setDate(cur.getDate() + 1);
           }
-          const nextIso = toIsoDateLocal(cur);
-          document.getElementById('inputDate').value = nextIso;
-          updateModalDateBadge(nextIso);
-          updateLivePnlPreview(false);
+          setSelectedCalendarDate(toIsoDateLocal(cur));
         });
 
         document.getElementById('btnSuggestToday').addEventListener('click', () => {
-          const todayIso = toIsoDateLocal(new Date());
-          document.getElementById('inputDate').value = todayIso;
-          updateModalDateBadge(todayIso);
-          updateLivePnlPreview(false);
+          setSelectedCalendarDate(toIsoDateLocal(new Date()));
         });
 
+        // Cashflow Accordion & Auto-Adjust
         document.getElementById('btnToggleCashflowSection').addEventListener('click', () => {
           document.getElementById('cashflowInputContainer').classList.toggle('hidden');
           document.getElementById('cashflowChevron').classList.toggle('rotate-180');
@@ -2018,264 +2044,260 @@ function doPost(e) {
 
         document.getElementById('btnFlowDeposit').addEventListener('click', () => {
           state.cashflowSign = 1;
-          syncCashflowSignButtons();
-          updateLivePnlPreview(true);
+          syncCashflowButtonsUI();
+          applyAutoCashflowToEquity();
+          updateLivePnlPreview();
         });
+
         document.getElementById('btnFlowWithdraw').addEventListener('click', () => {
           state.cashflowSign = -1;
-          syncCashflowSignButtons();
-          updateLivePnlPreview(true);
+          syncCashflowButtonsUI();
+          applyAutoCashflowToEquity();
+          updateLivePnlPreview();
         });
-        document.getElementById('inputEquity').addEventListener('input', () => updateLivePnlPreview(false));
-        document.getElementById('inputCashflowAmount').addEventListener('input', () => updateLivePnlPreview(true));
-        document.getElementById('chkAutoAdjustEquity').addEventListener('change', () => updateLivePnlPreview(true));
 
-        document.getElementById('entryForm').addEventListener('submit', (e) => {
+        document.getElementById('inputCashflowAmount').addEventListener('input', () => {
+          applyAutoCashflowToEquity();
+          updateLivePnlPreview();
+        });
+
+        document.getElementById('chkAutoAdjustEquity').addEventListener('change', () => {
+          applyAutoCashflowToEquity();
+          updateLivePnlPreview();
+        });
+
+        document.getElementById('inputEquity').addEventListener('input', updateLivePnlPreview);
+
+        // Save Entry Form
+        document.getElementById('entryForm').addEventListener('submit', async (e) => {
           e.preventDefault();
           const dateVal = normalizeToIsoDate(document.getElementById('inputDate').value);
-          const origDate = document.getElementById('editingOriginalDate').value;
-          const eqVal = parseFloat(document.getElementById('inputEquity').value);
+          const origDate = normalizeToIsoDate(document.getElementById('editingOriginalDate').value);
+          const equityVal = parseFloat(document.getElementById('inputEquity').value);
           const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
-          const netFlow = cfRaw * state.cashflowSign;
+          const netFlow = state.cashflowSign * Math.abs(cfRaw);
           const noteVal = document.getElementById('inputNote').value.trim();
 
-          if (!dateVal || isNaN(eqVal)) return;
+          if (!dateVal || isNaN(equityVal) || equityVal < 0) {
+            showToast('Masukkan tanggal dan nominal valid', true);
+            return;
+          }
 
-          state.entries = state.entries.filter(item => item.date !== origDate && item.date !== dateVal);
-          state.entries.push({ date: dateVal, equity: eqVal, netFlow, note: noteVal });
+          state.entries = state.entries.filter(item => item.date !== dateVal && (!origDate || item.date !== origDate));
+          state.entries.push({ date: dateVal, equity: equityVal, netFlow, note: noteVal });
           state.entries.sort((a, b) => a.date.localeCompare(b.date));
 
           saveLocal();
           renderAll();
           closeEntryModal();
           showToast('Data berhasil disimpan');
-          pushEntriesToCloud(true);
+
+          if (state.cloud.url) {
+            await pushEntriesToCloud(true);
+          }
         });
 
+        // Delete Entry
         document.getElementById('btnDeleteEntry').addEventListener('click', () => {
           document.getElementById('inlineDeleteConfirm').classList.remove('hidden');
         });
         document.getElementById('btnCancelDelete').addEventListener('click', () => {
           document.getElementById('inlineDeleteConfirm').classList.add('hidden');
         });
-        document.getElementById('btnConfirmDelete').addEventListener('click', () => {
-          const origDate = document.getElementById('editingOriginalDate').value;
-          state.entries = state.entries.filter(item => item.date !== origDate);
-          saveLocal();
-          renderAll();
-          closeEntryModal();
-          showToast('Catatan dihapus');
-          pushEntriesToCloud(true);
+        document.getElementById('btnConfirmDelete').addEventListener('click', async () => {
+          const origDate = normalizeToIsoDate(document.getElementById('editingOriginalDate').value);
+          if (origDate) {
+            state.entries = state.entries.filter(e => e.date !== origDate);
+            saveLocal();
+            renderAll();
+            closeEntryModal();
+            showToast('Catatan dihapus');
+            if (state.cloud.url) await pushEntriesToCloud(true);
+          }
         });
 
-        // Settings & Cloud Modal
-        const settingsModal = document.getElementById('settingsModalBackdrop');
-        function openSettingsModal() {
+        // Settings Modal
+        const openSettings = () => {
           document.getElementById('inputAppsScriptUrl').value = state.cloud.url || '';
           document.getElementById('inlineResetConfirm').classList.add('hidden');
-          settingsModal.classList.remove('hidden');
-        }
-        document.getElementById('btnOpenSettingsLeft').addEventListener('click', openSettingsModal);
-        document.getElementById('btnOpenSettingsRight').addEventListener('click', openSettingsModal);
-        document.getElementById('btnSyncStatusHeader').addEventListener('click', openSettingsModal);
-
+          updateCloudStatusUI();
+          document.getElementById('settingsModalBackdrop').classList.remove('hidden');
+        };
+        document.getElementById('btnOpenSettingsLeft').addEventListener('click', openSettings);
+        document.getElementById('btnOpenSettingsRight').addEventListener('click', openSettings);
+        document.getElementById('btnSyncStatusHeader').addEventListener('click', openSettings);
         document.getElementById('btnCloseSettingsModal').addEventListener('click', () => {
-          settingsModal.classList.add('hidden');
-        });
-        settingsModal.addEventListener('click', (e) => {
-          if (e.target.id === 'settingsModalBackdrop') settingsModal.classList.add('hidden');
+          document.getElementById('settingsModalBackdrop').classList.add('hidden');
         });
 
-        // Apps Script Guide & Copy
         document.getElementById('btnToggleScriptGuide').addEventListener('click', () => {
           document.getElementById('appsScriptSetupGuide').classList.toggle('hidden');
         });
+
         document.getElementById('btnCopyAppsScript').addEventListener('click', () => {
-          const code = document.getElementById('appsScriptCodeBlock').textContent;
+          const codeText = document.getElementById('appsScriptCodeBlock').textContent;
           const ta = document.createElement('textarea');
-          ta.value = code;
+          ta.value = codeText;
           document.body.appendChild(ta);
           ta.select();
           document.execCommand('copy');
           document.body.removeChild(ta);
-          showToast('Kode Apps Script berhasil disalin');
+          showToast('Kode Apps Script disalin');
         });
 
-        // Connect / Disconnect Cloud
         document.getElementById('btnSaveAppsScriptUrl').addEventListener('click', async () => {
           const urlVal = document.getElementById('inputAppsScriptUrl').value.trim();
-          if (!urlVal) return;
+          if (!urlVal) {
+            showToast('Masukkan URL Apps Script valid', true);
+            return;
+          }
           state.cloud.url = urlVal;
           localStorage.setItem(STORAGE_KEY_CLOUD, urlVal);
           await pullEntriesFromCloud(false);
         });
+
         document.getElementById('btnDisconnectCloud').addEventListener('click', () => {
           state.cloud.url = '';
           state.cloud.status = 'local';
           localStorage.setItem(STORAGE_KEY_CLOUD, '');
+          document.getElementById('inputAppsScriptUrl').value = '';
           updateCloudStatusUI();
-          showToast('Koneksi Cloud diputuskan');
+          showToast('Koneksi cloud diputuskan');
         });
+
         document.getElementById('btnPushToCloud').addEventListener('click', () => pushEntriesToCloud(false));
         document.getElementById('btnPullFromCloud').addEventListener('click', () => pullEntriesFromCloud(false));
 
-        // Currency Buttons
+        // Currency
         document.getElementById('btnCurrencyIDR').addEventListener('click', () => {
           state.settings.currency = 'IDR';
           saveLocal();
           renderAll();
-          showToast('Format angka bulat / IDR aktif');
         });
         document.getElementById('btnCurrencyUSD').addEventListener('click', () => {
           state.settings.currency = 'USD';
           saveLocal();
           renderAll();
-          showToast('Format US Dollar ($) aktif');
         });
 
-        // Export CSV & JSON
+        // Export / Import
         document.getElementById('btnExportCsv').addEventListener('click', () => {
           const computed = computeAllEntries();
-          const lines = ['Date,Equity,NetTopUp,DailyPnL,DailyPnLPct,Note'];
-          computed.forEach(e => {
-            const safeNote = `"${String(e.note || '').replace(/"/g, '""')}"`;
-            lines.push(`${e.date},${e.equity},${e.netFlow || 0},${e.pnl.toFixed(2)},${e.pnlPct.toFixed(2)}%,${safeNote}`);
+          const lines = ['Date,Equity,NetTopUp,PnL,PnL_Pct,Note'];
+          computed.forEach(r => {
+            lines.push(`${r.date},${r.equity},${r.netFlow},${r.pnl.toFixed(2)},${r.pnlPct.toFixed(2)}%,"${(r.note || '').replace(/"/g, '""')}"`);
           });
-          downloadTextFile(lines.join('\n'), `etf-pnl-${toIsoDateLocal(new Date())}.csv`, 'text/csv');
+          downloadFile(`etf-pnl-${toIsoDateLocal(new Date())}.csv`, lines.join('\n'), 'text/csv');
         });
 
         document.getElementById('btnExportJson').addEventListener('click', () => {
-          downloadTextFile(JSON.stringify({ currency: state.settings.currency, entries: state.entries }, null, 2), `etf-pnl-backup-${toIsoDateLocal(new Date())}.json`, 'application/json');
+          downloadFile(`etf-pnl-backup-${toIsoDateLocal(new Date())}.json`, JSON.stringify({
+            currency: state.settings.currency,
+            entries: state.entries
+          }, null, 2), 'application/json');
         });
 
-        document.getElementById('inputImportJson').addEventListener('change', (e) => {
-          const file = e.target.files && e.target.files[0];
+        document.getElementById('inputImportJson').addEventListener('change', async (e) => {
+          const file = e.target.files[0];
           if (!file) return;
-          const reader = new FileReader();
-          reader.onload = () => {
-            try {
-              const parsed = JSON.parse(String(reader.result));
-              const list = Array.isArray(parsed) ? parsed : parsed.entries;
-              if (Array.isArray(list)) {
-                state.entries = list.map(item => ({
-                  date: normalizeToIsoDate(item.date),
-                  equity: Number(item.equity) || 0,
-                  netFlow: Number(item.netFlow) || 0,
-                  note: item.note ? String(item.note) : ''
-                }));
-                saveLocal();
-                renderAll();
-                pushEntriesToCloud(true);
-                showToast('Backup JSON berhasil dimuat');
-              }
-            } catch (err) {
-              showToast('File JSON tidak valid', true);
+          try {
+            const parsed = JSON.parse(await file.text());
+            const list = Array.isArray(parsed) ? parsed : parsed.entries;
+            if (Array.isArray(list)) {
+              state.entries = list.map(x => ({
+                date: normalizeToIsoDate(x.date),
+                equity: Number(x.equity) || 0,
+                netFlow: Number(x.netFlow) || 0,
+                note: x.note ? String(x.note) : ''
+              })).filter(x => x.date).sort((a, b) => a.date.localeCompare(b.date));
+              saveLocal();
+              renderAll();
+              showToast(`Berhasil import ${state.entries.length} data`);
+              if (state.cloud.url) await pushEntriesToCloud(true);
             }
-          };
-          reader.readAsText(file);
+          } catch (err) {
+            showToast('File JSON tidak valid', true);
+          }
+          e.target.value = '';
         });
 
-        // Reset & Sample Data Generators
+        // Reset & Sample Simulators
         document.getElementById('btnClearAllDataPrompt').addEventListener('click', () => {
           document.getElementById('inlineResetConfirm').classList.remove('hidden');
         });
         document.getElementById('btnCancelReset').addEventListener('click', () => {
           document.getElementById('inlineResetConfirm').classList.add('hidden');
         });
-        document.getElementById('btnConfirmReset').addEventListener('click', () => {
+        document.getElementById('btnConfirmReset').addEventListener('click', async () => {
           state.entries = [];
           saveLocal();
           renderAll();
-          settingsModal.classList.add('hidden');
-          pushEntriesToCloud(true);
+          document.getElementById('inlineResetConfirm').classList.add('hidden');
+          document.getElementById('settingsModalBackdrop').classList.add('hidden');
           showToast('Semua data dikosongkan');
+          if (state.cloud.url) await pushEntriesToCloud(true);
+        });
+
+        document.getElementById('btnGenerate1YearSample').addEventListener('click', () => {
+          state.entries = generate1YearSampleEntries();
+          state.settings.period = '1Y';
+          saveLocal();
+          renderAll();
+          document.getElementById('settingsModalBackdrop').classList.add('hidden');
+          showToast('Simulasi 1 tahun (252 hari) dimuat');
         });
 
         document.getElementById('btnRestoreSampleData').addEventListener('click', () => {
           state.entries = [...SAMPLE_ENTRIES];
           saveLocal();
           renderAll();
-          settingsModal.classList.add('hidden');
+          document.getElementById('settingsModalBackdrop').classList.add('hidden');
           showToast('Data contoh dimuat');
         });
-
-        document.getElementById('btnGenerate1YearSample').addEventListener('click', () => {
-          const generated = [];
-          let eq = 1440000;
-          const cursor = new Date(2025, 10, 24);
-          let seed = 42;
-          for (let i = 0; i < 252; i++) {
-            while (cursor.getDay() === 0 || cursor.getDay() === 6) {
-              cursor.setDate(cursor.getDate() + 1);
-            }
-            seed = (seed * 1664525 + 1013904223) % 4294967296;
-            const rand = (seed / 4294967296) - 0.46;
-            eq = Math.round(eq * (1 + rand * 0.014));
-            generated.push({ date: toIsoDateLocal(cursor), equity: eq, netFlow: 0, note: '' });
-            cursor.setDate(cursor.getDate() + 1);
-          }
-          state.entries = generated;
-          saveLocal();
-          renderAll();
-          settingsModal.classList.add('hidden');
-          showToast('Simulasi 1 tahun (252 hari bursa) dimuat');
-        });
-      }
-
-      function downloadTextFile(content, filename, mimeType) {
-        const blob = new Blob([content], { type: mimeType });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
       }
 
       // ==================== INITIALIZATION ====================
-      function init() {
+      async function init() {
         try {
-          const savedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
-          const savedSettings = localStorage.getItem(STORAGE_KEY_SETTINGS);
+          const savedSettings = JSON.parse(localStorage.getItem(STORAGE_KEY_SETTINGS) || 'null');
+          if (savedSettings && typeof savedSettings === 'object') {
+            state.settings = { ...state.settings, ...savedSettings };
+          }
+
           const savedCloud = localStorage.getItem(STORAGE_KEY_CLOUD);
+          if (savedCloud !== null) {
+            state.cloud.url = savedCloud;
+          }
 
-          if (savedEntries) {
-            const parsed = JSON.parse(savedEntries);
-            state.entries = Array.isArray(parsed)
-              ? parsed.map(item => ({
-                  ...item,
-                  date: normalizeToIsoDate(item.date)
-                }))
-              : [...SAMPLE_ENTRIES];
-          } else {
+          const savedEntries = JSON.parse(localStorage.getItem(STORAGE_KEY_ENTRIES) || 'null');
+          if (Array.isArray(savedEntries)) {
+            state.entries = savedEntries
+              .map(x => ({
+                date: normalizeToIsoDate(x.date),
+                equity: Number(x.equity) || 0,
+                netFlow: Number(x.netFlow) || 0,
+                note: x.note ? String(x.note) : ''
+              }))
+              .filter(x => x.date)
+              .sort((a, b) => a.date.localeCompare(b.date));
+          } else if (!state.cloud.url) {
             state.entries = [...SAMPLE_ENTRIES];
+            saveLocal();
           }
-
-          if (savedSettings) {
-            state.settings = { ...state.settings, ...JSON.parse(savedSettings) };
-          }
-
-          state.cloud.url = savedCloud !== null ? savedCloud : DEFAULT_APPS_SCRIPT_URL;
         } catch (err) {
-          console.error('Init parse error:', err);
-          state.entries = [...SAMPLE_ENTRIES];
+          console.error('Init storage error:', err);
         }
 
         bindEvents();
+        updateCloudStatusUI();
         renderAll();
 
         if (state.cloud.url) {
-          pullEntriesFromCloud(true);
+          await pullEntriesFromCloud(true);
         }
       }
 
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-      } else {
-        init();
-      }
+      window.addEventListener('DOMContentLoaded', init);
     })();
   </script>
 </body>
