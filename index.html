@@ -1297,7 +1297,7 @@ function doPost(e) {
       const APPS_SCRIPT_URL_KEY = 'etf_portfolio_apps_script_url_v1';
       const PRIVACY_MODE_KEY = 'etf_portfolio_privacy_mode_v1';
       const THEME_MODE_KEY = 'etf_portfolio_theme_mode_v1';
-      const DEFAULT_APPS_SCRIPT_URL = '';
+      const DEFAULT_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzDa1zDUwAIkAn1EMLEPlevp84hkLgMsZ77Wnkp232rk20xlkY6a8QPx4cWaz-o_b5Z/exec';
 
       // Initial realistic ETF portfolio dataset (Senin - Jumat US Market days)
       const DEFAULT_SAMPLE_DATA = [
@@ -1639,7 +1639,7 @@ function doPost(e) {
       function getAppsScriptUrl() {
         try {
           const saved = localStorage.getItem(APPS_SCRIPT_URL_KEY);
-          if (saved !== null) return saved.trim();
+          if (saved && saved.trim()) return saved.trim();
           return DEFAULT_APPS_SCRIPT_URL;
         } catch (e) {
           return DEFAULT_APPS_SCRIPT_URL;
