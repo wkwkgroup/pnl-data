@@ -353,6 +353,18 @@
           <span id="statNetCashflow" class="text-sm font-semibold text-[#F3F4F6] block [font-variant-numeric:tabular-nums]">0</span>
           <span class="text-[11px] text-[#8E9591]">Modal awal: <span id="statInitialEquity">1,440,000</span></span>
         </div>
+
+        <!-- Max Drawdown (%) -->
+        <div class="col-span-2 rounded-2xl bg-[#181B19] border border-[#262B28] p-3.5 flex items-center justify-between">
+          <div>
+            <span class="text-[11px] text-[#8E9591] block mb-1">Max Drawdown (%)</span>
+            <span id="statMaxDrawdownPct" class="text-base font-semibold text-[#E05252] block [font-variant-numeric:tabular-nums]">0.00%</span>
+          </div>
+          <div class="text-right">
+            <span id="statMaxDrawdownRange" class="text-[11px] text-[#8E9591] block">Dari puncak tertinggi</span>
+            <span id="statMaxDrawdownNominal" class="text-[11px] text-[#8E9591] block [font-variant-numeric:tabular-nums]">Drop nominal: 0</span>
+          </div>
+        </div>
       </div>
 
       <!-- Top-Up / Withdrawal History Card -->
@@ -1296,6 +1308,56 @@ function doPost(e) {
 
         document.getElementById('statNetCashflow').textContent = formatNumber(netCashflow, true);
         document.getElementById('statInitialEquity').textContent = formatNumber(initialEquity);
+
+        // Risk Calculation: Max Drawdown (Peak-to-Trough on Pure Cumulative Return)
+        let cumulativeWealth = 100;
+        let peakWealth = 100;
+        let peakDate = filteredList[0].date;
+        let maxDrawdownPct = 0;
+        let maxDdPeakDate = filteredList[0].date;
+        let maxDdTroughDate = filteredList[0].date;
+
+        let peakEquityVal = filteredList[0].equity;
+        let maxDrawdownNominal = 0;
+
+        filteredList.forEach(d => {
+          if (!d.isInitial) {
+            cumulativeWealth = cumulativeWealth * (1 + (d.pnlPct / 100));
+            if (cumulativeWealth >= peakWealth) {
+              peakWealth = cumulativeWealth;
+              peakDate = d.date;
+            }
+            const ddPct = peakWealth > 0 ? ((cumulativeWealth - peakWealth) / peakWealth) * 100 : 0;
+            if (ddPct < maxDrawdownPct) {
+              maxDrawdownPct = ddPct;
+              maxDdPeakDate = peakDate;
+              maxDdTroughDate = d.date;
+            }
+
+            if (d.equity >= peakEquityVal) {
+              peakEquityVal = d.equity;
+            }
+            const ddNom = d.equity - peakEquityVal;
+            if (ddNom < maxDrawdownNominal) {
+              maxDrawdownNominal = ddNom;
+            }
+          }
+        });
+
+        const elDdPct = document.getElementById('statMaxDrawdownPct');
+        const elDdRange = document.getElementById('statMaxDrawdownRange');
+        const elDdNom = document.getElementById('statMaxDrawdownNominal');
+        if (maxDrawdownPct < -0.0001) {
+          elDdPct.textContent = `${maxDrawdownPct.toFixed(2)}%`;
+          elDdPct.className = 'text-base font-semibold text-[#E05252] block [font-variant-numeric:tabular-nums]';
+          elDdRange.textContent = `${formatDisplayDate(maxDdPeakDate)} → ${formatDisplayDate(maxDdTroughDate)}`;
+          elDdNom.textContent = `Drop nominal: ${formatNumber(maxDrawdownNominal, true)}`;
+        } else {
+          elDdPct.textContent = '0.00%';
+          elDdPct.className = 'text-base font-semibold text-[#D1D5DB] block [font-variant-numeric:tabular-nums]';
+          elDdRange.textContent = 'Belum ada drawdown';
+          elDdNom.textContent = 'Drop nominal: 0';
+        }
 
         // Render Cashflow History
         const cashflows = [...allComputed].filter(d => Number(d.netFlow) !== 0).reverse();
