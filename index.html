@@ -58,23 +58,6 @@
             <span id="headerCloudLabel">Local</span>
           </button>
           <button
-            id="btnTogglePrivacy"
-            type="button"
-            aria-label="Sembunyikan atau Tampilkan Nominal Saldo"
-            title="Mode Privasi (Sensor Saldo)"
-            class="w-8 h-8 flex items-center justify-center rounded-full text-[#8E9591] hover:text-[#F3F4F6] hover:bg-[#181B19] active:scale-95 transition"
-          >
-            <!-- Eye Open Icon -->
-            <svg id="iconEyeOpen" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
-            <!-- Eye Off Icon -->
-            <svg id="iconEyeClosed" class="hidden w-4 h-4 text-[#22C55E]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-            </svg>
-          </button>
-          <button
             id="btnRefreshApp"
             type="button"
             aria-label="Refresh & Sinkron Data"
@@ -161,7 +144,24 @@
       <div class="mb-4 p-4 rounded-2xl bg-[#181B19] border border-[#262B28] flex items-center justify-between gap-3">
         <div>
           <span class="text-[11px] text-[#8E9591] block mb-0.5">Total Portfolio</span>
-          <span id="heroTotalPortfolio" class="text-xl font-bold text-[#F3F4F6] block [font-variant-numeric:tabular-nums]">1,596,000</span>
+          <div class="flex items-center gap-1.5">
+            <span id="heroTotalPortfolio" class="text-xl font-bold text-[#F3F4F6] [font-variant-numeric:tabular-nums]">1,596,000</span>
+            <button
+              type="button"
+              data-privacy-trigger="true"
+              aria-label="Sembunyikan atau Tampilkan Nominal Saldo"
+              title="Sembunyikan / Tampilkan Saldo"
+              class="w-7 h-7 flex items-center justify-center rounded-full text-[#8E9591] hover:text-[#F3F4F6] hover:bg-[#222724] active:scale-95 transition"
+            >
+              <svg class="privacy-eye-open w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <svg class="privacy-eye-closed hidden w-4 h-4 text-[#22C55E]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+              </svg>
+            </button>
+          </div>
           <span class="text-[11px] text-[#8E9591] mt-1 block [font-variant-numeric:tabular-nums]">
             Modal Bersih: <strong id="heroTotalInvested" class="font-medium text-[#D1D5DB]">1,440,000</strong>
           </span>
@@ -360,7 +360,24 @@
               <span class="text-xs font-medium text-[#8E9591]">Nilai Portofolio</span>
               <span id="chartActiveDate" class="text-[11px] text-[#8E9591] bg-[#111312] px-2 py-0.5 rounded-full">24 Nov 26</span>
             </div>
-            <span id="chartActiveEquity" class="text-2xl font-bold tracking-tight text-[#F3F4F6] block [font-variant-numeric:tabular-nums]">1,596,000</span>
+            <div class="flex items-center gap-2">
+              <span id="chartActiveEquity" class="text-2xl font-bold tracking-tight text-[#F3F4F6] [font-variant-numeric:tabular-nums]">1,596,000</span>
+              <button
+                type="button"
+                data-privacy-trigger="true"
+                aria-label="Sembunyikan atau Tampilkan Nominal Saldo"
+                title="Sembunyikan / Tampilkan Saldo"
+                class="w-8 h-8 flex items-center justify-center rounded-full text-[#8E9591] hover:text-[#F3F4F6] hover:bg-[#222724] active:scale-95 transition"
+              >
+                <svg class="privacy-eye-open w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <svg class="privacy-eye-closed hidden w-4 h-4 text-[#22C55E]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                </svg>
+              </button>
+            </div>
             <div class="flex items-center gap-1.5 mt-1 flex-wrap">
               <span id="chartTrendArrow" class="text-xs font-bold text-[#22C55E]">↗</span>
               <span id="chartActivePnl" class="text-xs font-semibold text-[#22C55E] [font-variant-numeric:tabular-nums]">+156,000 (+10.83%)</span>
@@ -2186,8 +2203,12 @@ function doPost(e) {
         }
 
         // Privacy icon toggle
-        document.getElementById('iconEyeOpen').classList.toggle('hidden', state.settings.hideBalances);
-        document.getElementById('iconEyeClosed').classList.toggle('hidden', !state.settings.hideBalances);
+        document.querySelectorAll('.privacy-eye-open').forEach(el => {
+          el.classList.toggle('hidden', state.settings.hideBalances);
+        });
+        document.querySelectorAll('.privacy-eye-closed').forEach(el => {
+          el.classList.toggle('hidden', !state.settings.hideBalances);
+        });
 
         // Currency buttons in Settings
         const isUsd = state.settings.currency === 'USD';
@@ -2575,11 +2596,14 @@ function doPost(e) {
         });
 
         // Privacy Toggle
-        document.getElementById('btnTogglePrivacy').addEventListener('click', () => {
+        const togglePrivacyMode = () => {
           state.settings.hideBalances = !state.settings.hideBalances;
           saveLocal();
           renderAll();
           showToast(state.settings.hideBalances ? 'Saldo disembunyikan' : 'Saldo ditampilkan');
+        };
+        document.querySelectorAll('[data-privacy-trigger="true"]').forEach(btn => {
+          btn.addEventListener('click', togglePrivacyMode);
         });
 
         // Refresh Button (iOS Home Screen friendly)
