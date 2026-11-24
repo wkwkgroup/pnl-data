@@ -1,0 +1,2110 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Performance - ETF Portfolio P&L Tracker</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            appBg: '#111312',
+            surface: '#181B19',
+            surfaceElevated: '#1F2421',
+            borderSubtle: '#262B28',
+            borderPill: '#2F3532',
+            emeraldGain: '#22C55E',
+            coralLoss: '#E05252',
+            mutedText: '#8E9591',
+            neutralZero: '#D1D5DB',
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-[#0B0D0C] text-[#F3F4F6] font-sans antialiased selection:bg-[#22C55E]/20 selection:text-[#22C55E] overflow-x-hidden">
+
+  <!-- Mobile-First Centered App Shell -->
+  <div id="appShell" class="max-w-[480px] mx-auto min-h-screen bg-[#111312] flex flex-col relative shadow-2xl shadow-black/80 border-x border-[#1C201E]/60">
+
+    <!-- Top Sticky Header & Primary Tabs -->
+    <header class="sticky top-0 z-30 bg-[#111312]/95 backdrop-blur-md">
+      <!-- Top Bar -->
+      <div class="flex items-center justify-between px-4 h-14">
+        <!-- Left Back / Quick Menu Button -->
+        <button
+          id="btnOpenSettingsLeft"
+          type="button"
+          aria-label="Pengaturan & Data"
+          class="w-10 h-10 -ml-2 flex items-center justify-center rounded-full text-[#D1D5DB] hover:bg-[#181B19] active:scale-95 transition"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        <!-- Center Title -->
+        <h1 class="text-[16px] font-semibold tracking-tight text-[#F3F4F6]">Performance</h1>
+
+        <!-- Right Quick Action, Cloud Sync Status & Settings -->
+        <div class="flex items-center gap-1 -mr-1">
+          <button
+            id="btnSyncStatusHeader"
+            type="button"
+            title="Status Cloud Sync Google Sheets"
+            class="px-2 py-1 rounded-full text-[10px] font-medium bg-[#181B19] border border-[#262B28] text-[#8E9591] hover:text-[#F3F4F6] active:scale-95 transition flex items-center gap-1"
+          >
+            <span id="headerCloudDot" class="w-1.5 h-1.5 rounded-full bg-[#8E9591]"></span>
+            <span id="headerCloudLabel">Local</span>
+          </button>
+          <button
+            id="btnQuickAddHeader"
+            type="button"
+            aria-label="Tambah Data Harian"
+            class="px-2.5 py-1.5 rounded-full text-xs font-medium text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/30 hover:bg-[#22C55E]/20 active:scale-95 transition flex items-center gap-1"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Input</span>
+          </button>
+          <button
+            id="btnOpenSettingsRight"
+            type="button"
+            aria-label="Opsi Backup & Cloud Sync"
+            class="w-9 h-9 flex items-center justify-center rounded-full text-[#8E9591] hover:text-[#F3F4F6] hover:bg-[#181B19] active:scale-95 transition"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Primary Navigation Tabs: PORTFOLIO | TRADE -->
+      <nav class="grid grid-cols-2 border-b border-[#222624]" role="tablist">
+        <button
+          id="tabPortfolio"
+          type="button"
+          role="tab"
+          aria-selected="true"
+          class="py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors"
+        >
+          PORTFOLIO
+        </button>
+        <button
+          id="tabTrade"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          class="py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] border-b-2 border-transparent hover:text-[#D1D5DB] transition-colors"
+        >
+          TRADE
+        </button>
+      </nav>
+    </header>
+
+    <!-- ==================== VIEW 1: PORTFOLIO TAB ==================== -->
+    <main id="viewPortfolio" class="flex-1 flex flex-col px-4 pt-5 pb-28">
+      <!-- Sub-header Row: Total Equity Return (i) -->
+      <div class="flex items-center justify-between mb-3.5">
+        <div class="flex items-center gap-1.5">
+          <h2 class="text-[15px] font-semibold text-[#F3F4F6]">Total Equity Return</h2>
+          <button
+            id="btnToggleInfo"
+            type="button"
+            aria-label="Informasi Perhitungan P&L"
+            class="w-5 h-5 flex items-center justify-center rounded-full text-[#8E9591] hover:text-[#F3F4F6] active:scale-95 transition"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="9" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 11v5m0-8h.01" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Subtle US Market Status Pill -->
+        <span id="currencyBadge" class="text-[11px] font-medium text-[#8E9591] bg-[#181B19] border border-[#262B28] px-2 py-0.5 rounded-full">
+          US Market (Sen–Jum)
+        </span>
+      </div>
+
+      <!-- Collapsible Formula Tooltip Card -->
+      <div id="infoTooltipCard" class="hidden mb-4 p-3.5 rounded-xl bg-[#181B19] border border-[#2A302D] text-xs text-[#D1D5DB] space-y-1.5 shadow-lg">
+        <div class="flex items-center justify-between">
+          <span class="font-semibold text-[#22C55E]">Rumus P&amp;L Harian ETF</span>
+          <button id="btnCloseInfo" type="button" class="text-[#8E9591] hover:text-white text-xs px-1">Tutup</button>
+        </div>
+        <p class="text-[#9CA3AF] leading-relaxed">
+          <code class="text-[#F3F4F6] bg-[#111312] px-1.5 py-0.5 rounded text-[11px]">(Equity Hari Ini − Equity Sebelumnya − Net Top-Up) ÷ Equity Sebelumnya</code>
+        </p>
+        <p class="text-[#8E9591] text-[11px] leading-relaxed">
+          • Update setiap hari bursa saham AS (<strong class="text-[#D1D5DB]">Senin – Jumat</strong>).<br />
+          • Ketuk baris tanggal mana saja untuk <strong class="text-[#D1D5DB]">mengedit</strong> atau <strong class="text-[#D1D5DB]">menghapus</strong> data.
+        </p>
+      </div>
+
+      <!-- Controls Row: Daily / Monthly Pills + Period Dropdown -->
+      <div class="flex items-center justify-between mb-5">
+        <!-- Left Pill Switcher -->
+        <div class="flex items-center gap-2">
+          <button
+            id="btnModeDaily"
+            type="button"
+            class="px-4 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition"
+          >
+            Daily
+          </button>
+          <button
+            id="btnModeMonthly"
+            type="button"
+            class="px-4 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition"
+          >
+            Monthly
+          </button>
+        </div>
+
+        <!-- Right Period Dropdown -->
+        <div class="relative" id="periodDropdownWrapper">
+          <button
+            id="btnPeriodDropdown"
+            type="button"
+            class="flex items-center gap-1.5 py-1.5 pl-2 pr-1 text-xs font-medium text-[#22C55E] hover:opacity-85 active:scale-95 transition"
+          >
+            <span id="selectedPeriodLabel">Last 1 Month</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          <!-- Dropdown Menu -->
+          <div
+            id="periodDropdownMenu"
+            class="hidden absolute right-0 mt-1.5 w-44 rounded-xl bg-[#181B19] border border-[#2C322F] shadow-xl py-1 z-20"
+          >
+            <button type="button" data-period="1M" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#22C55E] font-medium hover:bg-[#222724] transition">
+              Last 1 Month
+            </button>
+            <button type="button" data-period="3M" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724] transition">
+              Last 3 Months
+            </button>
+            <button type="button" data-period="6M" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724] transition">
+              Last 6 Months
+            </button>
+            <button type="button" data-period="1Y" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724] transition">
+              1 Year (252 Hari)
+            </button>
+            <button type="button" data-period="YTD" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724] transition">
+              YTD
+            </button>
+            <button type="button" data-period="ALL" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724] transition">
+              All Time
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Header Row -->
+      <div class="grid grid-cols-12 items-center pb-2.5 text-xs font-normal text-[#8E9591] select-none">
+        <div class="col-span-4 text-left">Date</div>
+        <div class="col-span-4 text-right pr-2">Equity</div>
+        <div class="col-span-4 text-right">P&amp;L</div>
+      </div>
+
+      <!-- Performance Rows Container -->
+      <div id="performanceTableBody" class="divide-y divide-transparent">
+        <!-- Dynamically populated by JavaScript -->
+      </div>
+
+      <!-- Smart Load More Pagination for 1-Year (252+ rows) smooth scrolling -->
+      <div id="loadMoreContainer" class="hidden pt-4 pb-2 text-center">
+        <button
+          id="btnLoadMoreRows"
+          type="button"
+          class="px-4 py-2 rounded-full bg-[#181B19] border border-[#2F3532] hover:border-[#22C55E] text-xs font-medium text-[#D1D5DB] transition"
+        >
+          Tampilkan Lebih Banyak (<span id="remainingRowsCount">0</span> baris lagi)
+        </button>
+      </div>
+
+      <!-- Empty State (Shown when user clears all data) -->
+      <div id="emptyStateContainer" class="hidden flex-1 flex flex-col items-center justify-center text-center py-14 px-4">
+        <div class="w-12 h-12 rounded-2xl bg-[#181B19] border border-[#262B28] flex items-center justify-center text-[#22C55E] mb-3">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 17l6-6 4 4 8-8m0 0h-6m6 0v6" />
+          </svg>
+        </div>
+        <h3 class="text-sm font-semibold text-[#F3F4F6] mb-1">Belum Ada Data Portfolio ETF</h3>
+        <p class="text-xs text-[#8E9591] max-w-[260px] leading-relaxed mb-5">
+          Mulai catat modal awal atau nilai ekuitas penutupan bursa saham AS (Senin–Jumat) Anda hari ini.
+        </p>
+        <button
+          id="btnEmptyAddFirst"
+          type="button"
+          class="px-5 py-2.5 rounded-full bg-[#22C55E] text-[#0A0D0B] text-xs font-semibold hover:bg-[#1EB054] active:scale-95 transition"
+        >
+          + Input Equity Awal
+        </button>
+      </div>
+    </main>
+
+    <!-- ==================== VIEW 2: TRADE / ANALYTICS TAB ==================== -->
+    <main id="viewTrade" class="hidden flex-1 flex flex-col px-4 pt-5 pb-28 space-y-5">
+      <!-- Section Title -->
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-[15px] font-semibold text-[#F3F4F6]">ETF Analytics &amp; Cashflow</h2>
+          <p class="text-xs text-[#8E9591] mt-0.5">Statistik performa bursa AS (Senin – Jumat)</p>
+        </div>
+        <span id="tradePeriodTag" class="text-[11px] font-medium text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/30 px-2.5 py-1 rounded-full">
+          All Time
+        </span>
+      </div>
+
+      <!-- Interactive SVG Equity Sparkline Card -->
+      <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-4">
+        <div class="flex items-start justify-between mb-2">
+          <div>
+            <span class="text-[11px] text-[#8E9591] block">Current Portfolio Equity</span>
+            <span id="chartActiveEquity" class="text-xl font-bold text-[#F3F4F6] [font-variant-numeric:tabular-nums]">1,596,000</span>
+          </div>
+          <div class="text-right">
+            <span id="chartActiveDate" class="text-[11px] text-[#8E9591] block">24 Nov 26</span>
+            <span id="chartActivePnl" class="text-xs font-medium text-[#22C55E] [font-variant-numeric:tabular-nums]">+44,000 (+2.84%)</span>
+          </div>
+        </div>
+
+        <!-- SVG Chart Container -->
+        <div class="relative w-full h-40 mt-2 select-none touch-none" id="sparklineWrapper">
+          <svg id="equitySparklineSvg" class="w-full h-full overflow-visible" preserveAspectRatio="none"></svg>
+        </div>
+        <p class="text-[10px] text-[#8E9591] mt-2 text-center">Sentuh atau geser grafik untuk melihat rincian tiap hari bursa</p>
+      </div>
+
+      <!-- Key Metrics Grid -->
+      <div class="grid grid-cols-2 gap-3">
+        <!-- Total Return -->
+        <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-3.5">
+          <span class="text-[11px] text-[#8E9591] block mb-1">Total Net P&amp;L</span>
+          <span id="statTotalPnl" class="text-sm font-semibold text-[#22C55E] block [font-variant-numeric:tabular-nums]">+156,000</span>
+          <span id="statTotalPnlPct" class="text-xs text-[#22C55E] [font-variant-numeric:tabular-nums]">+10.83%</span>
+        </div>
+
+        <!-- Win Rate -->
+        <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-3.5">
+          <span class="text-[11px] text-[#8E9591] block mb-1">Win Rate (Sen–Jum)</span>
+          <span id="statWinRate" class="text-sm font-semibold text-[#F3F4F6] block [font-variant-numeric:tabular-nums]">64.3%</span>
+          <span id="statWinCounts" class="text-[11px] text-[#8E9591] [font-variant-numeric:tabular-nums]">9W • 4L • 1D</span>
+        </div>
+
+        <!-- Best Day -->
+        <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-3.5">
+          <span class="text-[11px] text-[#8E9591] block mb-1">Best Trading Day</span>
+          <span id="statBestDay" class="text-sm font-semibold text-[#22C55E] block [font-variant-numeric:tabular-nums]">+48,000 (+3.18%)</span>
+          <span id="statBestDayDate" class="text-[11px] text-[#8E9591]">12 Nov 26</span>
+        </div>
+
+        <!-- Worst Day -->
+        <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-3.5">
+          <span class="text-[11px] text-[#8E9591] block mb-1">Worst Trading Day</span>
+          <span id="statWorstDay" class="text-sm font-semibold text-[#E05252] block [font-variant-numeric:tabular-nums]">-8,000 (-0.51%)</span>
+          <span id="statWorstDayDate" class="text-[11px] text-[#8E9591]">20 Nov 26</span>
+        </div>
+
+        <!-- Avg Daily P&L -->
+        <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-3.5">
+          <span class="text-[11px] text-[#8E9591] block mb-1">Rata-Rata P&amp;L / Hari</span>
+          <span id="statAvgDaily" class="text-sm font-semibold text-[#F3F4F6] block [font-variant-numeric:tabular-nums]">+11,143</span>
+          <span id="statTradingDays" class="text-[11px] text-[#8E9591]">14 hari bursa</span>
+        </div>
+
+        <!-- Net Top-Up / Cashflow -->
+        <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-3.5">
+          <span class="text-[11px] text-[#8E9591] block mb-1">Net Top-Up / Tarik</span>
+          <span id="statNetCashflow" class="text-sm font-semibold text-[#F3F4F6] block [font-variant-numeric:tabular-nums]">0</span>
+          <span class="text-[11px] text-[#8E9591]">Modal awal: <span id="statInitialEquity">1,440,000</span></span>
+        </div>
+      </div>
+
+      <!-- Top-Up / Withdrawal History Card -->
+      <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-4">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-[#8E9591]">Riwayat Top-Up &amp; Tarik Dana</h3>
+          <button
+            id="btnAddCashflowShortcut"
+            type="button"
+            class="text-xs font-medium text-[#22C55E] hover:underline"
+          >
+            + Catat
+          </button>
+        </div>
+        <div id="cashflowListContainer" class="space-y-2.5 text-xs">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </main>
+
+    <!-- Floating Bottom CTA Bar -->
+    <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] px-4 pb-5 pt-3 bg-gradient-to-t from-[#111312] via-[#111312]/95 to-transparent z-20 pointer-events-none">
+      <button
+        id="btnFloatingUpdate"
+        type="button"
+        class="pointer-events-auto w-full py-3.5 px-5 rounded-full bg-[#22C55E] hover:bg-[#1EB054] active:scale-[0.99] text-[#090D0B] font-semibold text-sm shadow-lg shadow-[#22C55E]/20 flex items-center justify-center gap-2 transition"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        <span>Update Equity Hari Ini</span>
+      </button>
+    </div>
+
+    <!-- ==================== BOTTOM SHEET MODAL: ADD / EDIT ENTRY ==================== -->
+    <div id="entryModalBackdrop" class="hidden fixed inset-0 z-40 bg-black/75 backdrop-blur-xs transition-opacity flex items-end justify-center">
+      <div
+        id="entryModalSheet"
+        class="w-full max-w-[480px] bg-[#181B19] border-t border-[#2A302D] rounded-t-3xl p-5 pb-7 shadow-2xl transform transition-transform"
+      >
+        <!-- Drag Handle -->
+        <div class="w-10 h-1 bg-[#343B37] rounded-full mx-auto mb-4"></div>
+
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 id="entryModalTitle" class="text-base font-semibold text-[#F3F4F6]">Update Equity Harian</h3>
+            <p class="text-xs text-[#8E9591]">Jadwal Bursa AS: Senin – Jumat</p>
+          </div>
+          <button
+            id="btnCloseEntryModal"
+            type="button"
+            aria-label="Tutup Modal"
+            class="w-8 h-8 rounded-full bg-[#222724] text-[#8E9591] hover:text-white flex items-center justify-center transition"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form id="entryForm" class="space-y-4">
+          <input type="hidden" id="editingOriginalDate" value="" />
+
+          <!-- Date Field with Auto-Suggested US Trading Day -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="inputDate" class="text-xs font-medium text-[#D1D5DB]">Tanggal Bursa</label>
+              <span id="dayNameBadge" class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]">
+                Rabu
+              </span>
+            </div>
+            <input
+              type="date"
+              id="inputDate"
+              required
+              class="w-full px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-sm text-[#F3F4F6] focus:outline-none focus:border-[#22C55E] transition [color-scheme:dark]"
+            />
+            <!-- Quick Date Chips -->
+            <div class="flex items-center gap-2 mt-2">
+              <button
+                type="button"
+                id="btnSuggestNextTradingDay"
+                class="text-[11px] px-2.5 py-1 rounded-full bg-[#222724] text-[#22C55E] hover:bg-[#2A302D] transition"
+              >
+                Hari Bursa Berikutnya
+              </button>
+              <button
+                type="button"
+                id="btnSuggestToday"
+                class="text-[11px] px-2.5 py-1 rounded-full bg-[#222724] text-[#D1D5DB] hover:bg-[#2A302D] transition"
+              >
+                Hari Ini
+              </button>
+            </div>
+            <!-- Weekend Warning Banner -->
+            <div id="weekendWarning" class="hidden mt-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-300 flex items-center gap-2">
+              <svg class="w-4 h-4 shrink-0 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              </svg>
+              <span>Akhir pekan (Sabtu/Minggu): Bursa saham AS libur. Pastikan tanggal ini memang sesuai catatan Anda.</span>
+            </div>
+          </div>
+
+          <!-- Equity Input -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="inputEquity" class="text-xs font-medium text-[#D1D5DB]">Total Equity Penutupan</label>
+              <span id="prevEquityHint" class="text-[11px] text-[#8E9591] [font-variant-numeric:tabular-nums]">
+                Sebelumnya: 1,596,000
+              </span>
+            </div>
+            <div class="relative">
+              <span id="equityInputPrefix" class="hidden absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-[#8E9591]">$</span>
+              <input
+                type="number"
+                id="inputEquity"
+                step="any"
+                min="0"
+                required
+                placeholder="Contoh: 1612000"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-base font-medium text-[#F3F4F6] [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E] transition"
+              />
+            </div>
+          </div>
+
+          <!-- Optional Top-Up / Withdrawal Accordion -->
+          <div class="rounded-xl bg-[#111312] border border-[#262B28] overflow-hidden">
+            <button
+              type="button"
+              id="btnToggleCashflowSection"
+              class="w-full px-3.5 py-2.5 flex items-center justify-between text-xs text-[#8E9591] hover:text-[#D1D5DB] transition"
+            >
+              <span>+ Tambah / Tarik Dana Hari Ini (Opsional)</span>
+              <svg id="cashflowChevron" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            <div id="cashflowInputContainer" class="hidden px-3.5 pb-3.5 pt-1 border-t border-[#1E2220] space-y-2.5">
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  id="btnFlowDeposit"
+                  class="py-1.5 rounded-lg text-xs font-medium bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition"
+                >
+                  + Top-Up (Deposit)
+                </button>
+                <button
+                  type="button"
+                  id="btnFlowWithdraw"
+                  class="py-1.5 rounded-lg text-xs font-medium bg-[#181B19] text-[#8E9591] border border-[#2F3532] transition"
+                >
+                  - Tarik Dana
+                </button>
+              </div>
+              <input
+                type="number"
+                id="inputCashflowAmount"
+                step="any"
+                min="0"
+                placeholder="Nominal Top-Up / Penarikan (0 jika tidak ada)"
+                class="w-full px-3 py-2 rounded-lg bg-[#181B19] border border-[#2F3532] text-xs text-[#F3F4F6] [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E]"
+              />
+              <p class="text-[10px] text-[#8E9591] leading-normal">
+                Menjaga agar P&amp;L harian murni menghitung imbal hasil ETF, bukan kenaikan karena transfer modal baru.
+              </p>
+            </div>
+          </div>
+
+          <!-- Live Calculated P&L Preview Box -->
+          <div class="px-3.5 py-3 rounded-xl bg-[#111312] border border-[#262B28] flex items-center justify-between">
+            <span class="text-xs text-[#8E9591]">Estimasi P&amp;L Hari Ini</span>
+            <span id="livePnlPreview" class="text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]">
+              0 (0.00%)
+            </span>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex items-center gap-2.5 pt-1">
+            <button
+              type="button"
+              id="btnDeleteEntry"
+              class="hidden px-4 py-3 rounded-xl bg-[#E05252]/15 border border-[#E05252]/30 text-[#E05252] text-xs font-semibold hover:bg-[#E05252]/25 transition"
+            >
+              Hapus
+            </button>
+            <button
+              type="submit"
+              class="flex-1 py-3 px-4 rounded-xl bg-[#22C55E] hover:bg-[#1EB054] text-[#090D0B] text-sm font-semibold shadow-md transition"
+            >
+              Simpan Data
+            </button>
+          </div>
+
+          <!-- Inline Delete Confirmation -->
+          <div id="inlineDeleteConfirm" class="hidden p-3 rounded-xl bg-[#E05252]/10 border border-[#E05252]/30 flex items-center justify-between gap-2">
+            <span class="text-xs text-[#F3F4F6]">Hapus catatan tanggal ini?</span>
+            <div class="flex items-center gap-2">
+              <button type="button" id="btnCancelDelete" class="px-2.5 py-1 rounded-lg bg-[#222724] text-xs text-[#D1D5DB]">Batal</button>
+              <button type="button" id="btnConfirmDelete" class="px-2.5 py-1 rounded-lg bg-[#E05252] text-xs font-semibold text-white">Ya, Hapus</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ==================== MODAL: SETTINGS, CLOUD SYNC & BACKUP ==================== -->
+    <div id="settingsModalBackdrop" class="hidden fixed inset-0 z-40 bg-black/75 backdrop-blur-xs flex items-end justify-center">
+      <div class="w-full max-w-[480px] max-h-[90vh] overflow-y-auto bg-[#181B19] border-t border-[#2A302D] rounded-t-3xl p-5 pb-8 shadow-2xl space-y-5">
+        <div class="w-10 h-1 bg-[#343B37] rounded-full mx-auto"></div>
+
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-semibold text-[#F3F4F6]">Pengaturan &amp; Google Sheets</h3>
+            <p class="text-[11px] text-[#8E9591]">Sinkronisasi online gratis via Apps Script (1 Tahun+)</p>
+          </div>
+          <button
+            id="btnCloseSettingsModal"
+            type="button"
+            class="w-8 h-8 rounded-full bg-[#222724] text-[#8E9591] hover:text-white flex items-center justify-center"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Cloud Sync (Google Apps Script) Section -->
+        <div class="rounded-2xl bg-[#111312] border border-[#262B28] p-3.5 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-[#F3F4F6]">Google Sheets Sync</span>
+              <span id="modalSyncBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-[#222724] text-[#8E9591]">Belum Terhubung</span>
+            </div>
+            <button
+              type="button"
+              id="btnToggleScriptGuide"
+              class="text-[11px] text-[#22C55E] font-medium hover:underline"
+            >
+              Panduan &amp; Kode Script
+            </button>
+          </div>
+
+          <!-- 4-Step Setup Guide + One-Click Copy Apps Script -->
+          <div id="appsScriptSetupGuide" class="hidden p-3 rounded-xl bg-[#181B19] border border-[#2A302D] text-[11px] text-[#9CA3AF] space-y-2 leading-relaxed">
+            <div class="flex items-center justify-between">
+              <p class="font-semibold text-[#F3F4F6]">Cara Setup Gratis (2 Menit):</p>
+              <button
+                type="button"
+                id="btnCopyAppsScript"
+                class="px-2.5 py-1 rounded-lg bg-[#22C55E]/15 border border-[#22C55E]/40 text-[#22C55E] text-[10px] font-semibold hover:bg-[#22C55E]/25 transition"
+              >
+                Salin Kode Script
+              </button>
+            </div>
+            <ol class="list-decimal list-inside space-y-1">
+              <li>Buka <span class="text-[#22C55E]">sheets.new</span> &rarr; Buat Google Sheet baru.</li>
+              <li>Klik menu <strong class="text-[#D1D5DB]">Extensions &rarr; Apps Script</strong> &rarr; Hapus kode lama lalu tempel kode di bawah.</li>
+              <li>Klik <strong class="text-[#D1D5DB]">Deploy &rarr; New deployment</strong> &rarr; Pilih type <strong class="text-[#D1D5DB]">Web app</strong> &rarr; Set <em>Who has access</em>: <strong class="text-[#22C55E]">Anyone</strong> &rarr; Deploy.</li>
+              <li>Salin <strong class="text-[#D1D5DB]">Web app URL</strong> (akhiran <code class="text-[#22C55E]">/exec</code>) dan tempel di kolom bawah.</li>
+            </ol>
+            <pre id="appsScriptCodeBlock" class="p-2.5 rounded-lg bg-[#111312] border border-[#262B28] text-[10px] font-mono text-[#D1D5DB] overflow-x-auto select-all whitespace-pre leading-snug">function doGet(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('ETF_PnL') || ss.insertSheet('ETF_PnL');
+  var rows = sheet.getDataRange().getValues();
+  var entries = [];
+  var currency = 'IDR';
+  for (var i = 1; i &lt; rows.length; i++) {
+    if (rows[i][0]) {
+      var d = rows[i][0] instanceof Date
+        ? Utilities.formatDate(rows[i][0], ss.getSpreadsheetTimeZone(), 'yyyy-MM-dd')
+        : String(rows[i][0]).trim();
+      entries.push({
+        date: d,
+        equity: Number(rows[i][1]) || 0,
+        netFlow: Number(rows[i][2]) || 0
+      });
+      if (rows[i][4]) currency = String(rows[i][4]);
+    }
+  }
+  return ContentService.createTextOutput(JSON.stringify({
+    status: 'ok',
+    currency: currency,
+    entries: entries
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var payload = JSON.parse(e.postData.contents);
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('ETF_PnL') || ss.insertSheet('ETF_PnL');
+  sheet.clearContents();
+  var output = [['Date', 'Equity', 'NetTopUp', 'UpdatedAt', 'Currency']];
+  var now = new Date().toISOString();
+  var list = payload.entries || [];
+  for (var i = 0; i &lt; list.length; i++) {
+    output.push([
+      list[i].date,
+      Number(list[i].equity) || 0,
+      Number(list[i].netFlow) || 0,
+      i === 0 ? now : '',
+      i === 0 ? (payload.currency || 'IDR') : ''
+    ]);
+  }
+  sheet.getRange(1, 1, output.length, 5).setValues(output);
+  return ContentService.createTextOutput(JSON.stringify({
+    status: 'ok',
+    count: list.length
+  })).setMimeType(ContentService.MimeType.JSON);
+}</pre>
+          </div>
+
+          <div class="space-y-2.5">
+            <div>
+              <label for="inputAppsScriptUrl" class="text-[11px] text-[#8E9591] block mb-1">
+                Google Apps Script Web App URL (<code class="text-[#22C55E]">.../exec</code>)
+              </label>
+              <input
+                type="url"
+                id="inputAppsScriptUrl"
+                placeholder="https://script.google.com/macros/s/AKfycb.../exec"
+                class="w-full px-3 py-2 rounded-xl bg-[#181B19] border border-[#2F3532] text-xs font-mono text-[#F3F4F6] focus:outline-none focus:border-[#22C55E]"
+              />
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                id="btnSaveAppsScriptUrl"
+                class="py-2 px-3 rounded-xl bg-[#22C55E] hover:bg-[#1EB054] text-[#090D0B] text-xs font-semibold transition"
+              >
+                Simpan &amp; Hubungkan
+              </button>
+              <button
+                type="button"
+                id="btnDisconnectCloud"
+                class="py-2 px-3 rounded-xl bg-[#181B19] border border-[#2F3532] text-xs font-medium text-[#8E9591] hover:text-[#E05252] transition"
+              >
+                Putuskan Cloud
+              </button>
+            </div>
+
+            <!-- Manual Push & Pull Buttons -->
+            <div id="cloudManualActions" class="hidden grid grid-cols-2 gap-2 pt-1 border-t border-[#222624]">
+              <button
+                type="button"
+                id="btnPushToCloud"
+                class="py-2 px-3 rounded-xl bg-[#181B19] border border-[#22C55E]/40 text-xs font-medium text-[#22C55E] hover:bg-[#22C55E]/10 transition"
+              >
+                &uarr; Simpan ke Sheets
+              </button>
+              <button
+                type="button"
+                id="btnPullFromCloud"
+                class="py-2 px-3 rounded-xl bg-[#181B19] border border-[#2F3532] text-xs font-medium text-[#D1D5DB] hover:bg-[#222724] transition"
+              >
+                &darr; Muat dari Sheets
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Currency Display Mode -->
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-[#8E9591] block">Format Mata Uang / Angka</label>
+          <div class="grid grid-cols-2 gap-2.5">
+            <button
+              type="button"
+              id="btnCurrencyIDR"
+              class="py-2.5 px-3 rounded-xl text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] text-center transition"
+            >
+              Angka Bulat / IDR<br /><span class="text-[10px] opacity-80">1,596,000</span>
+            </button>
+            <button
+              type="button"
+              id="btnCurrencyUSD"
+              class="py-2.5 px-3 rounded-xl text-xs font-medium border border-[#2F3532] bg-[#111312] text-[#8E9591] text-center transition"
+            >
+              US Dollar ($)<br /><span class="text-[10px] opacity-80">$1,596.00</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Export / Import Backup -->
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-[#8E9591] block">Backup &amp; Export</label>
+          <div class="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              id="btnExportCsv"
+              class="py-2.5 px-2 rounded-xl bg-[#111312] border border-[#2F3532] hover:border-[#22C55E] text-xs font-medium text-[#F3F4F6] transition"
+            >
+              Export CSV
+            </button>
+            <button
+              type="button"
+              id="btnExportJson"
+              class="py-2.5 px-2 rounded-xl bg-[#111312] border border-[#2F3532] hover:border-[#22C55E] text-xs font-medium text-[#F3F4F6] transition"
+            >
+              Backup JSON
+            </button>
+            <label
+              for="inputImportJson"
+              class="py-2.5 px-2 rounded-xl bg-[#111312] border border-[#2F3532] hover:border-[#22C55E] text-xs font-medium text-[#F3F4F6] text-center cursor-pointer transition"
+            >
+              Import JSON
+              <input type="file" id="inputImportJson" accept=".json,application/json" class="hidden" />
+            </label>
+          </div>
+        </div>
+
+        <!-- Reset / Start Fresh & 1-Year Simulator -->
+        <div class="pt-2 border-t border-[#262B28] space-y-2.5">
+          <label class="text-xs font-medium text-[#8E9591] block">Kelola Data &amp; Simulasi 1 Tahun</label>
+          <div class="grid grid-cols-2 gap-2.5">
+            <button
+              type="button"
+              id="btnClearAllDataPrompt"
+              class="py-2.5 px-3 rounded-xl bg-[#E05252]/10 border border-[#E05252]/30 text-xs font-medium text-[#E05252] hover:bg-[#E05252]/20 transition"
+            >
+              Mulai Data Baru (Kosong)
+            </button>
+            <button
+              type="button"
+              id="btnGenerate1YearSample"
+              class="py-2.5 px-3 rounded-xl bg-[#22C55E]/10 border border-[#22C55E]/30 text-xs font-medium text-[#22C55E] hover:bg-[#22C55E]/20 transition"
+            >
+              Simulasi 1 Tahun (252 Hari)
+            </button>
+          </div>
+          <button
+            type="button"
+            id="btnRestoreSampleData"
+            class="w-full py-2 px-3 rounded-xl bg-[#111312] border border-[#2F3532] text-xs font-medium text-[#8E9591] hover:text-[#D1D5DB] transition"
+          >
+            Muat Data Contoh Referensi (15 Hari)
+          </button>
+
+          <!-- Inline Reset Confirmation -->
+          <div id="inlineResetConfirm" class="hidden p-3 rounded-xl bg-[#E05252]/10 border border-[#E05252]/30 flex items-center justify-between gap-2">
+            <span class="text-xs text-[#F3F4F6]">Kosongkan semua data sekarang?</span>
+            <div class="flex items-center gap-2">
+              <button type="button" id="btnCancelReset" class="px-2.5 py-1 rounded-lg bg-[#222724] text-xs text-[#D1D5DB]">Batal</button>
+              <button type="button" id="btnConfirmReset" class="px-2.5 py-1 rounded-lg bg-[#E05252] text-xs font-semibold text-white">Kosongkan</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Non-Blocking Toast Notification -->
+    <div
+      id="toastBanner"
+      class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full bg-[#1F2421] border border-[#2F3532] text-xs font-medium text-[#F3F4F6] shadow-xl flex items-center gap-2 transition-all"
+    >
+      <span id="toastDot" class="w-2 h-2 rounded-full bg-[#22C55E]"></span>
+      <span id="toastMessage">Data berhasil disimpan</span>
+    </div>
+  </div>
+
+  <!-- Application Logic -->
+  <script>
+    (function () {
+      'use strict';
+
+      // ==================== CONSTANTS & STORAGE KEYS ====================
+      const STORAGE_KEY_ENTRIES = 'etf_pnl_entries_v1';
+      const STORAGE_KEY_SETTINGS = 'etf_pnl_settings_v1';
+      const STORAGE_KEY_CLOUD = 'etf_pnl_apps_script_v1';
+      const INITIAL_VISIBLE_ROWS = 60;
+
+      const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const DAYS_ID_FULL = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const DAYS_ID_SHORT = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
+      // Reference initial dataset matching the user's screenshot (4 Nov 26 - 24 Nov 26)
+      const SAMPLE_ENTRIES = [
+        { date: '2026-11-04', equity: 1440000, netFlow: 0 },
+        { date: '2026-11-05', equity: 1444000, netFlow: 0 },
+        { date: '2026-11-06', equity: 1480000, netFlow: 0 },
+        { date: '2026-11-09', equity: 1484000, netFlow: 0 },
+        { date: '2026-11-10', equity: 1500000, netFlow: 0 },
+        { date: '2026-11-11', equity: 1508000, netFlow: 0 },
+        { date: '2026-11-12', equity: 1556000, netFlow: 0 },
+        { date: '2026-11-13', equity: 1556000, netFlow: 0 },
+        { date: '2026-11-16', equity: 1560000, netFlow: 0 },
+        { date: '2026-11-17', equity: 1576000, netFlow: 0 },
+        { date: '2026-11-18', equity: 1568000, netFlow: 0 },
+        { date: '2026-11-19', equity: 1564000, netFlow: 0 },
+        { date: '2026-11-20', equity: 1556000, netFlow: 0 },
+        { date: '2026-11-23', equity: 1552000, netFlow: 0 },
+        { date: '2026-11-24', equity: 1596000, netFlow: 0 },
+      ];
+
+      // ==================== APPLICATION STATE ====================
+      let state = {
+        entries: [],
+        activeTab: 'PORTFOLIO', // 'PORTFOLIO' | 'TRADE'
+        viewMode: 'DAILY',      // 'DAILY' | 'MONTHLY'
+        periodFilter: '1M',     // '1M' | '3M' | '6M' | '1Y' | 'YTD' | 'ALL'
+        currency: 'IDR',        // 'IDR' | 'USD'
+        flowDirection: 1,       // 1 for Deposit/Top-Up, -1 for Withdrawal
+        visibleLimit: INITIAL_VISIBLE_ROWS,
+        cloud: {
+          enabled: false,
+          webAppUrl: '',
+          status: 'LOCAL',      // 'LOCAL' | 'SYNCING' | 'SYNCED' | 'ERROR'
+        }
+      };
+
+      // Generate realistic 1-Year (252 US trading days, Mon-Fri) dataset ending on 24 Nov 26
+      function generateOneYearSampleEntries() {
+        const result = [];
+        // Start roughly 365 calendar days prior to 2026-11-24
+        const cursor = new Date(2025, 10, 24);
+        const end = new Date(2026, 10, 24);
+        let equity = 1200000;
+        let seed = 42;
+
+        const nextRand = () => {
+          seed = (seed * 1664525 + 1013904223) % 4294967296;
+          return seed / 4294967296;
+        };
+
+        while (cursor <= end) {
+          const day = cursor.getDay();
+          if (day !== 0 && day !== 6) {
+            const iso = toIsoDateString(cursor);
+            if (result.length === 0) {
+              result.push({ date: iso, equity: Math.round(equity), netFlow: 0 });
+            } else {
+              // Realistic ETF daily return between -1.4% and +1.6% with slight upward drift
+              const pctChange = (nextRand() - 0.465) * 0.028;
+              equity = Math.max(500000, Math.round((equity * (1 + pctChange)) / 1000) * 1000);
+              result.push({ date: iso, equity, netFlow: 0 });
+            }
+          }
+          cursor.setDate(cursor.getDate() + 1);
+        }
+        return result;
+      }
+
+      // ==================== GOOGLE APPS SCRIPT CLOUD SYNC ENGINE ====================
+      function validateAppsScriptUrl(rawUrl) {
+        const trimmed = (rawUrl || '').trim();
+        if (!trimmed) return null;
+        if (
+          trimmed.startsWith('https://script.google.com/macros/') ||
+          trimmed.startsWith('https://script.googleusercontent.com/')
+        ) {
+          return trimmed;
+        }
+        return null;
+      }
+
+      function updateCloudStatusUI(status, customLabel = null) {
+        state.cloud.status = status;
+        const dot = document.getElementById('headerCloudDot');
+        const label = document.getElementById('headerCloudLabel');
+        const modalBadge = document.getElementById('modalSyncBadge');
+        const manualActions = document.getElementById('cloudManualActions');
+
+        if (!state.cloud.enabled) {
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-[#8E9591]';
+          label.textContent = 'Local';
+          modalBadge.textContent = 'Belum Terhubung';
+          modalBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-[#222724] text-[#8E9591]';
+          manualActions.classList.add('hidden');
+          return;
+        }
+
+        manualActions.classList.remove('hidden');
+
+        if (status === 'SYNCING') {
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse';
+          label.textContent = customLabel || 'Syncing';
+          modalBadge.textContent = 'Menyinkronkan...';
+          modalBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300';
+        } else if (status === 'SYNCED') {
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-[#22C55E]';
+          label.textContent = customLabel || 'Sheets';
+          modalBadge.textContent = 'Terhubung (Google Sheets)';
+          modalBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]';
+        } else if (status === 'ERROR') {
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-[#E05252]';
+          label.textContent = customLabel || 'Offline';
+          modalBadge.textContent = 'Gagal Sync (Cek Deploy)';
+          modalBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-[#E05252]/15 text-[#E05252]';
+        }
+      }
+
+      async function pushEntriesToGoogleSheets(silent = false) {
+        if (!state.cloud.enabled || !state.cloud.webAppUrl) return;
+        updateCloudStatusUI('SYNCING');
+
+        const payload = {
+          updatedAt: new Date().toISOString(),
+          currency: state.currency,
+          entries: state.entries,
+        };
+
+        try {
+          // Use text/plain to avoid CORS preflight OPTIONS block on Google Apps Script Web App
+          const res = await fetch(state.cloud.webAppUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload),
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const json = await res.json();
+          if (json.status !== 'ok') throw new Error('Apps Script error');
+
+          updateCloudStatusUI('SYNCED');
+          if (!silent) showToast(`Tersimpan ke Google Sheets (${state.entries.length} baris)`);
+        } catch (err) {
+          console.error('Apps Script push error:', err);
+          updateCloudStatusUI('ERROR');
+          if (!silent) showToast('Gagal kirim ke Google Sheets. Pastikan akses Web App = Anyone.', true);
+        }
+      }
+
+      async function pullEntriesFromGoogleSheets(silent = false) {
+        if (!state.cloud.enabled || !state.cloud.webAppUrl) return;
+        updateCloudStatusUI('SYNCING');
+
+        try {
+          const separator = state.cloud.webAppUrl.includes('?') ? '&' : '?';
+          const res = await fetch(`${state.cloud.webAppUrl}${separator}t=${Date.now()}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+
+          if (data && Array.isArray(data.entries) && data.entries.length > 0) {
+            const validRows = data.entries.filter(
+              (r) => typeof r.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.date) && !isNaN(Number(r.equity))
+            );
+            state.entries = sortEntriesAsc(
+              validRows.map((r) => ({
+                date: r.date,
+                equity: Number(r.equity),
+                netFlow: Number(r.netFlow) || 0,
+              }))
+            );
+            if (data.currency === 'USD' || data.currency === 'IDR') {
+              state.currency = data.currency;
+              saveSettingsToStorage();
+            }
+            localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(state.entries));
+            renderAll();
+            updateCloudStatusUI('SYNCED');
+            if (!silent) showToast(`Dimuat ${state.entries.length} data dari Google Sheets`);
+          } else {
+            // Sheet is empty on first connect -> push local data to initialize sheet
+            await pushEntriesToGoogleSheets(silent);
+          }
+        } catch (err) {
+          console.error('Apps Script pull error:', err);
+          updateCloudStatusUI('ERROR');
+          if (!silent) showToast('Gagal membaca Google Sheets. Cek URL & izin akses Anyone.', true);
+        }
+      }
+
+      // ==================== DATE UTILITIES (LOCAL SAFE) ====================
+      function parseLocalDate(isoStr) {
+        const parts = isoStr.split('-').map(Number);
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+      }
+
+      function toIsoDateString(dateObj) {
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const d = String(dateObj.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      }
+
+      function formatDisplayDate(isoStr) {
+        const d = parseLocalDate(isoStr);
+        const day = d.getDate();
+        const month = MONTHS_SHORT[d.getMonth()];
+        const year2 = String(d.getFullYear()).slice(-2);
+        return `${day} ${month} ${year2}`;
+      }
+
+      function getIndonesianDayInfo(isoStr) {
+        const d = parseLocalDate(isoStr);
+        const dayIdx = d.getDay();
+        return {
+          dayIdx,
+          fullName: DAYS_ID_FULL[dayIdx],
+          shortName: DAYS_ID_SHORT[dayIdx],
+          isWeekend: dayIdx === 0 || dayIdx === 6,
+        };
+      }
+
+      // Calculates next US stock market trading day (Monday - Friday, skipping Sat & Sun)
+      function getNextUSTradingDay(latestIsoStr) {
+        let baseDate = latestIsoStr ? parseLocalDate(latestIsoStr) : new Date();
+        const next = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate() + 1);
+        while (next.getDay() === 0 || next.getDay() === 6) {
+          next.setDate(next.getDate() + 1);
+        }
+        return toIsoDateString(next);
+      }
+
+      // ==================== NUMBER FORMATTING ====================
+      function formatEquityValue(num) {
+        if (state.currency === 'USD') {
+          return '$' + Number(num).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+        }
+        return Math.round(Number(num)).toLocaleString('en-US');
+      }
+
+      function formatSignedPnlAmount(num) {
+        const absVal = Math.abs(num);
+        const sign = num > 0 ? '+' : num < 0 ? '-' : '';
+        if (state.currency === 'USD') {
+          return sign + '$' + absVal.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+        }
+        return sign + Math.round(absVal).toLocaleString('en-US');
+      }
+
+      function formatPnlCombined(pnlAmount, pnlPercent) {
+        // Normalize tiny floating point noise
+        const cleanAmt = Math.abs(pnlAmount) < 0.0001 ? 0 : pnlAmount;
+        const cleanPct = Math.abs(pnlPercent) < 0.0001 ? 0 : pnlPercent;
+        const pctSign = cleanPct > 0 ? '+' : '';
+        const amtStr = formatSignedPnlAmount(cleanAmt);
+        const pctStr = `${pctSign}${cleanPct.toFixed(2)}%`;
+        return `${amtStr} (${pctStr})`;
+      }
+
+      // ==================== STORAGE PERSISTENCE ====================
+      function loadFromStorage() {
+        try {
+          const savedCloud = localStorage.getItem(STORAGE_KEY_CLOUD);
+          if (savedCloud) {
+            const parsedCloud = JSON.parse(savedCloud);
+            if (parsedCloud && parsedCloud.enabled && parsedCloud.webAppUrl) {
+              state.cloud = { ...state.cloud, ...parsedCloud, status: 'LOCAL' };
+              document.getElementById('inputAppsScriptUrl').value = state.cloud.webAppUrl;
+            }
+          }
+
+          const savedSettings = localStorage.getItem(STORAGE_KEY_SETTINGS);
+          if (savedSettings) {
+            const parsedSettings = JSON.parse(savedSettings);
+            if (parsedSettings.currency === 'USD' || parsedSettings.currency === 'IDR') {
+              state.currency = parsedSettings.currency;
+            }
+          }
+
+          const savedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
+          if (savedEntries !== null) {
+            const parsed = JSON.parse(savedEntries);
+            if (Array.isArray(parsed)) {
+              state.entries = sortEntriesAsc(parsed);
+              return;
+            }
+          }
+          // First visit: load sample dataset so user immediately sees the reference table
+          state.entries = sortEntriesAsc([...SAMPLE_ENTRIES]);
+          saveEntriesToStorage(true);
+        } catch (err) {
+          console.error('Failed to read localStorage:', err);
+          state.entries = sortEntriesAsc([...SAMPLE_ENTRIES]);
+        }
+      }
+
+      function saveEntriesToStorage(skipCloudSync = false) {
+        try {
+          localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(state.entries));
+          if (!skipCloudSync && state.cloud.enabled) {
+            pushEntriesToGoogleSheets(true);
+          }
+        } catch (err) {
+          showToast('Gagal menyimpan ke browser storage', true);
+        }
+      }
+
+      function saveSettingsToStorage() {
+        try {
+          localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify({ currency: state.currency }));
+        } catch (err) {
+          console.error('Failed to save settings:', err);
+        }
+      }
+
+      function sortEntriesAsc(list) {
+        return [...list].sort((a, b) => a.date.localeCompare(b.date));
+      }
+
+      // ==================== P&L CALCULATION ENGINE ====================
+      function computeEnrichedEntries() {
+        const sorted = sortEntriesAsc(state.entries);
+        return sorted.map((entry, idx) => {
+          if (idx === 0) {
+            return {
+              ...entry,
+              prevEquity: entry.equity,
+              pnlAmount: 0,
+              pnlPercent: 0,
+              isBase: true,
+            };
+          }
+          const prevEquity = sorted[idx - 1].equity;
+          const netFlow = Number(entry.netFlow) || 0;
+          const pnlAmount = entry.equity - prevEquity - netFlow;
+          const pnlPercent = prevEquity !== 0 ? (pnlAmount / prevEquity) * 100 : 0;
+          return {
+            ...entry,
+            prevEquity,
+            pnlAmount,
+            pnlPercent,
+            isBase: false,
+          };
+        });
+      }
+
+      function filterByPeriod(enrichedList) {
+        if (enrichedList.length === 0 || state.periodFilter === 'ALL') {
+          return enrichedList;
+        }
+        const latestDate = parseLocalDate(enrichedList[enrichedList.length - 1].date);
+        let cutoffDate;
+
+        if (state.periodFilter === '1M') {
+          cutoffDate = new Date(latestDate.getFullYear(), latestDate.getMonth() - 1, latestDate.getDate());
+        } else if (state.periodFilter === '3M') {
+          cutoffDate = new Date(latestDate.getFullYear(), latestDate.getMonth() - 3, latestDate.getDate());
+        } else if (state.periodFilter === '6M') {
+          cutoffDate = new Date(latestDate.getFullYear(), latestDate.getMonth() - 6, latestDate.getDate());
+        } else if (state.periodFilter === '1Y') {
+          cutoffDate = new Date(latestDate.getFullYear() - 1, latestDate.getMonth(), latestDate.getDate());
+        } else if (state.periodFilter === 'YTD') {
+          cutoffDate = new Date(latestDate.getFullYear(), 0, 1);
+        }
+
+        return enrichedList.filter((item) => parseLocalDate(item.date) >= cutoffDate);
+      }
+
+      function computeMonthlyAggregates(enrichedList) {
+        if (enrichedList.length === 0) return [];
+        const groups = new Map();
+
+        enrichedList.forEach((item, globalIdx) => {
+          const d = parseLocalDate(item.date);
+          const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+          const monthLabel = `${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`;
+
+          if (!groups.has(monthKey)) {
+            // Starting capital for this month is previous day's equity (or base equity if first record ever)
+            const startBaseEquity = globalIdx === 0 ? item.equity : enrichedList[globalIdx - 1].equity;
+            groups.set(monthKey, {
+              monthKey,
+              monthLabel,
+              startBaseEquity,
+              endEquity: item.equity,
+              totalPnlAmount: 0,
+              totalNetFlow: 0,
+              tradingDaysCount: 0,
+            });
+          }
+
+          const g = groups.get(monthKey);
+          g.endEquity = item.equity;
+          g.totalPnlAmount += item.pnlAmount;
+          g.totalNetFlow += Number(item.netFlow) || 0;
+          if (!item.isBase) {
+            g.tradingDaysCount += 1;
+          }
+        });
+
+        return Array.from(groups.values()).map((g) => {
+          const pct = g.startBaseEquity !== 0 ? (g.totalPnlAmount / g.startBaseEquity) * 100 : 0;
+          return {
+            ...g,
+            pnlPercent: pct,
+          };
+        });
+      }
+
+      // ==================== RENDERING: PORTFOLIO TABLE ====================
+      function renderPortfolioView() {
+        const tableBody = document.getElementById('performanceTableBody');
+        const emptyState = document.getElementById('emptyStateContainer');
+        const loadMoreWrap = document.getElementById('loadMoreContainer');
+        const enrichedAll = computeEnrichedEntries();
+
+        if (enrichedAll.length === 0) {
+          tableBody.innerHTML = '';
+          emptyState.classList.remove('hidden');
+          loadMoreWrap.classList.add('hidden');
+          return;
+        }
+        emptyState.classList.add('hidden');
+
+        const filtered = filterByPeriod(enrichedAll);
+
+        if (state.viewMode === 'DAILY') {
+          // Sort newest first just like the reference image
+          const rowsDesc = [...filtered].reverse();
+          const visibleRows = rowsDesc.slice(0, state.visibleLimit);
+          const remaining = rowsDesc.length - visibleRows.length;
+
+          if (remaining > 0) {
+            loadMoreWrap.classList.remove('hidden');
+            document.getElementById('remainingRowsCount').textContent = remaining;
+          } else {
+            loadMoreWrap.classList.add('hidden');
+          }
+
+          tableBody.innerHTML = visibleRows
+            .map((row) => {
+              const dayInfo = getIndonesianDayInfo(row.date);
+              const isGain = row.pnlAmount > 0.0001;
+              const isLoss = row.pnlAmount < -0.0001;
+              const pnlColorClass = isGain
+                ? 'text-[#22C55E]'
+                : isLoss
+                ? 'text-[#E05252]'
+                : 'text-[#D1D5DB]';
+
+              const netFlow = Number(row.netFlow) || 0;
+              const flowBadge =
+                netFlow !== 0
+                  ? `<span class="inline-block ml-1 px-1.5 py-0.2 rounded text-[9px] font-medium bg-[#22C55E]/15 text-[#22C55E]" title="Top-Up / Tarik Dana">${netFlow > 0 ? '+TopUp' : '-Tarik'}</span>`
+                  : '';
+
+              const baseSubLabel = row.isBase
+                ? `<span class="text-[10px] text-[#8E9591] block">Modal Awal</span>`
+                : '';
+
+              return `
+                <div
+                  data-date="${row.date}"
+                  role="button"
+                  tabindex="0"
+                  class="perf-row grid grid-cols-12 items-center py-3.5 -mx-2 px-2 rounded-xl hover:bg-[#181B19]/70 active:bg-[#181B19] cursor-pointer transition select-none"
+                >
+                  <div class="col-span-4 text-left flex items-center gap-1.5">
+                    <span class="text-[13.5px] font-normal text-[#E5E7EB] [font-variant-numeric:tabular-nums]">${formatDisplayDate(row.date)}</span>
+                    <span class="text-[10px] text-[#6E7571] font-medium">${dayInfo.shortName}</span>
+                  </div>
+                  <div class="col-span-4 text-right pr-2">
+                    <span class="text-[13.5px] font-normal text-[#E5E7EB] [font-variant-numeric:tabular-nums]">${formatEquityValue(row.equity)}</span>
+                    ${flowBadge}
+                  </div>
+                  <div class="col-span-4 text-right">
+                    <span class="text-[13.5px] font-normal ${pnlColorClass} [font-variant-numeric:tabular-nums]">${formatPnlCombined(row.pnlAmount, row.pnlPercent)}</span>
+                    ${baseSubLabel}
+                  </div>
+                </div>
+              `;
+            })
+            .join('');
+
+          // Attach click handlers to edit/delete rows
+          tableBody.querySelectorAll('.perf-row').forEach((el) => {
+            el.addEventListener('click', () => {
+              const dateStr = el.getAttribute('data-date');
+              openEntryModal(dateStr);
+            });
+          });
+        } else {
+          // MONTHLY AGGREGATED MODE (Shows full 12+ months cleanly)
+          loadMoreWrap.classList.add('hidden');
+          const monthlyRows = computeMonthlyAggregates(filtered).reverse();
+          tableBody.innerHTML = monthlyRows
+            .map((m) => {
+              const isGain = m.totalPnlAmount > 0.0001;
+              const isLoss = m.totalPnlAmount < -0.0001;
+              const pnlColorClass = isGain
+                ? 'text-[#22C55E]'
+                : isLoss
+                ? 'text-[#E05252]'
+                : 'text-[#D1D5DB]';
+
+              return `
+                <div class="grid grid-cols-12 items-center py-3.5 -mx-2 px-2 rounded-xl select-none">
+                  <div class="col-span-4 text-left">
+                    <span class="text-[13.5px] font-medium text-[#E5E7EB] block">${m.monthLabel}</span>
+                    <span class="text-[10px] text-[#8E9591]">${m.tradingDaysCount} hari bursa</span>
+                  </div>
+                  <div class="col-span-4 text-right pr-2">
+                    <span class="text-[13.5px] font-normal text-[#E5E7EB] [font-variant-numeric:tabular-nums]">${formatEquityValue(m.endEquity)}</span>
+                  </div>
+                  <div class="col-span-4 text-right">
+                    <span class="text-[13.5px] font-normal ${pnlColorClass} [font-variant-numeric:tabular-nums]">${formatPnlCombined(m.totalPnlAmount, m.pnlPercent)}</span>
+                  </div>
+                </div>
+              `;
+            })
+            .join('');
+        }
+      }
+
+      // ==================== RENDERING: TRADE / ANALYTICS TAB ====================
+      function renderTradeAnalyticsView() {
+        const enrichedAll = computeEnrichedEntries();
+        const filtered = filterByPeriod(enrichedAll);
+
+        const periodNames = {
+          '1M': 'Last 1 Month',
+          '3M': 'Last 3 Months',
+          '6M': 'Last 6 Months',
+          '1Y': '1 Year (252 Hari)',
+          'YTD': 'YTD',
+          'ALL': 'All Time',
+        };
+        document.getElementById('tradePeriodTag').textContent = periodNames[state.periodFilter] || 'All Time';
+
+        if (filtered.length === 0) {
+          document.getElementById('chartActiveEquity').textContent = formatEquityValue(0);
+          document.getElementById('chartActiveDate').textContent = '-';
+          document.getElementById('chartActivePnl').textContent = '0 (0.00%)';
+          document.getElementById('equitySparklineSvg').innerHTML = '';
+          return;
+        }
+
+        // Latest point header
+        const latest = filtered[filtered.length - 1];
+        updateChartReadout(latest);
+        renderSparklineChart(filtered);
+
+        // Compute analytics metrics
+        const tradingRows = filtered.filter((r) => !r.isBase);
+        const totalPnl = tradingRows.reduce((acc, r) => acc + r.pnlAmount, 0);
+        const totalNetFlow = filtered.reduce((acc, r) => acc + (Number(r.netFlow) || 0), 0);
+        const startEquity = filtered[0].prevEquity;
+        const totalReturnPct = startEquity !== 0 ? (totalPnl / startEquity) * 100 : 0;
+
+        const wins = tradingRows.filter((r) => r.pnlAmount > 0.0001);
+        const losses = tradingRows.filter((r) => r.pnlAmount < -0.0001);
+        const draws = tradingRows.filter((r) => Math.abs(r.pnlAmount) <= 0.0001);
+        const winRate = tradingRows.length > 0 ? (wins.length / tradingRows.length) * 100 : 0;
+
+        let bestRow = tradingRows[0] || filtered[0];
+        let worstRow = tradingRows[0] || filtered[0];
+        tradingRows.forEach((r) => {
+          if (r.pnlPercent > bestRow.pnlPercent) bestRow = r;
+          if (r.pnlPercent < worstRow.pnlPercent) worstRow = r;
+        });
+
+        const avgDaily = tradingRows.length > 0 ? totalPnl / tradingRows.length : 0;
+
+        // Populate DOM stats
+        const elTotalPnl = document.getElementById('statTotalPnl');
+        const elTotalPct = document.getElementById('statTotalPnlPct');
+        elTotalPnl.textContent = formatSignedPnlAmount(totalPnl);
+        elTotalPct.textContent = `${totalReturnPct > 0 ? '+' : ''}${totalReturnPct.toFixed(2)}%`;
+        const totalColor = totalPnl > 0 ? 'text-[#22C55E]' : totalPnl < 0 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
+        elTotalPnl.className = `text-sm font-semibold block [font-variant-numeric:tabular-nums] ${totalColor}`;
+        elTotalPct.className = `text-xs [font-variant-numeric:tabular-nums] ${totalColor}`;
+
+        document.getElementById('statWinRate').textContent = `${winRate.toFixed(1)}%`;
+        document.getElementById('statWinCounts').textContent = `${wins.length}W • ${losses.length}L • ${draws.length}D`;
+
+        document.getElementById('statBestDay').textContent = tradingRows.length
+          ? formatPnlCombined(bestRow.pnlAmount, bestRow.pnlPercent)
+          : '-';
+        document.getElementById('statBestDayDate').textContent = tradingRows.length ? formatDisplayDate(bestRow.date) : '-';
+
+        document.getElementById('statWorstDay').textContent = tradingRows.length
+          ? formatPnlCombined(worstRow.pnlAmount, worstRow.pnlPercent)
+          : '-';
+        document.getElementById('statWorstDayDate').textContent = tradingRows.length ? formatDisplayDate(worstRow.date) : '-';
+
+        document.getElementById('statAvgDaily').textContent = formatSignedPnlAmount(avgDaily);
+        document.getElementById('statTradingDays').textContent = `${tradingRows.length} hari bursa`;
+
+        document.getElementById('statNetCashflow').textContent = formatSignedPnlAmount(totalNetFlow);
+        document.getElementById('statInitialEquity').textContent = formatEquityValue(enrichedAll[0].equity);
+
+        // Render Cashflow History
+        const cashflowRows = enrichedAll.filter((r) => (Number(r.netFlow) || 0) !== 0).reverse();
+        const cashflowContainer = document.getElementById('cashflowListContainer');
+        if (cashflowRows.length === 0) {
+          cashflowContainer.innerHTML = `<p class="text-[#8E9591] py-2">Belum ada catatan Top-Up atau Tarik Dana.</p>`;
+        } else {
+          cashflowContainer.innerHTML = cashflowRows
+            .map((r) => {
+              const isDeposit = r.netFlow > 0;
+              return `
+                <div class="flex items-center justify-between py-1.5 border-b border-[#222624] last:border-0">
+                  <div>
+                    <span class="text-[#F3F4F6] font-medium">${isDeposit ? 'Top-Up / Deposit' : 'Tarik Dana'}</span>
+                    <span class="text-[#8E9591] block text-[11px]">${formatDisplayDate(r.date)}</span>
+                  </div>
+                  <span class="font-semibold [font-variant-numeric:tabular-nums] ${isDeposit ? 'text-[#22C55E]' : 'text-[#E05252]'}">
+                    ${formatSignedPnlAmount(r.netFlow)}
+                  </span>
+                </div>
+              `;
+            })
+            .join('');
+        }
+      }
+
+      function updateChartReadout(point) {
+        document.getElementById('chartActiveEquity').textContent = formatEquityValue(point.equity);
+        document.getElementById('chartActiveDate').textContent = `${formatDisplayDate(point.date)} (${getIndonesianDayInfo(point.date).shortName})`;
+        const elPnl = document.getElementById('chartActivePnl');
+        elPnl.textContent = point.isBase ? 'Modal Awal' : formatPnlCombined(point.pnlAmount, point.pnlPercent);
+        elPnl.className = `text-xs font-medium [font-variant-numeric:tabular-nums] ${
+          point.pnlAmount > 0 ? 'text-[#22C55E]' : point.pnlAmount < 0 ? 'text-[#E05252]' : 'text-[#D1D5DB]'
+        }`;
+      }
+
+      function renderSparklineChart(points) {
+        const svg = document.getElementById('equitySparklineSvg');
+        const width = 400;
+        const height = 150;
+        const padX = 6;
+        const padY = 14;
+
+        if (points.length === 1) {
+          const p = points[0];
+          svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+          svg.innerHTML = `
+            <circle cx="${width / 2}" cy="${height / 2}" r="5" fill="#22C55E" />
+          `;
+          return;
+        }
+
+        const equities = points.map((p) => p.equity);
+        const minEq = Math.min(...equities);
+        const maxEq = Math.max(...equities);
+        const range = maxEq - minEq || 1;
+
+        const coords = points.map((p, idx) => {
+          const x = padX + (idx / (points.length - 1)) * (width - padX * 2);
+          const y = height - padY - ((p.equity - minEq) / range) * (height - padY * 2);
+          return { x, y, point: p };
+        });
+
+        const pathD = coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(' ');
+        const areaD = `${pathD} L ${coords[coords.length - 1].x.toFixed(1)} ${height} L ${coords[0].x.toFixed(1)} ${height} Z`;
+        const lastCoord = coords[coords.length - 1];
+
+        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+        svg.innerHTML = `
+          <defs>
+            <linearGradient id="emeraldAreaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#22C55E" stop-opacity="0.28" />
+              <stop offset="100%" stop-color="#22C55E" stop-opacity="0.0" />
+            </linearGradient>
+          </defs>
+          <path d="${areaD}" fill="url(#emeraldAreaGrad)" />
+          <path d="${pathD}" fill="none" stroke="#22C55E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+          <line id="chartCrosshairLine" x1="${lastCoord.x}" y1="0" x2="${lastCoord.x}" y2="${height}" stroke="#22C55E" stroke-opacity="0.35" stroke-dasharray="3 3" stroke-width="1" />
+          <circle id="chartActiveDot" cx="${lastCoord.x}" cy="${lastCoord.y}" r="4.5" fill="#22C55E" stroke="#111312" stroke-width="2" />
+        `;
+
+        // Interactive touch & mouse scrub handler
+        const handleScrub = (clientX) => {
+          const rect = svg.getBoundingClientRect();
+          const relX = Math.max(0, Math.min(rect.width, clientX - rect.left));
+          const ratio = relX / rect.width;
+          const idx = Math.round(ratio * (coords.length - 1));
+          const selected = coords[idx];
+          if (selected) {
+            const dot = document.getElementById('chartActiveDot');
+            const line = document.getElementById('chartCrosshairLine');
+            if (dot) {
+              dot.setAttribute('cx', selected.x);
+              dot.setAttribute('cy', selected.y);
+            }
+            if (line) {
+              line.setAttribute('x1', selected.x);
+              line.setAttribute('x2', selected.x);
+            }
+            updateChartReadout(selected.point);
+          }
+        };
+
+        svg.onmousemove = (e) => handleScrub(e.clientX);
+        svg.ontouchmove = (e) => {
+          if (e.touches && e.touches[0]) {
+            handleScrub(e.touches[0].clientX);
+          }
+        };
+      }
+
+      // ==================== MASTER RENDER ====================
+      function renderAll() {
+        renderPortfolioView();
+        if (state.activeTab === 'TRADE') {
+          renderTradeAnalyticsView();
+        }
+        syncCurrencyButtonsUI();
+      }
+
+      // ==================== MODAL: ADD / EDIT ENTRY LOGIC ====================
+      const entryModalBackdrop = document.getElementById('entryModalBackdrop');
+      const inputDate = document.getElementById('inputDate');
+      const inputEquity = document.getElementById('inputEquity');
+      const inputCashflowAmount = document.getElementById('inputCashflowAmount');
+      const editingOriginalDate = document.getElementById('editingOriginalDate');
+
+      function updateDateDayBadge(isoStr) {
+        if (!isoStr) return;
+        const info = getIndonesianDayInfo(isoStr);
+        const badge = document.getElementById('dayNameBadge');
+        const warning = document.getElementById('weekendWarning');
+        badge.textContent = info.fullName;
+
+        if (info.isWeekend) {
+          badge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300';
+          warning.classList.remove('hidden');
+        } else {
+          badge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]';
+          warning.classList.add('hidden');
+        }
+      }
+
+      function getPreviousEquityForDate(targetIsoDate, excludeOriginalDate) {
+        const candidates = sortEntriesAsc(state.entries).filter(
+          (e) => e.date < targetIsoDate && e.date !== excludeOriginalDate
+        );
+        if (candidates.length === 0) return null;
+        return candidates[candidates.length - 1].equity;
+      }
+
+      function updateLivePnlPreview() {
+        const dateVal = inputDate.value;
+        const origDate = editingOriginalDate.value;
+        const equityVal = parseFloat(inputEquity.value);
+        const rawFlow = parseFloat(inputCashflowAmount.value) || 0;
+        const netFlow = state.flowDirection * Math.abs(rawFlow);
+
+        const prevEq = getPreviousEquityForDate(dateVal, origDate);
+        const prevHintEl = document.getElementById('prevEquityHint');
+        const previewEl = document.getElementById('livePnlPreview');
+
+        if (prevEq === null) {
+          prevHintEl.textContent = 'Entri pertama (Modal Awal)';
+          previewEl.textContent = '0 (0.00%) — Modal Awal';
+          previewEl.className = 'text-xs font-medium text-[#D1D5DB] [font-variant-numeric:tabular-nums]';
+          return;
+        }
+
+        prevHintEl.textContent = `Sebelumnya: ${formatEquityValue(prevEq)}`;
+
+        if (isNaN(equityVal)) {
+          previewEl.textContent = '0 (0.00%)';
+          previewEl.className = 'text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]';
+          return;
+        }
+
+        const pnlAmt = equityVal - prevEq - netFlow;
+        const pnlPct = prevEq !== 0 ? (pnlAmt / prevEq) * 100 : 0;
+        previewEl.textContent = formatPnlCombined(pnlAmt, pnlPct);
+        previewEl.className = `text-sm font-semibold [font-variant-numeric:tabular-nums] ${
+          pnlAmt > 0.0001 ? 'text-[#22C55E]' : pnlAmt < -0.0001 ? 'text-[#E05252]' : 'text-[#D1D5DB]'
+        }`;
+      }
+
+      function setFlowDirectionUI(dir) {
+        state.flowDirection = dir;
+        const btnDep = document.getElementById('btnFlowDeposit');
+        const btnWith = document.getElementById('btnFlowWithdraw');
+        if (dir === 1) {
+          btnDep.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition';
+          btnWith.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#181B19] text-[#8E9591] border border-[#2F3532] transition';
+        } else {
+          btnWith.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#E05252]/15 text-[#E05252] border border-[#E05252]/40 transition';
+          btnDep.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#181B19] text-[#8E9591] border border-[#2F3532] transition';
+        }
+        updateLivePnlPreview();
+      }
+
+      function openEntryModal(editDateStr = null, expandCashflow = false) {
+        document.getElementById('inlineDeleteConfirm').classList.add('hidden');
+        const prefixEl = document.getElementById('equityInputPrefix');
+        if (state.currency === 'USD') {
+          prefixEl.classList.remove('hidden');
+          inputEquity.classList.add('pl-7');
+        } else {
+          prefixEl.classList.add('hidden');
+          inputEquity.classList.remove('pl-7');
+        }
+
+        if (editDateStr) {
+          // EDIT MODE
+          const target = state.entries.find((e) => e.date === editDateStr);
+          if (!target) return;
+
+          document.getElementById('entryModalTitle').textContent = `Edit Data (${formatDisplayDate(editDateStr)})`;
+          editingOriginalDate.value = target.date;
+          inputDate.value = target.date;
+          inputEquity.value = target.equity;
+
+          const flow = Number(target.netFlow) || 0;
+          if (flow !== 0) {
+            document.getElementById('cashflowInputContainer').classList.remove('hidden');
+            document.getElementById('cashflowChevron').classList.add('rotate-180');
+            setFlowDirectionUI(flow >= 0 ? 1 : -1);
+            inputCashflowAmount.value = Math.abs(flow);
+          } else {
+            document.getElementById('cashflowInputContainer').classList.add('hidden');
+            document.getElementById('cashflowChevron').classList.remove('rotate-180');
+            setFlowDirectionUI(1);
+            inputCashflowAmount.value = '';
+          }
+
+          document.getElementById('btnDeleteEntry').classList.remove('hidden');
+        } else {
+          // ADD NEW MODE — Auto-suggest next US trading day (Senin - Jumat)
+          const sorted = sortEntriesAsc(state.entries);
+          const latestIso = sorted.length > 0 ? sorted[sorted.length - 1].date : null;
+          const suggestedDate = latestIso ? getNextUSTradingDay(latestIso) : toIsoDateString(new Date());
+
+          document.getElementById('entryModalTitle').textContent =
+            sorted.length === 0 ? 'Input Equity Awal ETF' : 'Update Equity Harian';
+          editingOriginalDate.value = '';
+          inputDate.value = suggestedDate;
+          inputEquity.value = '';
+          inputCashflowAmount.value = '';
+          setFlowDirectionUI(1);
+
+          if (expandCashflow) {
+            document.getElementById('cashflowInputContainer').classList.remove('hidden');
+            document.getElementById('cashflowChevron').classList.add('rotate-180');
+          } else {
+            document.getElementById('cashflowInputContainer').classList.add('hidden');
+            document.getElementById('cashflowChevron').classList.remove('rotate-180');
+          }
+
+          document.getElementById('btnDeleteEntry').classList.add('hidden');
+        }
+
+        updateDateDayBadge(inputDate.value);
+        updateLivePnlPreview();
+        entryModalBackdrop.classList.remove('hidden');
+        setTimeout(() => inputEquity.focus(), 80);
+      }
+
+      function closeEntryModal() {
+        entryModalBackdrop.classList.add('hidden');
+      }
+
+      // ==================== TOAST HELPER ====================
+      let toastTimer = null;
+      function showToast(message, isError = false) {
+        const banner = document.getElementById('toastBanner');
+        const dot = document.getElementById('toastDot');
+        const msg = document.getElementById('toastMessage');
+
+        msg.textContent = message;
+        dot.className = `w-2 h-2 rounded-full ${isError ? 'bg-[#E05252]' : 'bg-[#22C55E]'}`;
+        banner.classList.remove('hidden');
+
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          banner.classList.add('hidden');
+        }, 2800);
+      }
+
+      // ==================== CURRENCY & EXPORT/IMPORT ====================
+      function syncCurrencyButtonsUI() {
+        const btnIdr = document.getElementById('btnCurrencyIDR');
+        const btnUsd = document.getElementById('btnCurrencyUSD');
+        if (state.currency === 'IDR') {
+          btnIdr.className = 'py-2.5 px-3 rounded-xl text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] text-center transition';
+          btnUsd.className = 'py-2.5 px-3 rounded-xl text-xs font-medium border border-[#2F3532] bg-[#111312] text-[#8E9591] text-center transition';
+        } else {
+          btnUsd.className = 'py-2.5 px-3 rounded-xl text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] text-center transition';
+          btnIdr.className = 'py-2.5 px-3 rounded-xl text-xs font-medium border border-[#2F3532] bg-[#111312] text-[#8E9591] text-center transition';
+        }
+      }
+
+      function triggerDownload(filename, content, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      function exportToCsv() {
+        const enriched = computeEnrichedEntries();
+        const header = 'Date,Day,Equity,NetTopUp,PnL_Amount,PnL_Percent\n';
+        const rows = enriched
+          .map((r) => {
+            const day = getIndonesianDayInfo(r.date).fullName;
+            return `${r.date},${day},${r.equity},${r.netFlow || 0},${r.pnlAmount.toFixed(2)},${r.pnlPercent.toFixed(4)}%`;
+          })
+          .join('\n');
+        triggerDownload(`etf-performance-${toIsoDateString(new Date())}.csv`, header + rows, 'text/csv;charset=utf-8;');
+        showToast('File CSV berhasil diunduh');
+      }
+
+      function exportToJson() {
+        const payload = {
+          app: 'ETF Portfolio P&L Tracker',
+          exportedAt: new Date().toISOString(),
+          currency: state.currency,
+          entries: state.entries,
+        };
+        triggerDownload(`etf-backup-${toIsoDateString(new Date())}.json`, JSON.stringify(payload, null, 2), 'application/json');
+        showToast('Backup JSON berhasil diunduh');
+      }
+
+      // ==================== EVENT LISTENERS ====================
+      function bindEvents() {
+        // Tab Switching: PORTFOLIO vs TRADE
+        const tabPortfolio = document.getElementById('tabPortfolio');
+        const tabTrade = document.getElementById('tabTrade');
+        const viewPortfolio = document.getElementById('viewPortfolio');
+        const viewTrade = document.getElementById('viewTrade');
+
+        tabPortfolio.addEventListener('click', () => {
+          state.activeTab = 'PORTFOLIO';
+          tabPortfolio.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors';
+          tabTrade.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] border-b-2 border-transparent hover:text-[#D1D5DB] transition-colors';
+          viewPortfolio.classList.remove('hidden');
+          viewTrade.classList.add('hidden');
+          renderPortfolioView();
+        });
+
+        tabTrade.addEventListener('click', () => {
+          state.activeTab = 'TRADE';
+          tabTrade.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors';
+          tabPortfolio.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] border-b-2 border-transparent hover:text-[#D1D5DB] transition-colors';
+          viewTrade.classList.remove('hidden');
+          viewPortfolio.classList.add('hidden');
+          renderTradeAnalyticsView();
+        });
+
+        // Info Tooltip Toggle
+        document.getElementById('btnToggleInfo').addEventListener('click', () => {
+          document.getElementById('infoTooltipCard').classList.toggle('hidden');
+        });
+        document.getElementById('btnCloseInfo').addEventListener('click', () => {
+          document.getElementById('infoTooltipCard').classList.add('hidden');
+        });
+
+        // Daily vs Monthly Mode Pills
+        const btnDaily = document.getElementById('btnModeDaily');
+        const btnMonthly = document.getElementById('btnModeMonthly');
+
+        btnDaily.addEventListener('click', () => {
+          state.viewMode = 'DAILY';
+          btnDaily.className = 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition';
+          btnMonthly.className = 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
+          renderPortfolioView();
+        });
+
+        btnMonthly.addEventListener('click', () => {
+          state.viewMode = 'MONTHLY';
+          btnMonthly.className = 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition';
+          btnDaily.className = 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
+          renderPortfolioView();
+        });
+
+        // Period Dropdown
+        const btnPeriod = document.getElementById('btnPeriodDropdown');
+        const menuPeriod = document.getElementById('periodDropdownMenu');
+        btnPeriod.addEventListener('click', (e) => {
+          e.stopPropagation();
+          menuPeriod.classList.toggle('hidden');
+        });
+
+        document.querySelectorAll('.period-option').forEach((opt) => {
+          opt.addEventListener('click', () => {
+            const p = opt.getAttribute('data-period');
+            state.periodFilter = p;
+            state.visibleLimit = INITIAL_VISIBLE_ROWS;
+            document.getElementById('selectedPeriodLabel').textContent = opt.textContent.trim();
+
+            document.querySelectorAll('.period-option').forEach((el) => {
+              el.className =
+                el.getAttribute('data-period') === p
+                  ? 'period-option w-full text-left px-3.5 py-2 text-xs text-[#22C55E] font-medium hover:bg-[#222724] transition'
+                  : 'period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724] transition';
+            });
+
+            menuPeriod.classList.add('hidden');
+            renderAll();
+          });
+        });
+
+        // Load More rows button for 1-Year (252+ days) performance
+        document.getElementById('btnLoadMoreRows').addEventListener('click', () => {
+          state.visibleLimit += 90;
+          renderPortfolioView();
+        });
+
+        // Header Cloud Sync status button opens Settings
+        document.getElementById('btnSyncStatusHeader').addEventListener('click', () => {
+          document.getElementById('inlineResetConfirm').classList.add('hidden');
+          document.getElementById('settingsModalBackdrop').classList.remove('hidden');
+        });
+
+        // Google Apps Script Setup Guide, Copy & Sync Controls
+        document.getElementById('btnToggleScriptGuide').addEventListener('click', () => {
+          document.getElementById('appsScriptSetupGuide').classList.toggle('hidden');
+        });
+
+        document.getElementById('btnCopyAppsScript').addEventListener('click', () => {
+          const codeText = document.getElementById('appsScriptCodeBlock').textContent;
+          const tempArea = document.createElement('textarea');
+          tempArea.value = codeText;
+          document.body.appendChild(tempArea);
+          tempArea.select();
+          try {
+            document.execCommand('copy');
+            showToast('Kode Apps Script berhasil disalin!');
+          } catch (err) {
+            showToast('Gagal menyalin otomatis, silakan blok & salin manual', true);
+          }
+          document.body.removeChild(tempArea);
+        });
+
+        document.getElementById('btnSaveAppsScriptUrl').addEventListener('click', () => {
+          const rawUrl = document.getElementById('inputAppsScriptUrl').value;
+          const validUrl = validateAppsScriptUrl(rawUrl);
+
+          if (!validUrl) {
+            showToast('URL harus berawalan https://script.google.com/macros/...', true);
+            return;
+          }
+
+          state.cloud = {
+            enabled: true,
+            webAppUrl: validUrl,
+            status: 'SYNCING',
+          };
+          localStorage.setItem(STORAGE_KEY_CLOUD, JSON.stringify(state.cloud));
+          updateCloudStatusUI('SYNCING');
+          pullEntriesFromGoogleSheets(false);
+        });
+
+        document.getElementById('btnDisconnectCloud').addEventListener('click', () => {
+          state.cloud.enabled = false;
+          state.cloud.status = 'LOCAL';
+          localStorage.removeItem(STORAGE_KEY_CLOUD);
+          updateCloudStatusUI('LOCAL');
+          showToast('Google Sheets Sync diputuskan (Mode Local)');
+        });
+
+        document.getElementById('btnPushToCloud').addEventListener('click', () => pushEntriesToGoogleSheets(false));
+        document.getElementById('btnPullFromCloud').addEventListener('click', () => pullEntriesFromGoogleSheets(false));
+
+        document.addEventListener('click', () => {
+          menuPeriod.classList.add('hidden');
+        });
+
+        // Open Add Entry Modal triggers
+        document.getElementById('btnFloatingUpdate').addEventListener('click', () => openEntryModal(null));
+        document.getElementById('btnQuickAddHeader').addEventListener('click', () => openEntryModal(null));
+        document.getElementById('btnEmptyAddFirst').addEventListener('click', () => openEntryModal(null));
+        document.getElementById('btnAddCashflowShortcut').addEventListener('click', () => openEntryModal(null, true));
+
+        // Close Entry Modal
+        document.getElementById('btnCloseEntryModal').addEventListener('click', closeEntryModal);
+        entryModalBackdrop.addEventListener('click', (e) => {
+          if (e.target === entryModalBackdrop) closeEntryModal();
+        });
+
+        // Date & Equity Live Updates inside Modal
+        inputDate.addEventListener('change', () => {
+          updateDateDayBadge(inputDate.value);
+          updateLivePnlPreview();
+        });
+        inputEquity.addEventListener('input', updateLivePnlPreview);
+        inputCashflowAmount.addEventListener('input', updateLivePnlPreview);
+
+        document.getElementById('btnSuggestNextTradingDay').addEventListener('click', () => {
+          const sorted = sortEntriesAsc(state.entries);
+          const latestIso = sorted.length > 0 ? sorted[sorted.length - 1].date : null;
+          inputDate.value = latestIso ? getNextUSTradingDay(latestIso) : toIsoDateString(new Date());
+          updateDateDayBadge(inputDate.value);
+          updateLivePnlPreview();
+        });
+
+        document.getElementById('btnSuggestToday').addEventListener('click', () => {
+          inputDate.value = toIsoDateString(new Date());
+          updateDateDayBadge(inputDate.value);
+          updateLivePnlPreview();
+        });
+
+        // Toggle Cashflow Collapsible Section
+        document.getElementById('btnToggleCashflowSection').addEventListener('click', () => {
+          document.getElementById('cashflowInputContainer').classList.toggle('hidden');
+          document.getElementById('cashflowChevron').classList.toggle('rotate-180');
+        });
+
+        document.getElementById('btnFlowDeposit').addEventListener('click', () => setFlowDirectionUI(1));
+        document.getElementById('btnFlowWithdraw').addEventListener('click', () => setFlowDirectionUI(-1));
+
+        // Save Entry Form Submit
+        document.getElementById('entryForm').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const dateVal = inputDate.value;
+          const equityVal = parseFloat(inputEquity.value);
+          const rawFlow = parseFloat(inputCashflowAmount.value) || 0;
+          const netFlow = rawFlow > 0 ? state.flowDirection * rawFlow : 0;
+          const origDate = editingOriginalDate.value;
+
+          if (!dateVal || isNaN(equityVal) || equityVal < 0) {
+            showToast('Masukkan tanggal dan nilai equity yang valid', true);
+            return;
+          }
+
+          // Remove original date if editing, and replace any duplicate on the target date
+          state.entries = state.entries.filter((item) => item.date !== origDate && item.date !== dateVal);
+          state.entries.push({
+            date: dateVal,
+            equity: equityVal,
+            netFlow: netFlow,
+          });
+          state.entries = sortEntriesAsc(state.entries);
+          saveEntriesToStorage();
+
+          closeEntryModal();
+          renderAll();
+          showToast(`Equity ${formatDisplayDate(dateVal)} tersimpan`);
+        });
+
+        // Delete Entry Flow (Two-step inline confirmation)
+        document.getElementById('btnDeleteEntry').addEventListener('click', () => {
+          document.getElementById('inlineDeleteConfirm').classList.remove('hidden');
+        });
+        document.getElementById('btnCancelDelete').addEventListener('click', () => {
+          document.getElementById('inlineDeleteConfirm').classList.add('hidden');
+        });
+        document.getElementById('btnConfirmDelete').addEventListener('click', () => {
+          const origDate = editingOriginalDate.value;
+          if (!origDate) return;
+          state.entries = state.entries.filter((item) => item.date !== origDate);
+          saveEntriesToStorage();
+          closeEntryModal();
+          renderAll();
+          showToast(`Data ${formatDisplayDate(origDate)} dihapus`);
+        });
+
+        // Settings Modal Open / Close
+        const settingsBackdrop = document.getElementById('settingsModalBackdrop');
+        const openSettings = () => {
+          document.getElementById('inlineResetConfirm').classList.add('hidden');
+          settingsBackdrop.classList.remove('hidden');
+        };
+        document.getElementById('btnOpenSettingsLeft').addEventListener('click', openSettings);
+        document.getElementById('btnOpenSettingsRight').addEventListener('click', openSettings);
+        document.getElementById('btnCloseSettingsModal').addEventListener('click', () => {
+          settingsBackdrop.classList.add('hidden');
+        });
+        settingsBackdrop.addEventListener('click', (e) => {
+          if (e.target === settingsBackdrop) settingsBackdrop.classList.add('hidden');
+        });
+
+        // Currency Switchers
+        document.getElementById('btnCurrencyIDR').addEventListener('click', () => {
+          state.currency = 'IDR';
+          saveSettingsToStorage();
+          renderAll();
+          showToast('Format: Angka Bulat / IDR');
+        });
+        document.getElementById('btnCurrencyUSD').addEventListener('click', () => {
+          state.currency = 'USD';
+          saveSettingsToStorage();
+          renderAll();
+          showToast('Format: US Dollar ($)');
+        });
+
+        // Export & Import Handlers
+        document.getElementById('btnExportCsv').addEventListener('click', exportToCsv);
+        document.getElementById('btnExportJson').addEventListener('click', exportToJson);
+
+        document.getElementById('inputImportJson').addEventListener('change', (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            try {
+              const parsed = JSON.parse(evt.target.result);
+              const importedList = Array.isArray(parsed) ? parsed : parsed.entries;
+              if (!Array.isArray(importedList)) {
+                throw new Error('Format JSON tidak valid');
+              }
+              const validRows = importedList.filter(
+                (r) => typeof r.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.date) && typeof r.equity === 'number'
+              );
+              if (validRows.length === 0) {
+                throw new Error('Tidak ada baris data yang valid');
+              }
+              state.entries = sortEntriesAsc(
+                validRows.map((r) => ({
+                  date: r.date,
+                  equity: r.equity,
+                  netFlow: Number(r.netFlow) || 0,
+                }))
+              );
+              if (parsed.currency === 'USD' || parsed.currency === 'IDR') {
+                state.currency = parsed.currency;
+                saveSettingsToStorage();
+              }
+              saveEntriesToStorage();
+              settingsBackdrop.classList.add('hidden');
+              renderAll();
+              showToast(`${validRows.length} data berhasil di-import`);
+            } catch (err) {
+              showToast('Gagal import: Format file tidak sesuai', true);
+            } finally {
+              e.target.value = '';
+            }
+          };
+          reader.readAsText(file);
+        });
+
+        // Reset / Clear All Data & Restore Sample Data
+        document.getElementById('btnClearAllDataPrompt').addEventListener('click', () => {
+          document.getElementById('inlineResetConfirm').classList.remove('hidden');
+        });
+        document.getElementById('btnCancelReset').addEventListener('click', () => {
+          document.getElementById('inlineResetConfirm').classList.add('hidden');
+        });
+        document.getElementById('btnConfirmReset').addEventListener('click', () => {
+          state.entries = [];
+          saveEntriesToStorage();
+          settingsBackdrop.classList.add('hidden');
+          renderAll();
+          showToast('Data dikosongkan. Silakan input equity awal Anda.');
+        });
+
+        document.getElementById('btnRestoreSampleData').addEventListener('click', () => {
+          state.entries = sortEntriesAsc([...SAMPLE_ENTRIES]);
+          state.visibleLimit = INITIAL_VISIBLE_ROWS;
+          saveEntriesToStorage();
+          settingsBackdrop.classList.add('hidden');
+          renderAll();
+          showToast('Data contoh 15 hari berhasil dimuat');
+        });
+
+        document.getElementById('btnGenerate1YearSample').addEventListener('click', () => {
+          state.entries = generateOneYearSampleEntries();
+          state.periodFilter = '1Y';
+          state.visibleLimit = INITIAL_VISIBLE_ROWS;
+          document.getElementById('selectedPeriodLabel').textContent = '1 Year (252 Hari)';
+          saveEntriesToStorage();
+          settingsBackdrop.classList.add('hidden');
+          renderAll();
+          showToast(`Simulasi 1 Tahun (${state.entries.length} hari bursa) dibuat`);
+        });
+      }
+
+      // ==================== INITIALIZATION ====================
+      document.addEventListener('DOMContentLoaded', () => {
+        loadFromStorage();
+        bindEvents();
+        renderAll();
+        if (state.cloud.enabled) {
+          pullEntriesFromGoogleSheets(true);
+        } else {
+          updateCloudStatusUI('LOCAL');
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
