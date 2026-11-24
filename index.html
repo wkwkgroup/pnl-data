@@ -192,7 +192,7 @@
           <!-- Dropdown Menu -->
           <div
             id="periodDropdownMenu"
-            class="hidden absolute right-0 mt-1.5 w-44 rounded-xl bg-[#181B19] border border-[#2C322F] shadow-xl py-1 z-20"
+            class="hidden absolute right-0 mt-1.5 w-44 rounded-xl bg-[#181B19] border border-[#2C322F] shadow-xl py-1 z-30"
           >
             <button type="button" data-period="1M" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#22C55E] font-medium hover:bg-[#222724] transition">
               Last 1 Month
@@ -224,7 +224,7 @@
       </div>
 
       <!-- Performance Rows Container -->
-      <div id="performanceTableBody" class="divide-y divide-transparent">
+      <div id="performanceTableBody" class="divide-y divide-[#1A1E1C] relative z-10">
         <!-- Dynamically populated by JavaScript -->
       </div>
 
@@ -803,7 +803,6 @@ function doPost(e) {
       'use strict';
 
       // ==================== KONFIGURASI CLOUD PERMANEN (OPSI 1) ====================
-      // Web App URL Google Apps Script tertanam permanen sehingga semua perangkat langsung sinkron:
       const DEFAULT_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzDa1zDUwAIkAn1EMLEPlevp84hkLgMsZ77Wnkp232rk20xlkY6a8QPx4cWaz-o_b5Z/exec';
 
       // ==================== CONSTANTS & STORAGE KEYS ====================
@@ -811,4 +810,1149 @@ function doPost(e) {
       const STORAGE_KEY_SETTINGS = 'etf_pnl_settings_v1';
       const STORAGE_KEY_CLOUD = 'etf_pnl_apps_script_v1';
       const INITIAL_VISIBLE_ROWS = 60;
-// ... existing code ... -->
+
+      const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const DAYS_ID_FULL = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const DAYS_ID_SHORT = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
+      const PERIOD_LABELS = {
+        '1M': 'Last 1 Month',
+        '3M': 'Last 3 Months',
+        '6M': 'Last 6 Months',
+        '1Y': '1 Year (252 Hari)',
+        'YTD': 'YTD',
+        'ALL': 'All Time'
+      };
+
+      const SAMPLE_ENTRIES = [
+        { date: '2026-11-04', equity: 1440000, netFlow: 0 },
+        { date: '2026-11-05', equity: 1444000, netFlow: 0 },
+        { date: '2026-11-06', equity: 1480000, netFlow: 0 },
+        { date: '2026-11-09', equity: 1484000, netFlow: 0 },
+        { date: '2026-11-10', equity: 1500000, netFlow: 0 },
+        { date: '2026-11-11', equity: 1508000, netFlow: 0 },
+        { date: '2026-11-12', equity: 1556000, netFlow: 0 },
+        { date: '2026-11-13', equity: 1556000, netFlow: 0 },
+        { date: '2026-11-16', equity: 1560000, netFlow: 0 },
+        { date: '2026-11-17', equity: 1576000, netFlow: 0 },
+        { date: '2026-11-18', equity: 1568000, netFlow: 0 },
+        { date: '2026-11-19', equity: 1564000, netFlow: 0 },
+        { date: '2026-11-20', equity: 1556000, netFlow: 0 },
+        { date: '2026-11-23', equity: 1552000, netFlow: 0 },
+        { date: '2026-11-24', equity: 1596000, netFlow: 0 }
+      ];
+
+      // ==================== APPLICATION STATE ====================
+      let state = {
+        entries: [],
+        settings: {
+          currency: 'IDR',
+          period: '1M',
+          mode: 'daily'
+        },
+        cloud: {
+          url: DEFAULT_APPS_SCRIPT_URL,
+          status: 'local'
+        },
+        visibleRowLimit: INITIAL_VISIBLE_ROWS,
+        cashflowSign: 1
+      };
+
+      // ==================== UTILITY & FORMATTING HELPERS ====================
+      function parseDateLocal(isoStr) {
+        const parts = String(isoStr).split('-');
+        if (parts.length !== 3) return new Date();
+        return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      }
+
+      function toIsoDateLocal(d) {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+      }
+
+      function formatDisplayDate(isoStr) {
+        const d = parseDateLocal(isoStr);
+        const day = d.getDate();
+        const month = MONTHS_SHORT[d.getMonth()];
+        const yearShort = String(d.getFullYear()).slice(-2);
+        return `${day} ${month} ${yearShort}`;
+      }
+
+      function formatNumber(val, withSign = false) {
+        const num = Number(val) || 0;
+        const isUSD = state.settings.currency === 'USD';
+        const absVal = Math.abs(num);
+        const formatted = isUSD
+          ? '$' + absVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+          : Math.round(absVal).toLocaleString('en-US');
+
+        if (!withSign) return formatted;
+        if (num > 0) return '+' + formatted;
+        if (num < 0) return '-' + formatted;
+        return isUSD ? '$0.00' : '0';
+      }
+
+      function formatPnlCombined(pnlVal, pnlPct) {
+        const val = Number(pnlVal) || 0;
+        const pct = Number(pnlPct) || 0;
+        const isZero = Math.abs(val) < 0.0001;
+        if (isZero) {
+          return state.settings.currency === 'USD' ? '$0.00 (0.00%)' : '0 (0.00%)';
+        }
+        const signStr = val > 0 ? '+' : '';
+        const pctStr = `${signStr}${pct.toFixed(2)}%`;
+        return `${formatNumber(val, true)} (${pctStr})`;
+      }
+
+      function getPnlColorClass(pnlVal) {
+        const val = Number(pnlVal) || 0;
+        if (val > 0.0001) return 'text-[#22C55E]';
+        if (val < -0.0001) return 'text-[#E05252]';
+        return 'text-[#D1D5DB]';
+      }
+
+      function showToast(msg, isError = false) {
+        const banner = document.getElementById('toastBanner');
+        const dot = document.getElementById('toastDot');
+        const text = document.getElementById('toastMessage');
+        if (!banner || !text) return;
+
+        text.textContent = msg;
+        dot.className = `w-2 h-2 rounded-full ${isError ? 'bg-[#E05252]' : 'bg-[#22C55E]'}`;
+        banner.classList.remove('hidden');
+
+        clearTimeout(window.__toastTimer);
+        window.__toastTimer = setTimeout(() => {
+          banner.classList.add('hidden');
+        }, 2800);
+      }
+
+      // ==================== CORE P&L & PERIOD CALCULATIONS ====================
+      function computeAllDailyMetrics(entries) {
+        const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
+        return sorted.map((item, idx) => {
+          if (idx === 0) {
+            return {
+              ...item,
+              prevEquity: item.equity,
+              pnl: 0,
+              pnlPct: 0,
+              isInitial: true
+            };
+          }
+          const prev = sorted[idx - 1].equity;
+          const netFlow = Number(item.netFlow) || 0;
+          const pnl = item.equity - prev - netFlow;
+          const base = prev > 0 ? prev : 1;
+          const pnlPct = (pnl / base) * 100;
+          return {
+            ...item,
+            prevEquity: prev,
+            pnl,
+            pnlPct,
+            isInitial: false
+          };
+        });
+      }
+
+      function filterEntriesByPeriod(computedList, period) {
+        if (!computedList.length || period === 'ALL') return computedList;
+        const latestDate = parseDateLocal(computedList[computedList.length - 1].date);
+        const cutoff = new Date(latestDate);
+
+        if (period === '1M') cutoff.setMonth(cutoff.getMonth() - 1);
+        else if (period === '3M') cutoff.setMonth(cutoff.getMonth() - 3);
+        else if (period === '6M') cutoff.setMonth(cutoff.getMonth() - 6);
+        else if (period === '1Y') cutoff.setFullYear(cutoff.getFullYear() - 1);
+        else if (period === 'YTD') {
+          cutoff.setMonth(0);
+          cutoff.setDate(1);
+        }
+
+        const cutoffIso = toIsoDateLocal(cutoff);
+        const filtered = computedList.filter(item => item.date >= cutoffIso);
+        return filtered.length ? filtered : computedList;
+      }
+
+      function computeMonthlyMetrics(computedList) {
+        const map = new Map();
+        computedList.forEach(item => {
+          const monthKey = item.date.slice(0, 7);
+          if (!map.has(monthKey)) {
+            map.set(monthKey, {
+              monthKey,
+              startPrevEquity: item.isInitial ? item.equity : item.prevEquity,
+              endEquity: item.equity,
+              totalPnl: 0,
+              tradingDays: 0
+            });
+          }
+          const group = map.get(monthKey);
+          group.endEquity = item.equity;
+          group.totalPnl += item.pnl;
+          group.tradingDays += 1;
+        });
+
+        return Array.from(map.values()).map(g => {
+          const base = g.startPrevEquity > 0 ? g.startPrevEquity : 1;
+          const pnlPct = (g.totalPnl / base) * 100;
+          const [yyyy, mm] = g.monthKey.split('-');
+          const label = `${MONTHS_SHORT[Number(mm) - 1]} ${yyyy}`;
+          return {
+            ...g,
+            label,
+            pnlPct
+          };
+        });
+      }
+
+      // ==================== RENDERING: TABLE, ANALYTICS & CHART ====================
+      function renderAll() {
+        const allComputed = computeAllDailyMetrics(state.entries);
+        const filtered = filterEntriesByPeriod(allComputed, state.settings.period);
+
+        // Update Dropdown & Mode Pills
+        document.getElementById('selectedPeriodLabel').textContent = PERIOD_LABELS[state.settings.period] || 'Last 1 Month';
+        document.getElementById('tradePeriodTag').textContent = PERIOD_LABELS[state.settings.period] || 'All Time';
+
+        document.querySelectorAll('.period-option').forEach(btn => {
+          const isActive = btn.dataset.period === state.settings.period;
+          btn.className = `period-option w-full text-left px-3.5 py-2 text-xs transition ${
+            isActive ? 'text-[#22C55E] font-medium bg-[#222724]/60' : 'text-[#D1D5DB] hover:bg-[#222724]'
+          }`;
+        });
+
+        const btnDaily = document.getElementById('btnModeDaily');
+        const btnMonthly = document.getElementById('btnModeMonthly');
+        if (state.settings.mode === 'daily') {
+          btnDaily.className = 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition';
+          btnMonthly.className = 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
+        } else {
+          btnMonthly.className = 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition';
+          btnDaily.className = 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
+        }
+
+        // Currency Buttons
+        const btnIDR = document.getElementById('btnCurrencyIDR');
+        const btnUSD = document.getElementById('btnCurrencyUSD');
+        if (state.settings.currency === 'IDR') {
+          btnIDR.className = 'py-2.5 px-3 rounded-xl text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] text-center transition';
+          btnUSD.className = 'py-2.5 px-3 rounded-xl text-xs font-medium border border-[#2F3532] bg-[#111312] text-[#8E9591] text-center transition';
+        } else {
+          btnUSD.className = 'py-2.5 px-3 rounded-xl text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] text-center transition';
+          btnIDR.className = 'py-2.5 px-3 rounded-xl text-xs font-medium border border-[#2F3532] bg-[#111312] text-[#8E9591] text-center transition';
+        }
+
+        renderPerformanceTable(filtered);
+        renderTradeAnalytics(filtered, allComputed);
+        updateCloudStatusUI();
+      }
+
+      function renderPerformanceTable(filteredList) {
+        const tbody = document.getElementById('performanceTableBody');
+        const emptyState = document.getElementById('emptyStateContainer');
+        const loadMoreBox = document.getElementById('loadMoreContainer');
+
+        if (!filteredList.length) {
+          tbody.innerHTML = '';
+          emptyState.classList.remove('hidden');
+          loadMoreBox.classList.add('hidden');
+          return;
+        }
+
+        emptyState.classList.add('hidden');
+
+        if (state.settings.mode === 'monthly') {
+          loadMoreBox.classList.add('hidden');
+          const monthly = computeMonthlyMetrics(filteredList).reverse();
+          tbody.innerHTML = monthly.map(m => {
+            const colorCls = getPnlColorClass(m.totalPnl);
+            return `
+              <button
+                type="button"
+                data-month="${m.monthKey}"
+                class="month-row w-full grid grid-cols-12 items-center py-3.5 px-1 -mx-1 rounded-xl hover:bg-[#181B19] active:bg-[#1F2421] transition text-left cursor-pointer touch-manipulation"
+              >
+                <div class="col-span-4">
+                  <span class="text-[13px] font-medium text-[#E5E7EB] block">${m.label}</span>
+                  <span class="text-[10px] text-[#8E9591]">${m.tradingDays} hari bursa</span>
+                </div>
+                <div class="col-span-4 text-right pr-2 text-[13px] font-normal text-[#E5E7EB] [font-variant-numeric:tabular-nums]">
+                  ${formatNumber(m.endEquity, false)}
+                </div>
+                <div class="col-span-4 text-right text-[13px] font-normal ${colorCls} [font-variant-numeric:tabular-nums]">
+                  ${formatPnlCombined(m.totalPnl, m.pnlPct)}
+                </div>
+              </button>
+            `;
+          }).join('');
+          return;
+        }
+
+        // Daily Mode (Newest first)
+        const reversed = [...filteredList].reverse();
+        const visibleItems = reversed.slice(0, state.visibleRowLimit);
+        const remaining = reversed.length - visibleItems.length;
+
+        if (remaining > 0) {
+          loadMoreBox.classList.remove('hidden');
+          document.getElementById('remainingRowsCount').textContent = remaining;
+        } else {
+          loadMoreBox.classList.add('hidden');
+        }
+
+        tbody.innerHTML = visibleItems.map(item => {
+          const colorCls = getPnlColorClass(item.pnl);
+          const flowTag = item.netFlow !== 0
+            ? `<span class="ml-1 text-[9px] px-1.5 py-0.5 rounded bg-[#222724] text-[#8E9591]">${item.netFlow > 0 ? '+TopUp' : '-Tarik'}</span>`
+            : '';
+          return `
+            <button
+              type="button"
+              data-date="${item.date}"
+              class="daily-row w-full grid grid-cols-12 items-center py-3.5 px-1 -mx-1 rounded-xl hover:bg-[#181B19] active:bg-[#1F2421] transition text-left cursor-pointer touch-manipulation"
+            >
+              <div class="col-span-4 flex items-center text-[13px] font-normal text-[#E5E7EB]">
+                <span>${formatDisplayDate(item.date)}</span>
+                ${flowTag}
+              </div>
+              <div class="col-span-4 text-right pr-2 text-[13px] font-normal text-[#E5E7EB] [font-variant-numeric:tabular-nums]">
+                ${formatNumber(item.equity, false)}
+              </div>
+              <div class="col-span-4 text-right text-[13px] font-normal ${colorCls} [font-variant-numeric:tabular-nums]">
+                ${formatPnlCombined(item.pnl, item.pnlPct)}
+              </div>
+            </button>
+          `;
+        }).join('');
+      }
+
+      function renderTradeAnalytics(filteredList, allComputed) {
+        if (!filteredList.length) {
+          document.getElementById('chartActiveEquity').textContent = formatNumber(0);
+          document.getElementById('chartActiveDate').textContent = '-';
+          document.getElementById('chartActivePnl').textContent = formatPnlCombined(0, 0);
+          document.getElementById('equitySparklineSvg').innerHTML = '';
+          return;
+        }
+
+        const latest = filteredList[filteredList.length - 1];
+        const first = filteredList[0];
+        const baseStart = first.isInitial ? first.equity : first.prevEquity;
+
+        document.getElementById('chartActiveEquity').textContent = formatNumber(latest.equity);
+        document.getElementById('chartActiveDate').textContent = formatDisplayDate(latest.date);
+        const activePnlEl = document.getElementById('chartActivePnl');
+        activePnlEl.textContent = formatPnlCombined(latest.pnl, latest.pnlPct);
+        activePnlEl.className = `text-xs font-medium ${getPnlColorClass(latest.pnl)} [font-variant-numeric:tabular-nums]`;
+
+        // Aggregate metrics
+        const activeDays = filteredList.filter(d => !d.isInitial);
+        const totalPnl = activeDays.reduce((acc, d) => acc + d.pnl, 0);
+        const totalPnlPct = baseStart > 0 ? (totalPnl / baseStart) * 100 : 0;
+
+        const wins = activeDays.filter(d => d.pnl > 0.0001).length;
+        const losses = activeDays.filter(d => d.pnl < -0.0001).length;
+        const draws = activeDays.length - wins - losses;
+        const winRate = activeDays.length ? (wins / activeDays.length) * 100 : 0;
+
+        let best = activeDays[0] || latest;
+        let worst = activeDays[0] || latest;
+        activeDays.forEach(d => {
+          if (d.pnl > best.pnl) best = d;
+          if (d.pnl < worst.pnl) worst = d;
+        });
+
+        const avgDaily = activeDays.length ? totalPnl / activeDays.length : 0;
+        const netCashflow = filteredList.reduce((acc, d) => acc + (Number(d.netFlow) || 0), 0);
+        const initialEquity = allComputed.length ? allComputed[0].equity : 0;
+
+        const elTotalPnl = document.getElementById('statTotalPnl');
+        const elTotalPct = document.getElementById('statTotalPnlPct');
+        elTotalPnl.textContent = formatNumber(totalPnl, true);
+        elTotalPnl.className = `text-sm font-semibold ${getPnlColorClass(totalPnl)} block [font-variant-numeric:tabular-nums]`;
+        elTotalPct.textContent = `${totalPnl >= 0 ? '+' : ''}${totalPnlPct.toFixed(2)}%`;
+        elTotalPct.className = `text-xs ${getPnlColorClass(totalPnl)} [font-variant-numeric:tabular-nums]`;
+
+        document.getElementById('statWinRate').textContent = `${winRate.toFixed(1)}%`;
+        document.getElementById('statWinCounts').textContent = `${wins}W • ${losses}L • ${draws}D`;
+
+        document.getElementById('statBestDay').textContent = formatPnlCombined(best.pnl, best.pnlPct);
+        document.getElementById('statBestDay').className = `text-sm font-semibold ${getPnlColorClass(best.pnl)} block [font-variant-numeric:tabular-nums]`;
+        document.getElementById('statBestDayDate').textContent = formatDisplayDate(best.date);
+
+        document.getElementById('statWorstDay').textContent = formatPnlCombined(worst.pnl, worst.pnlPct);
+        document.getElementById('statWorstDay').className = `text-sm font-semibold ${getPnlColorClass(worst.pnl)} block [font-variant-numeric:tabular-nums]`;
+        document.getElementById('statWorstDayDate').textContent = formatDisplayDate(worst.date);
+
+        document.getElementById('statAvgDaily').textContent = formatNumber(avgDaily, true);
+        document.getElementById('statAvgDaily').className = `text-sm font-semibold ${getPnlColorClass(avgDaily)} block [font-variant-numeric:tabular-nums]`;
+        document.getElementById('statTradingDays').textContent = `${activeDays.length} hari bursa`;
+
+        document.getElementById('statNetCashflow').textContent = formatNumber(netCashflow, true);
+        document.getElementById('statInitialEquity').textContent = formatNumber(initialEquity);
+
+        // Render Cashflow History
+        const cashflows = [...allComputed].filter(d => Number(d.netFlow) !== 0).reverse();
+        const cfContainer = document.getElementById('cashflowListContainer');
+        if (!cashflows.length) {
+          cfContainer.innerHTML = '<p class="text-[#8E9591] text-center py-3">Belum ada catatan top-up atau penarikan dana.</p>';
+        } else {
+          cfContainer.innerHTML = cashflows.map(c => {
+            const isPos = c.netFlow > 0;
+            return `
+              <button
+                type="button"
+                data-date="${c.date}"
+                class="daily-row w-full flex items-center justify-between py-2 px-2.5 rounded-xl bg-[#111312] hover:bg-[#1E2320] transition text-left"
+              >
+                <div>
+                  <span class="text-[#F3F4F6] font-medium block">${isPos ? 'Top-Up Modal' : 'Tarik Dana'}</span>
+                  <span class="text-[11px] text-[#8E9591]">${formatDisplayDate(c.date)}</span>
+                </div>
+                <span class="font-semibold ${isPos ? 'text-[#22C55E]' : 'text-[#E05252]'} [font-variant-numeric:tabular-nums]">
+                  ${formatNumber(c.netFlow, true)}
+                </span>
+              </button>
+            `;
+          }).join('');
+        }
+
+        renderSparkline(filteredList);
+      }
+
+      function renderSparkline(data) {
+        const svg = document.getElementById('equitySparklineSvg');
+        if (!svg) return;
+        const w = 360;
+        const h = 150;
+        svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+
+        if (data.length === 1) {
+          const d = data[0];
+          svg.innerHTML = `
+            <line x1="0" y1="${h / 2}" x2="${w}" y2="${h / 2}" stroke="#22C55E" stroke-width="2.5" stroke-dasharray="4 4" />
+            <circle cx="${w / 2}" cy="${h / 2}" r="5" fill="#22C55E" />
+          `;
+          return;
+        }
+
+        const values = data.map(d => d.equity);
+        const minVal = Math.min(...values);
+        const maxVal = Math.max(...values);
+        const span = maxVal - minVal || 1;
+        const padY = 14;
+
+        const points = data.map((d, idx) => {
+          const x = (idx / (data.length - 1)) * w;
+          const y = h - padY - ((d.equity - minVal) / span) * (h - padY * 2);
+          return { x, y, item: d };
+        });
+
+        const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+        const areaD = `${pathD} L ${w} ${h} L 0 ${h} Z`;
+        const isUp = data[data.length - 1].equity >= data[0].equity;
+        const strokeHex = isUp ? '#22C55E' : '#E05252';
+        const lastPt = points[points.length - 1];
+
+        svg.innerHTML = `
+          <defs>
+            <linearGradient id="eqAreaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="${strokeHex}" stop-opacity="0.28" />
+              <stop offset="100%" stop-color="${strokeHex}" stop-opacity="0.0" />
+            </linearGradient>
+          </defs>
+          <path d="${areaD}" fill="url(#eqAreaGrad)" />
+          <path d="${pathD}" fill="none" stroke="${strokeHex}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+          <line id="chartHoverLine" x1="${lastPt.x}" y1="0" x2="${lastPt.x}" y2="${h}" stroke="#4B5563" stroke-width="1" stroke-dasharray="3 3" />
+          <circle id="chartHoverDot" cx="${lastPt.x}" cy="${lastPt.y}" r="4.5" fill="${strokeHex}" stroke="#111312" stroke-width="2" />
+        `;
+
+        window.__sparklinePoints = points;
+      }
+
+      // ==================== STORAGE & GOOGLE APPS SCRIPT SYNC ====================
+      function saveLocal() {
+        try {
+          localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(state.entries));
+          localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(state.settings));
+        } catch (err) {
+          console.error('Local storage error:', err);
+        }
+      }
+
+      function updateCloudStatusUI() {
+        const dot = document.getElementById('headerCloudDot');
+        const label = document.getElementById('headerCloudLabel');
+        const badge = document.getElementById('modalSyncBadge');
+        const manualBox = document.getElementById('cloudManualActions');
+
+        if (!state.cloud.url) {
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-[#8E9591]';
+          label.textContent = 'Local';
+          badge.textContent = 'Belum Terhubung';
+          badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-[#222724] text-[#8E9591]';
+          manualBox.classList.add('hidden');
+          return;
+        }
+
+        manualBox.classList.remove('hidden');
+        if (state.cloud.status === 'syncing') {
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse';
+          label.textContent = 'Syncing...';
+          badge.textContent = 'Menyinkronkan...';
+          badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300';
+        } else if (state.cloud.status === 'synced') {
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-[#22C55E]';
+          label.textContent = 'Synced';
+          badge.textContent = 'Terhubung (Google Sheets)';
+          badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]';
+        } else if (state.cloud.status === 'error') {
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-[#E05252]';
+          label.textContent = 'Offline';
+          badge.textContent = 'Gagal Koneksi';
+          badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-[#E05252]/15 text-[#E05252]';
+        }
+      }
+
+      async function pushEntriesToCloud(silent = false) {
+        if (!state.cloud.url) return;
+        state.cloud.status = 'syncing';
+        updateCloudStatusUI();
+        try {
+          const res = await fetch(state.cloud.url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+              currency: state.settings.currency,
+              entries: state.entries
+            })
+          });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          state.cloud.status = 'synced';
+          updateCloudStatusUI();
+          if (!silent) showToast('Data tersimpan ke Google Sheets');
+        } catch (err) {
+          console.error('Push cloud failed:', err);
+          state.cloud.status = 'error';
+          updateCloudStatusUI();
+          if (!silent) showToast('Gagal sinkron ke Google Sheets', true);
+        }
+      }
+
+      async function pullEntriesFromCloud(silent = false) {
+        if (!state.cloud.url) return;
+        state.cloud.status = 'syncing';
+        updateCloudStatusUI();
+        try {
+          const res = await fetch(state.cloud.url);
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+          if (data && Array.isArray(data.entries)) {
+            if (data.entries.length > 0) {
+              state.entries = data.entries.map(item => ({
+                date: String(item.date).slice(0, 10),
+                equity: Number(item.equity) || 0,
+                netFlow: Number(item.netFlow) || 0
+              }));
+              if (data.currency === 'USD' || data.currency === 'IDR') {
+                state.settings.currency = data.currency;
+              }
+              saveLocal();
+              renderAll();
+              if (!silent) showToast(`Berhasil memuat ${state.entries.length} data dari Sheets`);
+            } else if (!silent) {
+              showToast('Sheet masih kosong (0 baris)');
+            }
+          }
+          state.cloud.status = 'synced';
+          updateCloudStatusUI();
+        } catch (err) {
+          console.error('Pull cloud failed:', err);
+          state.cloud.status = 'error';
+          updateCloudStatusUI();
+          if (!silent) showToast('Gagal memuat dari Google Sheets', true);
+        }
+      }
+
+      // ==================== MODAL & FORM INTERACTIONS ====================
+      function getNextTradingDayIso() {
+        if (!state.entries.length) {
+          const today = new Date();
+          while (today.getDay() === 0 || today.getDay() === 6) {
+            today.setDate(today.getDate() - 1);
+          }
+          return toIsoDateLocal(today);
+        }
+        const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
+        const last = parseDateLocal(sorted[sorted.length - 1].date);
+        last.setDate(last.getDate() + 1);
+        while (last.getDay() === 0 || last.getDay() === 6) {
+          last.setDate(last.getDate() + 1);
+        }
+        return toIsoDateLocal(last);
+      }
+
+      function updateModalDateBadge(isoStr) {
+        const d = parseDateLocal(isoStr);
+        const dayIdx = d.getDay();
+        const badge = document.getElementById('dayNameBadge');
+        const warning = document.getElementById('weekendWarning');
+        badge.textContent = DAYS_ID_FULL[dayIdx];
+        if (dayIdx === 0 || dayIdx === 6) {
+          badge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300';
+          warning.classList.remove('hidden');
+        } else {
+          badge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]';
+          warning.classList.add('hidden');
+        }
+      }
+
+      function getPreviousEquityForDate(targetIso, ignoreOriginalIso = '') {
+        const sorted = [...state.entries]
+          .filter(e => e.date !== ignoreOriginalIso && e.date < targetIso)
+          .sort((a, b) => a.date.localeCompare(b.date));
+        return sorted.length ? sorted[sorted.length - 1].equity : null;
+      }
+
+      function updateLivePnlPreview() {
+        const dateVal = document.getElementById('inputDate').value;
+        const origDate = document.getElementById('editingOriginalDate').value;
+        const eqVal = parseFloat(document.getElementById('inputEquity').value);
+        const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
+        const netFlow = cfRaw * state.cashflowSign;
+
+        const prevEq = getPreviousEquityForDate(dateVal, origDate);
+        const hintEl = document.getElementById('prevEquityHint');
+        const previewEl = document.getElementById('livePnlPreview');
+
+        if (prevEq === null) {
+          hintEl.textContent = 'Modal Awal (Hari ke-1)';
+          previewEl.textContent = formatPnlCombined(0, 0);
+          previewEl.className = 'text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]';
+          return;
+        }
+
+        hintEl.textContent = `Sebelumnya: ${formatNumber(prevEq)}`;
+        if (isNaN(eqVal)) {
+          previewEl.textContent = formatPnlCombined(0, 0);
+          previewEl.className = 'text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]';
+          return;
+        }
+
+        const pnl = eqVal - prevEq - netFlow;
+        const pnlPct = prevEq > 0 ? (pnl / prevEq) * 100 : 0;
+        previewEl.textContent = formatPnlCombined(pnl, pnlPct);
+        previewEl.className = `text-sm font-semibold ${getPnlColorClass(pnl)} [font-variant-numeric:tabular-nums]`;
+      }
+
+      function openEntryModal(editDateIso = null, expandCashflow = false) {
+        const modal = document.getElementById('entryModalBackdrop');
+        const title = document.getElementById('entryModalTitle');
+        const origInput = document.getElementById('editingOriginalDate');
+        const dateInput = document.getElementById('inputDate');
+        const eqInput = document.getElementById('inputEquity');
+        const cfInput = document.getElementById('inputCashflowAmount');
+        const btnDel = document.getElementById('btnDeleteEntry');
+        const delConfirm = document.getElementById('inlineDeleteConfirm');
+        const cfContainer = document.getElementById('cashflowInputContainer');
+        const prefixEl = document.getElementById('equityInputPrefix');
+
+        delConfirm.classList.add('hidden');
+        if (state.settings.currency === 'USD') {
+          prefixEl.classList.remove('hidden');
+          eqInput.classList.add('pl-8');
+        } else {
+          prefixEl.classList.add('hidden');
+          eqInput.classList.remove('pl-8');
+        }
+
+        if (editDateIso) {
+          const existing = state.entries.find(e => e.date === editDateIso);
+          if (existing) {
+            title.textContent = 'Edit Equity Harian';
+            origInput.value = existing.date;
+            dateInput.value = existing.date;
+            eqInput.value = existing.equity;
+            const nf = Number(existing.netFlow) || 0;
+            state.cashflowSign = nf < 0 ? -1 : 1;
+            cfInput.value = nf !== 0 ? Math.abs(nf) : '';
+            btnDel.classList.remove('hidden');
+            if (nf !== 0 || expandCashflow) cfContainer.classList.remove('hidden');
+            else cfContainer.classList.add('hidden');
+          }
+        } else {
+          title.textContent = 'Update Equity Harian';
+          origInput.value = '';
+          const nextIso = getNextTradingDayIso();
+          dateInput.value = nextIso;
+          const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
+          eqInput.value = sorted.length ? sorted[sorted.length - 1].equity : '';
+          state.cashflowSign = 1;
+          cfInput.value = '';
+          btnDel.classList.add('hidden');
+          if (expandCashflow) cfContainer.classList.remove('hidden');
+          else cfContainer.classList.add('hidden');
+        }
+
+        syncCashflowSignButtons();
+        updateModalDateBadge(dateInput.value);
+        updateLivePnlPreview();
+        modal.classList.remove('hidden');
+      }
+
+      function closeEntryModal() {
+        document.getElementById('entryModalBackdrop').classList.add('hidden');
+      }
+
+      function syncCashflowSignButtons() {
+        const btnDep = document.getElementById('btnFlowDeposit');
+        const btnWit = document.getElementById('btnFlowWithdraw');
+        if (state.cashflowSign === 1) {
+          btnDep.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition';
+          btnWit.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#181B19] text-[#8E9591] border border-[#2F3532] transition';
+        } else {
+          btnWit.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#E05252]/15 text-[#E05252] border border-[#E05252]/40 transition';
+          btnDep.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#181B19] text-[#8E9591] border border-[#2F3532] transition';
+        }
+      }
+
+      // ==================== 1-YEAR GENERATOR & EXPORT ====================
+      function generate1YearSampleEntries() {
+        const list = [];
+        let eq = 1440000;
+        const cur = new Date(2025, 10, 24);
+        const end = new Date(2026, 10, 24);
+        let seed = 42;
+        while (cur <= end) {
+          const day = cur.getDay();
+          if (day !== 0 && day !== 6) {
+            seed = (seed * 1664525 + 1013904223) % 4294967296;
+            const rand = seed / 4294967296;
+            const dailyReturn = (rand - 0.465) * 0.024;
+            if (list.length > 0) {
+              eq = Math.max(10000, Math.round((eq * (1 + dailyReturn)) / 1000) * 1000);
+            }
+            list.push({
+              date: toIsoDateLocal(cur),
+              equity: eq,
+              netFlow: 0
+            });
+          }
+          cur.setDate(cur.getDate() + 1);
+        }
+        return list;
+      }
+
+      function downloadFile(filename, content, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      // ==================== EVENT BINDINGS & INITIALIZATION ====================
+      function bindEvents() {
+        // Primary Tabs: PORTFOLIO | TRADE
+        const tabPortfolio = document.getElementById('tabPortfolio');
+        const tabTrade = document.getElementById('tabTrade');
+        const viewPortfolio = document.getElementById('viewPortfolio');
+        const viewTrade = document.getElementById('viewTrade');
+
+        tabPortfolio.addEventListener('click', () => {
+          tabPortfolio.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors';
+          tabTrade.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] border-b-2 border-transparent hover:text-[#D1D5DB] transition-colors';
+          viewPortfolio.classList.remove('hidden');
+          viewTrade.classList.add('hidden');
+        });
+
+        tabTrade.addEventListener('click', () => {
+          tabTrade.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors';
+          tabPortfolio.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] border-b-2 border-transparent hover:text-[#D1D5DB] transition-colors';
+          viewTrade.classList.remove('hidden');
+          viewPortfolio.classList.add('hidden');
+          renderAll();
+        });
+
+        // Info Tooltip Toggle
+        document.getElementById('btnToggleInfo').addEventListener('click', () => {
+          document.getElementById('infoTooltipCard').classList.toggle('hidden');
+        });
+        document.getElementById('btnCloseInfo').addEventListener('click', () => {
+          document.getElementById('infoTooltipCard').classList.add('hidden');
+        });
+
+        // Daily / Monthly Switcher
+        document.getElementById('btnModeDaily').addEventListener('click', () => {
+          state.settings.mode = 'daily';
+          saveLocal();
+          renderAll();
+        });
+        document.getElementById('btnModeMonthly').addEventListener('click', () => {
+          state.settings.mode = 'monthly';
+          saveLocal();
+          renderAll();
+        });
+
+        // Period Dropdown
+        const periodMenu = document.getElementById('periodDropdownMenu');
+        document.getElementById('btnPeriodDropdown').addEventListener('click', (e) => {
+          e.stopPropagation();
+          periodMenu.classList.toggle('hidden');
+        });
+        document.querySelectorAll('.period-option').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.settings.period = btn.dataset.period;
+            state.visibleRowLimit = INITIAL_VISIBLE_ROWS;
+            periodMenu.classList.add('hidden');
+            saveLocal();
+            renderAll();
+          });
+        });
+        document.addEventListener('click', () => {
+          periodMenu.classList.add('hidden');
+        });
+
+        // Delegated Click on Table Rows (Daily & Monthly) and Cashflow Rows
+        document.getElementById('performanceTableBody').addEventListener('click', (e) => {
+          const dailyRow = e.target.closest('.daily-row');
+          if (dailyRow && dailyRow.dataset.date) {
+            openEntryModal(dailyRow.dataset.date);
+            return;
+          }
+          const monthRow = e.target.closest('.month-row');
+          if (monthRow && monthRow.dataset.month) {
+            state.settings.mode = 'daily';
+            state.settings.period = 'ALL';
+            saveLocal();
+            renderAll();
+            showToast(`Menampilkan rincian harian (${monthRow.dataset.month})`);
+          }
+        });
+
+        document.getElementById('cashflowListContainer').addEventListener('click', (e) => {
+          const row = e.target.closest('.daily-row');
+          if (row && row.dataset.date) {
+            openEntryModal(row.dataset.date, true);
+          }
+        });
+
+        // Load More Pagination
+        document.getElementById('btnLoadMoreRows').addEventListener('click', () => {
+          state.visibleRowLimit += 100;
+          renderAll();
+        });
+
+        // Open Entry Modal Triggers
+        document.getElementById('btnQuickAddHeader').addEventListener('click', () => openEntryModal(null));
+        document.getElementById('btnFloatingUpdate').addEventListener('click', () => openEntryModal(null));
+        document.getElementById('btnEmptyAddFirst').addEventListener('click', () => openEntryModal(null));
+        document.getElementById('btnAddCashflowShortcut').addEventListener('click', () => openEntryModal(null, true));
+
+        // Close Entry Modal
+        document.getElementById('btnCloseEntryModal').addEventListener('click', closeEntryModal);
+        document.getElementById('entryModalBackdrop').addEventListener('click', (e) => {
+          if (e.target === document.getElementById('entryModalBackdrop')) closeEntryModal();
+        });
+
+        // Form Inputs & Quick Chips
+        document.getElementById('inputDate').addEventListener('change', (e) => {
+          updateModalDateBadge(e.target.value);
+          updateLivePnlPreview();
+        });
+        document.getElementById('inputEquity').addEventListener('input', updateLivePnlPreview);
+        document.getElementById('inputCashflowAmount').addEventListener('input', updateLivePnlPreview);
+
+        document.getElementById('btnSuggestNextTradingDay').addEventListener('click', () => {
+          const nextIso = getNextTradingDayIso();
+          document.getElementById('inputDate').value = nextIso;
+          updateModalDateBadge(nextIso);
+          updateLivePnlPreview();
+        });
+        document.getElementById('btnSuggestToday').addEventListener('click', () => {
+          const todayIso = toIsoDateLocal(new Date());
+          document.getElementById('inputDate').value = todayIso;
+          updateModalDateBadge(todayIso);
+          updateLivePnlPreview();
+        });
+
+        document.getElementById('btnToggleCashflowSection').addEventListener('click', () => {
+          document.getElementById('cashflowInputContainer').classList.toggle('hidden');
+          document.getElementById('cashflowChevron').classList.toggle('rotate-180');
+        });
+        document.getElementById('btnFlowDeposit').addEventListener('click', () => {
+          state.cashflowSign = 1;
+          syncCashflowSignButtons();
+          updateLivePnlPreview();
+        });
+        document.getElementById('btnFlowWithdraw').addEventListener('click', () => {
+          state.cashflowSign = -1;
+          syncCashflowSignButtons();
+          updateLivePnlPreview();
+        });
+
+        // Submit Entry Form
+        document.getElementById('entryForm').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const origDate = document.getElementById('editingOriginalDate').value;
+          const dateVal = document.getElementById('inputDate').value;
+          const eqVal = parseFloat(document.getElementById('inputEquity').value);
+          const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
+          const netFlow = cfRaw * state.cashflowSign;
+
+          if (!dateVal || isNaN(eqVal)) {
+            showToast('Mohon isi tanggal dan nilai equity', true);
+            return;
+          }
+
+          state.entries = state.entries.filter(item => item.date !== origDate && item.date !== dateVal);
+          state.entries.push({
+            date: dateVal,
+            equity: eqVal,
+            netFlow
+          });
+          state.entries.sort((a, b) => a.date.localeCompare(b.date));
+
+          saveLocal();
+          renderAll();
+          closeEntryModal();
+          showToast(`Data ${formatDisplayDate(dateVal)} disimpan`);
+          pushEntriesToCloud(true);
+        });
+
+        // Delete Entry Flow
+        document.getElementById('btnDeleteEntry').addEventListener('click', () => {
+          document.getElementById('inlineDeleteConfirm').classList.remove('hidden');
+        });
+        document.getElementById('btnCancelDelete').addEventListener('click', () => {
+          document.getElementById('inlineDeleteConfirm').classList.add('hidden');
+        });
+        document.getElementById('btnConfirmDelete').addEventListener('click', () => {
+          const origDate = document.getElementById('editingOriginalDate').value;
+          state.entries = state.entries.filter(item => item.date !== origDate);
+          saveLocal();
+          renderAll();
+          closeEntryModal();
+          showToast('Catatan tanggal dihapus');
+          pushEntriesToCloud(true);
+        });
+
+        // Interactive Sparkline Scrubbing (Touch & Mouse)
+        const sparkWrap = document.getElementById('sparklineWrapper');
+        function scrubSparkline(clientX) {
+          const pts = window.__sparklinePoints;
+          if (!pts || !pts.length) return;
+          const rect = sparkWrap.getBoundingClientRect();
+          const relX = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+          const idx = Math.round(relX * (pts.length - 1));
+          const pt = pts[idx];
+          if (!pt) return;
+
+          document.getElementById('chartActiveEquity').textContent = formatNumber(pt.item.equity);
+          document.getElementById('chartActiveDate').textContent = formatDisplayDate(pt.item.date);
+          const pnlEl = document.getElementById('chartActivePnl');
+          pnlEl.textContent = formatPnlCombined(pt.item.pnl, pt.item.pnlPct);
+          pnlEl.className = `text-xs font-medium ${getPnlColorClass(pt.item.pnl)} [font-variant-numeric:tabular-nums]`;
+
+          const line = document.getElementById('chartHoverLine');
+          const dot = document.getElementById('chartHoverDot');
+          if (line && dot) {
+            line.setAttribute('x1', pt.x);
+            line.setAttribute('x2', pt.x);
+            dot.setAttribute('cx', pt.x);
+            dot.setAttribute('cy', pt.y);
+          }
+        }
+        sparkWrap.addEventListener('mousemove', (e) => scrubSparkline(e.clientX));
+        sparkWrap.addEventListener('touchmove', (e) => {
+          if (e.touches && e.touches[0]) scrubSparkline(e.touches[0].clientX);
+        }, { passive: true });
+
+        // Settings & Cloud Modal
+        const settingsModal = document.getElementById('settingsModalBackdrop');
+        function openSettingsModal() {
+          document.getElementById('inputAppsScriptUrl').value = state.cloud.url || '';
+          document.getElementById('inlineResetConfirm').classList.add('hidden');
+          settingsModal.classList.remove('hidden');
+        }
+        document.getElementById('btnOpenSettingsLeft').addEventListener('click', openSettingsModal);
+        document.getElementById('btnOpenSettingsRight').addEventListener('click', openSettingsModal);
+        document.getElementById('btnSyncStatusHeader').addEventListener('click', openSettingsModal);
+        document.getElementById('btnCloseSettingsModal').addEventListener('click', () => {
+          settingsModal.classList.add('hidden');
+        });
+        settingsModal.addEventListener('click', (e) => {
+          if (e.target === settingsModal) settingsModal.classList.add('hidden');
+        });
+
+        // Script Guide & Copy
+        document.getElementById('btnToggleScriptGuide').addEventListener('click', () => {
+          document.getElementById('appsScriptSetupGuide').classList.toggle('hidden');
+        });
+        document.getElementById('btnCopyAppsScript').addEventListener('click', () => {
+          const code = document.getElementById('appsScriptCodeBlock').textContent;
+          const ta = document.createElement('textarea');
+          ta.value = code;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          showToast('Kode Apps Script disalin');
+        });
+
+        // Cloud Connect / Disconnect / Manual Sync
+        document.getElementById('btnSaveAppsScriptUrl').addEventListener('click', () => {
+          const url = document.getElementById('inputAppsScriptUrl').value.trim();
+          state.cloud.url = url;
+          localStorage.setItem(STORAGE_KEY_CLOUD, url);
+          updateCloudStatusUI();
+          if (url) pullEntriesFromCloud(false);
+        });
+        document.getElementById('btnDisconnectCloud').addEventListener('click', () => {
+          state.cloud.url = '';
+          state.cloud.status = 'local';
+          localStorage.setItem(STORAGE_KEY_CLOUD, '');
+          document.getElementById('inputAppsScriptUrl').value = '';
+          updateCloudStatusUI();
+          showToast('Koneksi Cloud diputuskan');
+        });
+        document.getElementById('btnPushToCloud').addEventListener('click', () => pushEntriesToCloud(false));
+        document.getElementById('btnPullFromCloud').addEventListener('click', () => pullEntriesFromCloud(false));
+
+        // Currency Switcher
+        document.getElementById('btnCurrencyIDR').addEventListener('click', () => {
+          state.settings.currency = 'IDR';
+          saveLocal();
+          renderAll();
+          pushEntriesToCloud(true);
+        });
+        document.getElementById('btnCurrencyUSD').addEventListener('click', () => {
+          state.settings.currency = 'USD';
+          saveLocal();
+          renderAll();
+          pushEntriesToCloud(true);
+        });
+
+        // Export CSV / JSON & Import JSON
+        document.getElementById('btnExportCsv').addEventListener('click', () => {
+          const computed = computeAllDailyMetrics(state.entries);
+          const rows = ['Date,Equity,NetTopUp,DailyPnL,DailyPnLPct'];
+          computed.forEach(r => {
+            rows.push(`${r.date},${r.equity},${r.netFlow || 0},${r.pnl.toFixed(2)},${r.pnlPct.toFixed(4)}`);
+          });
+          downloadFile(`etf-pnl-${toIsoDateLocal(new Date())}.csv`, rows.join('\n'), 'text/csv');
+          showToast('File CSV diunduh');
+        });
+
+        document.getElementById('btnExportJson').addEventListener('click', () => {
+          const payload = JSON.stringify({ currency: state.settings.currency, entries: state.entries }, null, 2);
+          downloadFile(`etf-pnl-backup-${toIsoDateLocal(new Date())}.json`, payload, 'application/json');
+          showToast('Backup JSON diunduh');
+        });
+
+        document.getElementById('inputImportJson').addEventListener('change', (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            try {
+              const parsed = JSON.parse(ev.target.result);
+              const list = Array.isArray(parsed) ? parsed : parsed.entries;
+              if (!Array.isArray(list)) throw new Error('Format tidak valid');
+              state.entries = list.map(item => ({
+                date: String(item.date).slice(0, 10),
+                equity: Number(item.equity) || 0,
+                netFlow: Number(item.netFlow) || 0
+              })).sort((a, b) => a.date.localeCompare(b.date));
+              saveLocal();
+              renderAll();
+              pushEntriesToCloud(true);
+              showToast(`Berhasil import ${state.entries.length} data`);
+            } catch (err) {
+              showToast('File JSON tidak valid', true);
+            }
+          };
+          reader.readAsText(file);
+        });
+
+        // Clear Data & Sample Generators
+        document.getElementById('btnClearAllDataPrompt').addEventListener('click', () => {
+          document.getElementById('inlineResetConfirm').classList.remove('hidden');
+        });
+        document.getElementById('btnCancelReset').addEventListener('click', () => {
+          document.getElementById('inlineResetConfirm').classList.add('hidden');
+        });
+        document.getElementById('btnConfirmReset').addEventListener('click', () => {
+          state.entries = [];
+          saveLocal();
+          renderAll();
+          document.getElementById('inlineResetConfirm').classList.add('hidden');
+          settingsModal.classList.add('hidden');
+          showToast('Semua data dikosongkan');
+        });
+
+        document.getElementById('btnGenerate1YearSample').addEventListener('click', () => {
+          state.entries = generate1YearSampleEntries();
+          state.settings.period = '1Y';
+          saveLocal();
+          renderAll();
+          settingsModal.classList.add('hidden');
+          showToast('Simulasi 1 tahun (252 hari) dimuat');
+        });
+
+        document.getElementById('btnRestoreSampleData').addEventListener('click', () => {
+          state.entries = [...SAMPLE_ENTRIES];
+          state.settings.period = '1M';
+          saveLocal();
+          renderAll();
+          settingsModal.classList.add('hidden');
+          showToast('Data contoh referensi dimuat');
+        });
+      }
+
+      function init() {
+        try {
+          const savedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
+          const savedSettings = localStorage.getItem(STORAGE_KEY_SETTINGS);
+          const savedCloud = localStorage.getItem(STORAGE_KEY_CLOUD);
+
+          if (savedEntries !== null) {
+            state.entries = JSON.parse(savedEntries);
+          } else {
+            state.entries = [...SAMPLE_ENTRIES];
+          }
+
+          if (savedSettings) {
+            state.settings = { ...state.settings, ...JSON.parse(savedSettings) };
+          }
+
+          state.cloud.url = savedCloud !== null ? savedCloud : DEFAULT_APPS_SCRIPT_URL;
+        } catch (err) {
+          console.error('Init parse error:', err);
+          state.entries = [...SAMPLE_ENTRIES];
+        }
+
+        bindEvents();
+        renderAll();
+
+        if (state.cloud.url) {
+          pullEntriesFromCloud(true);
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+  </script>
+</body>
+</html>
