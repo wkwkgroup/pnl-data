@@ -70,22 +70,6 @@
             <span id="headerCloudLabel">Local</span>
           </button>
           <button
-            id="btnPinLockHeader"
-            type="button"
-            aria-label="Status Kunci PIN Keamanan"
-            title="Keamanan PIN (Ketuk untuk Kunci / Buka Kunci)"
-            class="w-8 h-8 flex items-center justify-center rounded-full text-[#22C55E] hover:bg-[#181B19] active:scale-95 transition"
-          >
-            <!-- Unlocked Icon -->
-            <svg id="iconPinUnlocked" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
-            </svg>
-            <!-- Locked Icon -->
-            <svg id="iconPinLocked" class="hidden w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-          </button>
-          <button
             id="btnTogglePrivacy"
             type="button"
             aria-label="Sembunyikan atau Tampilkan Nominal Saldo"
@@ -633,56 +617,6 @@
       </div>
     </div>
 
-    <!-- ==================== MODAL: PIN VERIFICATION (ONCE PER DEVICE) ==================== -->
-    <div id="pinModalBackdrop" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-      <div class="w-full max-w-[340px] bg-[#181B19] border border-[#2A302D] rounded-3xl p-5 shadow-2xl space-y-4 text-center">
-        <div class="w-11 h-11 rounded-2xl bg-[#22C55E]/15 border border-[#22C55E]/30 text-[#22C55E] flex items-center justify-center mx-auto">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-        </div>
-        <div>
-          <h3 class="text-base font-semibold text-[#F3F4F6]">Masukkan PIN Keamanan</h3>
-          <p class="text-[11px] text-[#8E9591] mt-1 leading-relaxed">
-            Cukup masukkan <strong>1 kali</strong> di perangkat ini. Setelah terbuka, Anda bebas update data tanpa diminta PIN lagi.
-          </p>
-        </div>
-
-        <form id="pinVerifyForm" class="space-y-3">
-          <input
-            type="password"
-            id="inputVerifyPin"
-            inputmode="numeric"
-            pattern="[0-9]*"
-            maxlength="8"
-            placeholder="••••••"
-            required
-            class="w-full px-4 py-3 rounded-xl bg-[#111312] border border-[#2F3532] text-center text-lg tracking-[0.4em] font-bold text-[#F3F4F6] focus:outline-none focus:border-[#22C55E]"
-          />
-          <label class="flex items-center justify-center gap-2 text-[11px] text-[#D1D5DB] cursor-pointer select-none">
-            <input type="checkbox" id="chkRememberDevicePin" checked class="w-3.5 h-3.5 rounded accent-[#22C55E]" />
-            <span>Ingat perangkat ini (jangan tanya lagi)</span>
-          </label>
-          <p id="pinErrorText" class="hidden text-[11px] text-[#E05252] font-medium">PIN salah. Silakan coba lagi.</p>
-          <div class="grid grid-cols-2 gap-2 pt-1">
-            <button
-              type="button"
-              id="btnCancelPinModal"
-              class="py-2.5 rounded-xl bg-[#222724] text-xs font-medium text-[#D1D5DB] hover:bg-[#2B312E] transition"
-            >
-              Batal
-            </button>
-            <button
-              type="submit"
-              class="py-2.5 rounded-xl bg-[#22C55E] hover:bg-[#1EB054] text-[#090D0B] text-xs font-semibold transition"
-            >
-              Buka Akses
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
     <!-- ==================== MODAL: SETTINGS, CLOUD SYNC & BACKUP ==================== -->
     <div id="settingsModalBackdrop" class="hidden fixed inset-0 z-40 bg-black/75 backdrop-blur-xs flex items-end justify-center">
       <div class="w-full max-w-[480px] max-h-[90vh] overflow-y-auto bg-[#181B19] border-t border-[#2A302D] rounded-t-3xl p-5 pb-8 shadow-2xl space-y-5">
@@ -851,42 +785,6 @@ function doPost(e) {
           </div>
         </div>
 
-        <!-- Security PIN Settings -->
-        <div class="rounded-2xl bg-[#111312] border border-[#262B28] p-3.5 space-y-2.5">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-[#F3F4F6]">Keamanan PIN Edit Data</span>
-            <span id="pinDeviceStatusBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]">Perangkat Terverifikasi</span>
-          </div>
-          <p class="text-[11px] text-[#8E9591] leading-relaxed">
-            Mencegah orang lain menambah/mengedit data dari perangkat lain. Perangkat yang sudah memasukkan PIN otomatis diingat.
-          </p>
-          <div class="flex items-center gap-2">
-            <input
-              type="password"
-              id="inputNewPin"
-              inputmode="numeric"
-              pattern="[0-9]*"
-              maxlength="8"
-              placeholder="PIN baru (4-8 angka)"
-              class="flex-1 px-3 py-2 rounded-xl bg-[#181B19] border border-[#2F3532] text-xs text-[#F3F4F6] focus:outline-none focus:border-[#22C55E]"
-            />
-            <button
-              type="button"
-              id="btnSaveNewPin"
-              class="px-3.5 py-2 rounded-xl bg-[#22C55E] hover:bg-[#1EB054] text-[#090D0B] text-xs font-semibold transition"
-            >
-              Ubah PIN
-            </button>
-          </div>
-          <button
-            type="button"
-            id="btnLockDeviceNow"
-            class="w-full py-2 px-3 rounded-xl bg-[#181B19] border border-[#2F3532] text-[11px] font-medium text-amber-400 hover:bg-[#222724] transition"
-          >
-            Kunci Perangkat Ini Sekarang (Minta PIN Lagi)
-          </button>
-        </div>
-
         <!-- Currency Display Mode -->
         <div class="space-y-2">
           <label class="text-xs font-medium text-[#8E9591] block">Format Mata Uang / Angka</label>
@@ -990,16 +888,13 @@ function doPost(e) {
     (function () {
       'use strict';
 
-      // ==================== KONFIGURASI CLOUD & PIN PERMANEN ====================
+      // ==================== KONFIGURASI CLOUD PERMANEN ====================
       const DEFAULT_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzDa1zDUwAIkAn1EMLEPlevp84hkLgMsZ77Wnkp232rk20xlkY6a8QPx4cWaz-o_b5Z/exec';
-      const DEFAULT_SECURITY_PIN = '123456'; // Ganti angka ini jika ingin PIN permanen di semua device
 
       // ==================== CONSTANTS & STORAGE KEYS ====================
       const STORAGE_KEY_ENTRIES = 'etf_pnl_entries_v1';
       const STORAGE_KEY_SETTINGS = 'etf_pnl_settings_v1';
       const STORAGE_KEY_CLOUD = 'etf_pnl_apps_script_v1';
-      const STORAGE_KEY_PIN_CODE = 'etf_pnl_pin_code_v1';
-      const STORAGE_KEY_PIN_TRUSTED = 'etf_pnl_device_trusted_v1';
       const INITIAL_VISIBLE_ROWS = 60;
 
       // ==================== REFERENCE SAMPLE DATA ====================
@@ -1033,11 +928,6 @@ function doPost(e) {
         cloud: {
           url: DEFAULT_APPS_SCRIPT_URL,
           status: 'local'
-        },
-        security: {
-          pinCode: DEFAULT_SECURITY_PIN,
-          isTrustedDevice: false,
-          pendingAction: null
         },
         visibleRowLimit: INITIAL_VISIBLE_ROWS,
         cashflowSign: 1
@@ -1242,7 +1132,6 @@ function doPost(e) {
         renderTradeAnalytics(filtered, allComputed);
         updatePortfolioHeroSummary(allComputed);
         updateCloudStatusUI();
-        updatePinStatusUI();
       }
 
       function updatePortfolioHeroSummary(allComputed) {
@@ -1274,44 +1163,6 @@ function doPost(e) {
         pnlEl.className = `text-sm font-semibold ${colorClass} block [font-variant-numeric:tabular-nums]`;
         pctEl.textContent = formatPercent(totalPct, true);
         pctEl.className = `text-xs font-medium ${colorClass} block [font-variant-numeric:tabular-nums]`;
-      }
-
-      function updatePinStatusUI() {
-        const iconUnlocked = document.getElementById('iconPinUnlocked');
-        const iconLocked = document.getElementById('iconPinLocked');
-        const badge = document.getElementById('pinDeviceStatusBadge');
-        if (!iconUnlocked || !iconLocked) return;
-
-        if (state.security.isTrustedDevice) {
-          iconUnlocked.classList.remove('hidden');
-          iconLocked.classList.add('hidden');
-          if (badge) {
-            badge.textContent = 'Perangkat Diingat (Bebas Edit)';
-            badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]';
-          }
-        } else {
-          iconUnlocked.classList.add('hidden');
-          iconLocked.classList.remove('hidden');
-          if (badge) {
-            badge.textContent = 'Terkunci (Butuh PIN)';
-            badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400';
-          }
-        }
-      }
-
-      function requirePinThen(actionFn) {
-        if (state.security.isTrustedDevice) {
-          actionFn();
-          return;
-        }
-        state.security.pendingAction = actionFn;
-        const pinModal = document.getElementById('pinModalBackdrop');
-        const pinInput = document.getElementById('inputVerifyPin');
-        const pinErr = document.getElementById('pinErrorText');
-        pinInput.value = '';
-        pinErr.classList.add('hidden');
-        pinModal.classList.remove('hidden');
-        setTimeout(() => pinInput.focus(), 100);
       }
 
       function renderPerformanceTable(filteredList) {
@@ -1836,7 +1687,7 @@ function doPost(e) {
         document.getElementById('performanceTableBody').addEventListener('click', (e) => {
           const dailyRow = e.target.closest('.daily-row');
           if (dailyRow && dailyRow.dataset.date) {
-            requirePinThen(() => openEntryModal(dailyRow.dataset.date));
+            openEntryModal(dailyRow.dataset.date);
             return;
           }
           const monthRow = e.target.closest('.month-row');
@@ -1852,7 +1703,7 @@ function doPost(e) {
         document.getElementById('cashflowListContainer').addEventListener('click', (e) => {
           const row = e.target.closest('.daily-row');
           if (row && row.dataset.date) {
-            requirePinThen(() => openEntryModal(row.dataset.date, true));
+            openEntryModal(row.dataset.date, true);
           }
         });
 
@@ -1862,53 +1713,11 @@ function doPost(e) {
           renderAll();
         });
 
-        // Open Entry Modal Triggers (Protected by 1-Time Device PIN)
-        document.getElementById('btnQuickAddHeader').addEventListener('click', () => requirePinThen(() => openEntryModal(null)));
-        document.getElementById('btnFloatingUpdate').addEventListener('click', () => requirePinThen(() => openEntryModal(null)));
-        document.getElementById('btnEmptyAddFirst').addEventListener('click', () => requirePinThen(() => openEntryModal(null)));
-        document.getElementById('btnAddCashflowShortcut').addEventListener('click', () => requirePinThen(() => openEntryModal(null, true)));
-
-        // Header Lock / Unlock Quick Toggle
-        document.getElementById('btnPinLockHeader').addEventListener('click', () => {
-          if (state.security.isTrustedDevice) {
-            state.security.isTrustedDevice = false;
-            localStorage.removeItem(STORAGE_KEY_PIN_TRUSTED);
-            updatePinStatusUI();
-            showToast('Perangkat dikunci (memerlukan PIN untuk edit)');
-          } else {
-            requirePinThen(() => showToast('Perangkat berhasil dibuka & diingat'));
-          }
-        });
-
-        // PIN Verification Modal Events
-        document.getElementById('btnCancelPinModal').addEventListener('click', () => {
-          document.getElementById('pinModalBackdrop').classList.add('hidden');
-          state.security.pendingAction = null;
-        });
-        document.getElementById('pinModalBackdrop').addEventListener('click', (e) => {
-          if (e.target.id === 'pinModalBackdrop') {
-            document.getElementById('pinModalBackdrop').classList.add('hidden');
-            state.security.pendingAction = null;
-          }
-        });
-        document.getElementById('pinVerifyForm').addEventListener('submit', (e) => {
-          e.preventDefault();
-          const entered = document.getElementById('inputVerifyPin').value.trim();
-          const remember = document.getElementById('chkRememberDevicePin').checked;
-          if (entered === state.security.pinCode) {
-            state.security.isTrustedDevice = true;
-            if (remember) {
-              localStorage.setItem(STORAGE_KEY_PIN_TRUSTED, 'true');
-            }
-            document.getElementById('pinModalBackdrop').classList.add('hidden');
-            updatePinStatusUI();
-            const fn = state.security.pendingAction;
-            state.security.pendingAction = null;
-            if (typeof fn === 'function') fn();
-          } else {
-            document.getElementById('pinErrorText').classList.remove('hidden');
-          }
-        });
+        // Open Entry Modal Triggers
+        document.getElementById('btnQuickAddHeader').addEventListener('click', () => openEntryModal(null));
+        document.getElementById('btnFloatingUpdate').addEventListener('click', () => openEntryModal(null));
+        document.getElementById('btnEmptyAddFirst').addEventListener('click', () => openEntryModal(null));
+        document.getElementById('btnAddCashflowShortcut').addEventListener('click', () => openEntryModal(null, true));
 
         // Refresh Button for iOS Add-to-Home-Screen Mode
         async function triggerManualRefresh() {
@@ -2026,33 +1835,9 @@ function doPost(e) {
           document.getElementById('inlineResetConfirm').classList.add('hidden');
           settingsModal.classList.remove('hidden');
         }
-        document.getElementById('btnOpenSettingsLeft').addEventListener('click', () => requirePinThen(openSettingsModal));
-        document.getElementById('btnOpenSettingsRight').addEventListener('click', () => requirePinThen(openSettingsModal));
-        document.getElementById('btnSyncStatusHeader').addEventListener('click', () => requirePinThen(openSettingsModal));
-
-        // Change PIN & Manual Device Lock inside Settings
-        document.getElementById('btnSaveNewPin').addEventListener('click', () => {
-          const newPin = document.getElementById('inputNewPin').value.trim();
-          if (!/^\d{4,8}$/.test(newPin)) {
-            showToast('PIN harus berupa 4–8 digit angka', true);
-            return;
-          }
-          state.security.pinCode = newPin;
-          state.security.isTrustedDevice = true;
-          localStorage.setItem(STORAGE_KEY_PIN_CODE, newPin);
-          localStorage.setItem(STORAGE_KEY_PIN_TRUSTED, 'true');
-          document.getElementById('inputNewPin').value = '';
-          updatePinStatusUI();
-          showToast('PIN keamanan berhasil diperbarui');
-        });
-
-        document.getElementById('btnLockDeviceNow').addEventListener('click', () => {
-          state.security.isTrustedDevice = false;
-          localStorage.removeItem(STORAGE_KEY_PIN_TRUSTED);
-          updatePinStatusUI();
-          settingsModal.classList.add('hidden');
-          showToast('Perangkat dikunci');
-        });
+        document.getElementById('btnOpenSettingsLeft').addEventListener('click', openSettingsModal);
+        document.getElementById('btnOpenSettingsRight').addEventListener('click', openSettingsModal);
+        document.getElementById('btnSyncStatusHeader').addEventListener('click', openSettingsModal);
 
         document.getElementById('btnCloseSettingsModal').addEventListener('click', () => {
           settingsModal.classList.add('hidden');
@@ -2233,9 +2018,6 @@ function doPost(e) {
           }
 
           state.cloud.url = savedCloud !== null ? savedCloud : DEFAULT_APPS_SCRIPT_URL;
-          const savedPin = localStorage.getItem(STORAGE_KEY_PIN_CODE);
-          state.security.pinCode = savedPin || DEFAULT_SECURITY_PIN;
-          state.security.isTrustedDevice = localStorage.getItem(STORAGE_KEY_PIN_TRUSTED) === 'true';
         } catch (err) {
           console.error('Init parse error:', err);
           state.entries = [...SAMPLE_ENTRIES];
