@@ -312,18 +312,32 @@
           <span id="statWinCounts" class="text-[11px] text-[#8E9591] [font-variant-numeric:tabular-nums]">9W • 4L • 1D</span>
         </div>
 
-        <!-- Best Day -->
+        <!-- Max Profit (Nominal) -->
         <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-3.5">
-          <span class="text-[11px] text-[#8E9591] block mb-1">Best Trading Day</span>
-          <span id="statBestDay" class="text-sm font-semibold text-[#22C55E] block [font-variant-numeric:tabular-nums]">+48,000 (+3.18%)</span>
-          <span id="statBestDayDate" class="text-[11px] text-[#8E9591]">12 Nov 26</span>
+          <span class="text-[11px] text-[#8E9591] block mb-1">Max Profit</span>
+          <span id="statMaxProfit" class="text-sm font-semibold text-[#22C55E] block [font-variant-numeric:tabular-nums]">+48,000</span>
+          <span id="statMaxProfitDate" class="text-[11px] text-[#8E9591]">12 Nov 26</span>
         </div>
 
-        <!-- Worst Day -->
+        <!-- Max Loss (Nominal) -->
         <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-3.5">
-          <span class="text-[11px] text-[#8E9591] block mb-1">Worst Trading Day</span>
-          <span id="statWorstDay" class="text-sm font-semibold text-[#E05252] block [font-variant-numeric:tabular-nums]">-8,000 (-0.51%)</span>
-          <span id="statWorstDayDate" class="text-[11px] text-[#8E9591]">20 Nov 26</span>
+          <span class="text-[11px] text-[#8E9591] block mb-1">Max Loss</span>
+          <span id="statMaxLoss" class="text-sm font-semibold text-[#E05252] block [font-variant-numeric:tabular-nums]">-8,000</span>
+          <span id="statMaxLossDate" class="text-[11px] text-[#8E9591]">20 Nov 26</span>
+        </div>
+
+        <!-- Max Profit (%) -->
+        <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-3.5">
+          <span class="text-[11px] text-[#8E9591] block mb-1">Max Profit (%)</span>
+          <span id="statMaxProfitPct" class="text-sm font-semibold text-[#22C55E] block [font-variant-numeric:tabular-nums]">+3.18%</span>
+          <span id="statMaxProfitPctDate" class="text-[11px] text-[#8E9591]">12 Nov 26</span>
+        </div>
+
+        <!-- Max Loss (%) -->
+        <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-3.5">
+          <span class="text-[11px] text-[#8E9591] block mb-1">Max Loss (%)</span>
+          <span id="statMaxLossPct" class="text-sm font-semibold text-[#E05252] block [font-variant-numeric:tabular-nums]">-0.51%</span>
+          <span id="statMaxLossPctDate" class="text-[11px] text-[#8E9591]">20 Nov 26</span>
         </div>
 
         <!-- Avg Daily P&L -->
@@ -1185,11 +1199,20 @@ function doPost(e) {
         const draws = activeDays.length - wins - losses;
         const winRate = activeDays.length ? (wins / activeDays.length) * 100 : 0;
 
-        let best = activeDays[0] || latest;
-        let worst = activeDays[0] || latest;
+        let maxProfitItem = null;
+        let maxLossItem = null;
+        let maxProfitPctItem = null;
+        let maxLossPctItem = null;
+
         activeDays.forEach(d => {
-          if (d.pnl > best.pnl) best = d;
-          if (d.pnl < worst.pnl) worst = d;
+          if (d.pnl > 0.0001) {
+            if (!maxProfitItem || d.pnl > maxProfitItem.pnl) maxProfitItem = d;
+            if (!maxProfitPctItem || d.pnlPct > maxProfitPctItem.pnlPct) maxProfitPctItem = d;
+          }
+          if (d.pnl < -0.0001) {
+            if (!maxLossItem || d.pnl < maxLossItem.pnl) maxLossItem = d;
+            if (!maxLossPctItem || d.pnlPct < maxLossPctItem.pnlPct) maxLossPctItem = d;
+          }
         });
 
         const avgDaily = activeDays.length ? totalPnl / activeDays.length : 0;
@@ -1206,13 +1229,57 @@ function doPost(e) {
         document.getElementById('statWinRate').textContent = `${winRate.toFixed(1)}%`;
         document.getElementById('statWinCounts').textContent = `${wins}W • ${losses}L • ${draws}D`;
 
-        document.getElementById('statBestDay').textContent = formatPnlCombined(best.pnl, best.pnlPct);
-        document.getElementById('statBestDay').className = `text-sm font-semibold ${getPnlColorClass(best.pnl)} block [font-variant-numeric:tabular-nums]`;
-        document.getElementById('statBestDayDate').textContent = formatDisplayDate(best.date);
+        // Max Profit (Nominal)
+        const elMaxProfit = document.getElementById('statMaxProfit');
+        const elMaxProfitDate = document.getElementById('statMaxProfitDate');
+        if (maxProfitItem) {
+          elMaxProfit.textContent = formatNumber(maxProfitItem.pnl, true);
+          elMaxProfit.className = 'text-sm font-semibold text-[#22C55E] block [font-variant-numeric:tabular-nums]';
+          elMaxProfitDate.textContent = formatDisplayDate(maxProfitItem.date);
+        } else {
+          elMaxProfit.textContent = formatNumber(0);
+          elMaxProfit.className = 'text-sm font-semibold text-[#D1D5DB] block [font-variant-numeric:tabular-nums]';
+          elMaxProfitDate.textContent = '-';
+        }
 
-        document.getElementById('statWorstDay').textContent = formatPnlCombined(worst.pnl, worst.pnlPct);
-        document.getElementById('statWorstDay').className = `text-sm font-semibold ${getPnlColorClass(worst.pnl)} block [font-variant-numeric:tabular-nums]`;
-        document.getElementById('statWorstDayDate').textContent = formatDisplayDate(worst.date);
+        // Max Loss (Nominal)
+        const elMaxLoss = document.getElementById('statMaxLoss');
+        const elMaxLossDate = document.getElementById('statMaxLossDate');
+        if (maxLossItem) {
+          elMaxLoss.textContent = formatNumber(maxLossItem.pnl, true);
+          elMaxLoss.className = 'text-sm font-semibold text-[#E05252] block [font-variant-numeric:tabular-nums]';
+          elMaxLossDate.textContent = formatDisplayDate(maxLossItem.date);
+        } else {
+          elMaxLoss.textContent = formatNumber(0);
+          elMaxLoss.className = 'text-sm font-semibold text-[#D1D5DB] block [font-variant-numeric:tabular-nums]';
+          elMaxLossDate.textContent = '-';
+        }
+
+        // Max Profit (%)
+        const elMaxProfitPct = document.getElementById('statMaxProfitPct');
+        const elMaxProfitPctDate = document.getElementById('statMaxProfitPctDate');
+        if (maxProfitPctItem) {
+          elMaxProfitPct.textContent = `+${maxProfitPctItem.pnlPct.toFixed(2)}%`;
+          elMaxProfitPct.className = 'text-sm font-semibold text-[#22C55E] block [font-variant-numeric:tabular-nums]';
+          elMaxProfitPctDate.textContent = formatDisplayDate(maxProfitPctItem.date);
+        } else {
+          elMaxProfitPct.textContent = '0.00%';
+          elMaxProfitPct.className = 'text-sm font-semibold text-[#D1D5DB] block [font-variant-numeric:tabular-nums]';
+          elMaxProfitPctDate.textContent = '-';
+        }
+
+        // Max Loss (%)
+        const elMaxLossPct = document.getElementById('statMaxLossPct');
+        const elMaxLossPctDate = document.getElementById('statMaxLossPctDate');
+        if (maxLossPctItem) {
+          elMaxLossPct.textContent = `${maxLossPctItem.pnlPct.toFixed(2)}%`;
+          elMaxLossPct.className = 'text-sm font-semibold text-[#E05252] block [font-variant-numeric:tabular-nums]';
+          elMaxLossPctDate.textContent = formatDisplayDate(maxLossPctItem.date);
+        } else {
+          elMaxLossPct.textContent = '0.00%';
+          elMaxLossPct.className = 'text-sm font-semibold text-[#D1D5DB] block [font-variant-numeric:tabular-nums]';
+          elMaxLossPctDate.textContent = '-';
+        }
 
         document.getElementById('statAvgDaily').textContent = formatNumber(avgDaily, true);
         document.getElementById('statAvgDaily').className = `text-sm font-semibold ${getPnlColorClass(avgDaily)} block [font-variant-numeric:tabular-nums]`;
