@@ -235,13 +235,32 @@
             id="periodDropdownMenu"
             class="hidden absolute right-0 mt-1.5 w-44 rounded-2xl bg-[#181B19] border border-[#2B312E] shadow-xl py-1.5 z-30"
           >
-            <button type="button" data-period="MTD" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">This Month</button>
-            <button type="button" data-period="1M" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#22C55E] font-medium bg-[#222724]/60">Last 1 Month</button>
-            <button type="button" data-period="3M" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">Last 3 Months</button>
-            <button type="button" data-period="6M" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">Last 6 Months</button>
-            <button type="button" data-period="1Y" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">1 Year (252 Hari)</button>
+            <button type="button" data-period="1W" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">Mingguan (7 Hari)</button>
+            <button type="button" data-period="1M" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#22C55E] font-medium bg-[#222724]/60">Bulanan (1 Bulan)</button>
+            <button type="button" data-period="3M" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">3 Bulanan (3 Bulan)</button>
             <button type="button" data-period="YTD" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">YTD</button>
-            <button type="button" data-period="ALL" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">All Time</button>
+            <button type="button" data-period="1Y" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">1 Tahun</button>
+            <button type="button" data-period="ALL" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">All</button>
+            <div class="my-1 border-t border-[#262B28]"></div>
+            <button type="button" data-period="CUSTOM" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">Kostum Tanggal...</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Date Range Picker Bar (Portfolio Tab) -->
+      <div id="customRangeBarPortfolio" class="hidden mb-4 p-3 rounded-2xl bg-[#181B19] border border-[#262B28] space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-medium text-[#22C55E]">Rentang Tanggal Kostum</span>
+          <span class="text-[10px] text-[#8E9591]">Pilih tanggal mulai &amp; akhir</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[10px] text-[#8E9591] block mb-1">Dari Tanggal</label>
+            <input type="date" id="customStartPort" class="w-full px-2.5 py-1.5 rounded-xl bg-[#111312] border border-[#2F3532] text-xs text-[#F3F4F6] focus:outline-none focus:border-[#22C55E]" />
+          </div>
+          <div>
+            <label class="text-[10px] text-[#8E9591] block mb-1">Sampai Tanggal</label>
+            <input type="date" id="customEndPort" class="w-full px-2.5 py-1.5 rounded-xl bg-[#111312] border border-[#2F3532] text-xs text-[#F3F4F6] focus:outline-none focus:border-[#22C55E]" />
           </div>
         </div>
       </div>
@@ -292,15 +311,56 @@
 
     <!-- ==================== VIEW 2: TRADE / ANALYTICS TAB ==================== -->
     <main id="viewTrade" class="hidden flex-1 flex flex-col px-4 pt-5 pb-28 space-y-5">
-      <!-- Section Title -->
-      <div class="flex items-center justify-between">
+      <!-- Section Title & Period Selector -->
+      <div class="flex items-center justify-between gap-2">
         <div>
           <h2 class="text-[15px] font-semibold text-[#F3F4F6]">ETF Analytics &amp; Cashflow</h2>
           <p class="text-xs text-[#8E9591] mt-0.5">Statistik performa bursa AS (Senin – Jumat)</p>
         </div>
-        <span id="tradePeriodTag" class="text-[11px] font-medium text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/30 px-2.5 py-1 rounded-full">
-          All Time
-        </span>
+        <div class="relative">
+          <button
+            id="btnTradePeriodDropdown"
+            type="button"
+            class="flex items-center gap-1 text-[11px] font-medium text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/30 px-2.5 py-1.5 rounded-full hover:bg-[#22C55E]/20 active:scale-95 transition"
+          >
+            <span id="tradePeriodTag">Bulanan</span>
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          <div
+            id="tradePeriodDropdownMenu"
+            class="hidden absolute right-0 mt-1.5 w-44 rounded-2xl bg-[#181B19] border border-[#2B312E] shadow-xl py-1.5 z-30"
+          >
+            <button type="button" data-period="1W" class="trade-period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">Mingguan (7 Hari)</button>
+            <button type="button" data-period="1M" class="trade-period-option w-full text-left px-3.5 py-2 text-xs text-[#22C55E] font-medium bg-[#222724]/60">Bulanan (1 Bulan)</button>
+            <button type="button" data-period="3M" class="trade-period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">3 Bulanan (3 Bulan)</button>
+            <button type="button" data-period="YTD" class="trade-period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">YTD</button>
+            <button type="button" data-period="1Y" class="trade-period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">1 Tahun</button>
+            <button type="button" data-period="ALL" class="trade-period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">All</button>
+            <div class="my-1 border-t border-[#262B28]"></div>
+            <button type="button" data-period="CUSTOM" class="trade-period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">Kostum Tanggal...</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Date Range Picker Bar (Trade Tab) -->
+      <div id="customRangeBarTrade" class="hidden p-3 rounded-2xl bg-[#181B19] border border-[#262B28] space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-medium text-[#22C55E]">Rentang Tanggal Kostum</span>
+          <span class="text-[10px] text-[#8E9591]">Pilih tanggal mulai &amp; akhir</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[10px] text-[#8E9591] block mb-1">Dari Tanggal</label>
+            <input type="date" id="customStartTrade" class="w-full px-2.5 py-1.5 rounded-xl bg-[#111312] border border-[#2F3532] text-xs text-[#F3F4F6] focus:outline-none focus:border-[#22C55E]" />
+          </div>
+          <div>
+            <label class="text-[10px] text-[#8E9591] block mb-1">Sampai Tanggal</label>
+            <input type="date" id="customEndTrade" class="w-full px-2.5 py-1.5 rounded-xl bg-[#111312] border border-[#2F3532] text-xs text-[#F3F4F6] focus:outline-none focus:border-[#22C55E]" />
+          </div>
+        </div>
       </div>
 
       <!-- Interactive SVG Equity Sparkline Card -->
@@ -390,6 +450,63 @@
           <div class="text-right">
             <span id="statMaxDrawdownRange" class="text-[11px] text-[#8E9591] block">Dari puncak tertinggi</span>
             <span id="statMaxDrawdownNominal" class="text-[11px] text-[#8E9591] block [font-variant-numeric:tabular-nums]">Drop nominal: 0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly P&L Heatmap Calendar Card (Senin - Jumat) -->
+      <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-[#8E9591]">Kalender Heatmap P&amp;L</h3>
+            <p id="heatmapMonthSummary" class="text-[11px] text-[#8E9591] mt-0.5">0 hari hijau • 0 hari merah</p>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button
+              type="button"
+              id="btnHeatmapPrevMonth"
+              aria-label="Bulan Heatmap Sebelumnya"
+              class="w-7 h-7 rounded-lg bg-[#111312] border border-[#2A302D] hover:border-[#22C55E] text-[#D1D5DB] flex items-center justify-center transition"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <span id="heatmapMonthLabel" class="text-xs font-semibold text-[#F3F4F6] min-w-[78px] text-center">Nov 2026</span>
+            <button
+              type="button"
+              id="btnHeatmapNextMonth"
+              aria-label="Bulan Heatmap Berikutnya"
+              class="w-7 h-7 rounded-lg bg-[#111312] border border-[#2A302D] hover:border-[#22C55E] text-[#D1D5DB] flex items-center justify-center transition"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Weekday Headers (Senin - Jumat) -->
+        <div class="grid grid-cols-5 gap-1.5 text-center text-[10px] font-medium text-[#8E9591]">
+          <span>Sen</span>
+          <span>Sel</span>
+          <span>Rab</span>
+          <span>Kam</span>
+          <span>Jum</span>
+        </div>
+
+        <!-- Heatmap Cells Grid -->
+        <div id="pnlHeatmapGrid" class="grid grid-cols-5 gap-1.5">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Selected Heatmap Day Detail & Color Legend -->
+        <div class="pt-2 border-t border-[#222624] flex items-center justify-between gap-2 text-[10px]">
+          <span id="heatmapSelectedInfo" class="text-[#8E9591] truncate">Ketuk tanggal untuk melihat P&amp;L</span>
+          <div class="flex items-center gap-2 shrink-0 text-[#8E9591]">
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-[#E05252]/30 border border-[#E05252]/60"></span>Merah</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-[#222724] border border-[#2F3532]"></span>Abu</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-[#22C55E]/30 border border-[#22C55E]/60"></span>Hijau</span>
           </div>
         </div>
       </div>
@@ -843,88 +960,83 @@ function doPost(e) {
           </div>
         </div>
 
-        <!-- Currency Display Mode -->
-        <div class="space-y-2">
-          <label class="text-xs font-medium text-[#8E9591] block">Format Mata Uang / Angka</label>
-          <div class="grid grid-cols-2 gap-2.5">
+        <!-- Currency Selection -->
+        <div class="rounded-2xl bg-[#111312] border border-[#262B28] p-3.5 space-y-2.5">
+          <span class="text-xs font-semibold text-[#F3F4F6] block">Format Mata Uang Tampilan</span>
+          <div class="grid grid-cols-2 gap-2">
             <button
               type="button"
               id="btnCurrencyIDR"
               class="py-2.5 px-3 rounded-xl text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] text-center transition"
             >
-              Angka Bulat / IDR<br /><span class="text-[10px] opacity-80">1,596,000</span>
+              Rupiah / Angka (IDR)
             </button>
             <button
               type="button"
               id="btnCurrencyUSD"
               class="py-2.5 px-3 rounded-xl text-xs font-medium border border-[#2F3532] bg-[#111312] text-[#8E9591] text-center transition"
             >
-              US Dollar ($)<br /><span class="text-[10px] opacity-80">$1,596.00</span>
+              US Dollar ($ USD)
             </button>
           </div>
         </div>
 
-        <!-- Export / Import Backup -->
-        <div class="space-y-2">
-          <label class="text-xs font-medium text-[#8E9591] block">Backup &amp; Export</label>
-          <div class="grid grid-cols-3 gap-2">
+        <!-- Backup, Export & Import -->
+        <div class="rounded-2xl bg-[#111312] border border-[#262B28] p-3.5 space-y-2.5">
+          <span class="text-xs font-semibold text-[#F3F4F6] block">Backup &amp; Ekspor Data</span>
+          <div class="grid grid-cols-2 gap-2">
             <button
               type="button"
               id="btnExportCsv"
-              class="py-2.5 px-2 rounded-xl bg-[#111312] border border-[#2F3532] hover:border-[#22C55E] text-xs font-medium text-[#F3F4F6] transition"
+              class="py-2 px-3 rounded-xl bg-[#181B19] border border-[#2F3532] hover:border-[#22C55E] text-xs font-medium text-[#D1D5DB] transition"
             >
-              Export CSV
+              Ekspor CSV
             </button>
             <button
               type="button"
               id="btnExportJson"
-              class="py-2.5 px-2 rounded-xl bg-[#111312] border border-[#2F3532] hover:border-[#22C55E] text-xs font-medium text-[#F3F4F6] transition"
+              class="py-2 px-3 rounded-xl bg-[#181B19] border border-[#2F3532] hover:border-[#22C55E] text-xs font-medium text-[#D1D5DB] transition"
             >
               Backup JSON
             </button>
-            <label
-              for="inputImportJson"
-              class="py-2.5 px-2 rounded-xl bg-[#111312] border border-[#2F3532] hover:border-[#22C55E] text-xs font-medium text-[#F3F4F6] text-center cursor-pointer transition"
-            >
-              Import JSON
-              <input type="file" id="inputImportJson" accept=".json,application/json" class="hidden" />
-            </label>
           </div>
+          <label class="block w-full py-2 px-3 rounded-xl bg-[#181B19] border border-dashed border-[#2F3532] hover:border-[#22C55E] text-xs font-medium text-[#8E9591] hover:text-[#F3F4F6] text-center cursor-pointer transition">
+            <span>Import Backup JSON</span>
+            <input type="file" id="inputImportJson" accept=".json,application/json" class="hidden" />
+          </label>
         </div>
 
-        <!-- Reset / Start Fresh & 1-Year Simulator -->
-        <div class="pt-2 border-t border-[#262B28] space-y-2.5">
-          <label class="text-xs font-medium text-[#8E9591] block">Kelola Data &amp; Simulasi 1 Tahun</label>
-          <div class="grid grid-cols-2 gap-2.5">
-            <button
-              type="button"
-              id="btnClearAllDataPrompt"
-              class="py-2.5 px-3 rounded-xl bg-[#E05252]/10 border border-[#E05252]/30 text-xs font-medium text-[#E05252] hover:bg-[#E05252]/20 transition"
-            >
-              Mulai Data Baru (Kosong)
-            </button>
+        <!-- Simulator & Reset Data -->
+        <div class="rounded-2xl bg-[#111312] border border-[#262B28] p-3.5 space-y-2.5">
+          <span class="text-xs font-semibold text-[#F3F4F6] block">Simulasi &amp; Reset</span>
+          <div class="grid grid-cols-2 gap-2">
             <button
               type="button"
               id="btnGenerate1YearSample"
-              class="py-2.5 px-3 rounded-xl bg-[#22C55E]/10 border border-[#22C55E]/30 text-xs font-medium text-[#22C55E] hover:bg-[#22C55E]/20 transition"
+              class="py-2 px-3 rounded-xl bg-[#181B19] border border-[#2F3532] text-xs font-medium text-[#D1D5DB] hover:border-[#22C55E] transition"
             >
-              Simulasi 1 Tahun (252 Hari)
+              Simulasi 1 Tahun
+            </button>
+            <button
+              type="button"
+              id="btnRestoreSampleData"
+              class="py-2 px-3 rounded-xl bg-[#181B19] border border-[#2F3532] text-xs font-medium text-[#D1D5DB] hover:border-[#22C55E] transition"
+            >
+              Data Contoh
             </button>
           </div>
           <button
             type="button"
-            id="btnRestoreSampleData"
-            class="w-full py-2 px-3 rounded-xl bg-[#111312] border border-[#2F3532] text-xs font-medium text-[#8E9591] hover:text-[#D1D5DB] transition"
+            id="btnClearAllDataPrompt"
+            class="w-full py-2 px-3 rounded-xl bg-[#E05252]/10 border border-[#E05252]/30 text-xs font-medium text-[#E05252] hover:bg-[#E05252]/20 transition"
           >
-            Muat Data Contoh Referensi (15 Hari)
+            Hapus Semua Data
           </button>
-
-          <!-- Inline Reset Confirmation -->
-          <div id="inlineResetConfirm" class="hidden p-3 rounded-xl bg-[#E05252]/10 border border-[#E05252]/30 flex items-center justify-between gap-2">
-            <span class="text-xs text-[#F3F4F6]">Kosongkan semua data sekarang?</span>
-            <div class="flex items-center gap-2">
-              <button type="button" id="btnCancelReset" class="px-2.5 py-1 rounded-lg bg-[#222724] text-xs text-[#D1D5DB]">Batal</button>
-              <button type="button" id="btnConfirmReset" class="px-2.5 py-1 rounded-lg bg-[#E05252] text-xs font-semibold text-white">Kosongkan</button>
+          <div id="inlineResetConfirm" class="hidden p-2.5 rounded-xl bg-[#E05252]/10 border border-[#E05252]/30 flex items-center justify-between gap-2">
+            <span class="text-[11px] text-[#F3F4F6]">Kosongkan semua data?</span>
+            <div class="flex items-center gap-1.5">
+              <button type="button" id="btnCancelReset" class="px-2.5 py-1 rounded-lg bg-[#222724] text-[11px] text-[#D1D5DB]">Batal</button>
+              <button type="button" id="btnConfirmReset" class="px-2.5 py-1 rounded-lg bg-[#E05252] text-[11px] font-semibold text-white">Ya, Hapus</button>
             </div>
           </div>
         </div>
@@ -980,6 +1092,8 @@ function doPost(e) {
           tab: 'portfolio',
           mode: 'daily',
           period: '1M',
+          customStart: '',
+          customEnd: '',
           currency: 'IDR',
           hideBalances: false
         },
@@ -990,93 +1104,119 @@ function doPost(e) {
         visibleRowLimit: INITIAL_VISIBLE_ROWS,
         cashflowSign: 1,
         calViewYear: new Date().getFullYear(),
-        calViewMonth: new Date().getMonth()
+        calViewMonth: new Date().getMonth(),
+        heatmapYear: null,
+        heatmapMonth: null
       };
 
-      // ==================== DATE & FORMAT UTILITIES ====================
-      const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      const MONTHS_FULL_ID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-      const DAYS_ID = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const PERIOD_LABELS = {
+        '1W': 'Mingguan',
+        '1M': 'Bulanan',
+        '3M': '3 Bulanan',
+        'YTD': 'YTD',
+        '1Y': '1 Tahun',
+        'ALL': 'All',
+        'CUSTOM': 'Kostum'
+      };
 
-      function toIsoDateLocal(d) {
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
-      }
-
-      function normalizeToIsoDate(val) {
-        if (!val) return '';
-        const str = String(val).trim();
-        if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
-          return str.slice(0, 10);
-        }
-        const parsed = new Date(str);
-        if (!isNaN(parsed.getTime())) {
-          return toIsoDateLocal(parsed);
-        }
-        return str;
-      }
-
+      // ==================== UTILITY HELPERS ====================
       function parseIsoLocal(isoStr) {
         const clean = normalizeToIsoDate(isoStr);
-        const parts = clean.split('-').map(Number);
-        if (parts.length !== 3 || parts.some(isNaN)) return new Date();
-        return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+        const [y, m, d] = clean.split('-').map(Number);
+        return new Date(y, (m || 1) - 1, d || 1);
+      }
+
+      function toIsoDateLocal(dateObj) {
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const d = String(dateObj.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      }
+
+      function normalizeToIsoDate(raw) {
+        if (!raw) return toIsoDateLocal(new Date());
+        const str = String(raw).trim();
+        if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.slice(0, 10);
+        const parsed = new Date(str);
+        if (!isNaN(parsed.getTime())) return toIsoDateLocal(parsed);
+        return toIsoDateLocal(new Date());
       }
 
       function formatDisplayDate(isoStr) {
-        const clean = normalizeToIsoDate(isoStr);
-        const parts = clean.split('-').map(Number);
-        if (parts.length !== 3 || parts.some(isNaN)) return clean;
-        const [y, m, d] = parts;
-        const monthName = MONTHS_SHORT[(m || 1) - 1] || 'Jan';
-        const shortYear = String(y || 2026).slice(-2);
-        return `${d} ${monthName} ${shortYear}`;
+        const d = parseIsoLocal(isoStr);
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const day = String(d.getDate()).padStart(2, '0');
+        const mon = months[d.getMonth()];
+        const yr = String(d.getFullYear()).slice(-2);
+        return `${day} ${mon} ${yr}`;
       }
 
-      function formatMonthLabel(ymStr) {
-        if (!ymStr || !/^\d{4}-\d{2}$/.test(ymStr)) return ymStr || '-';
-        const [y, m] = ymStr.split('-').map(Number);
-        return `${MONTHS_SHORT[(m || 1) - 1] || 'Jan'} ${y}`;
+      function getIndonesianDayName(isoStr) {
+        const d = parseIsoLocal(isoStr);
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        return days[d.getDay()];
       }
 
-      function formatCurrency(val, allowHide = true) {
-        if (allowHide && state.settings.hideBalances) return '••••••';
-        const num = Number(val) || 0;
-        if (state.settings.currency === 'USD') {
-          return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      function isWeekendDate(isoStr) {
+        const day = parseIsoLocal(isoStr).getDay();
+        return day === 0 || day === 6;
+      }
+
+      function getNextTradingDay(isoStr) {
+        const d = parseIsoLocal(isoStr);
+        d.setDate(d.getDate() + 1);
+        while (d.getDay() === 0 || d.getDay() === 6) {
+          d.setDate(d.getDate() + 1);
         }
-        return Math.round(num).toLocaleString('en-US');
+        return toIsoDateLocal(d);
       }
 
-      function formatSignedPnl(pnl, pct) {
-        const safePnl = Math.abs(pnl) < 0.005 ? 0 : pnl;
-        const safePct = Math.abs(pct) < 0.005 ? 0 : pct;
-        const sign = safePnl > 0 ? '+' : safePnl < 0 ? '-' : '';
-        const absVal = Math.abs(safePnl);
-        const valText = state.settings.currency === 'USD'
-          ? '$' + absVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-          : Math.round(absVal).toLocaleString('en-US');
-        const pctSign = safePct > 0 ? '+' : safePct < 0 ? '-' : '';
-        const pctText = `${pctSign}${Math.abs(safePct).toFixed(2)}%`;
-        return `${sign}${valText} (${pctText})`;
+      function formatCurrency(val, includeSign = false) {
+        const num = Number(val) || 0;
+        const absVal = Math.abs(num);
+        const isUsd = state.settings.currency === 'USD';
+        const formatted = absVal.toLocaleString('en-US', {
+          minimumFractionDigits: isUsd ? 2 : 0,
+          maximumFractionDigits: isUsd ? 2 : 0
+        });
+        const prefix = isUsd ? '$' : '';
+        if (num < 0) return `-${prefix}${formatted}`;
+        if (includeSign && num > 0) return `+${prefix}${formatted}`;
+        return `${prefix}${formatted}`;
       }
 
-      function getPnlColorClass(pnl) {
-        if (pnl > 0.005) return 'text-[#22C55E]';
-        if (pnl < -0.005) return 'text-[#E05252]';
+      function formatBalanceDisplay(val, includeSign = false) {
+        if (state.settings.hideBalances) {
+          const num = Number(val) || 0;
+          if (num < 0) return '-••••••';
+          if (includeSign && num > 0) return '+••••••';
+          return '••••••';
+        }
+        return formatCurrency(val, includeSign);
+      }
+
+      function formatPercent(pct) {
+        const num = Number(pct) || 0;
+        const sign = num > 0 ? '+' : '';
+        return `${sign}${num.toFixed(2)}%`;
+      }
+
+      function getValueColorClass(val) {
+        if (val > 0.0001) return 'text-[#22C55E]';
+        if (val < -0.0001) return 'text-[#E05252]';
         return 'text-[#D1D5DB]';
       }
 
-      function getNextTradingDayIso() {
-        const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
-        const base = sorted.length > 0 ? parseIsoLocal(sorted[sorted.length - 1].date) : new Date();
-        base.setDate(base.getDate() + 1);
-        while (base.getDay() === 0 || base.getDay() === 6) {
-          base.setDate(base.getDate() + 1);
-        }
-        return toIsoDateLocal(base);
+      let toastTimer = null;
+      function showToast(msg, type = 'success') {
+        const banner = document.getElementById('toastBanner');
+        const dot = document.getElementById('toastDot');
+        const text = document.getElementById('toastMessage');
+        text.textContent = msg;
+        dot.className = `w-2 h-2 rounded-full ${type === 'error' ? 'bg-[#E05252]' : type === 'warn' ? 'bg-amber-400' : 'bg-[#22C55E]'}`;
+        banner.classList.remove('hidden');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => banner.classList.add('hidden'), 2600);
       }
 
       // ==================== STORAGE & CLOUD SYNC ====================
@@ -1084,136 +1224,157 @@ function doPost(e) {
         try {
           localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(state.entries));
           localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(state.settings));
+          localStorage.setItem(STORAGE_KEY_CLOUD, state.cloud.url || '');
         } catch (err) {
-          console.error('Save local error:', err);
+          console.error('Failed saving to localStorage:', err);
         }
       }
 
-      function updateCloudStatusUI() {
+      function loadLocal() {
+        try {
+          const savedSettings = localStorage.getItem(STORAGE_KEY_SETTINGS);
+          if (savedSettings) {
+            state.settings = { ...state.settings, ...JSON.parse(savedSettings) };
+          }
+          const savedCloud = localStorage.getItem(STORAGE_KEY_CLOUD);
+          if (savedCloud !== null) {
+            state.cloud.url = savedCloud;
+          }
+          const savedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
+          if (savedEntries) {
+            const parsed = JSON.parse(savedEntries);
+            state.entries = Array.isArray(parsed) ? parsed : [];
+          } else {
+            state.entries = [...SAMPLE_ENTRIES];
+          }
+        } catch (err) {
+          console.error('Failed loading localStorage:', err);
+          state.entries = [...SAMPLE_ENTRIES];
+        }
+      }
+
+      function updateCloudBadgeUI() {
         const dot = document.getElementById('headerCloudDot');
         const label = document.getElementById('headerCloudLabel');
         const modalBadge = document.getElementById('modalSyncBadge');
-        const manualBox = document.getElementById('cloudManualActions');
+        const manualActions = document.getElementById('cloudManualActions');
 
         if (!state.cloud.url) {
           dot.className = 'w-1.5 h-1.5 rounded-full bg-[#8E9591]';
           label.textContent = 'Local';
-          if (modalBadge) {
-            modalBadge.textContent = 'Belum Terhubung';
-            modalBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-[#222724] text-[#8E9591]';
-          }
-          if (manualBox) manualBox.classList.add('hidden');
+          modalBadge.textContent = 'Belum Terhubung';
+          modalBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-[#222724] text-[#8E9591]';
+          manualActions.classList.add('hidden');
           return;
         }
 
-        if (manualBox) manualBox.classList.remove('hidden');
-
+        manualActions.classList.remove('hidden');
         if (state.cloud.status === 'syncing') {
           dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse';
           label.textContent = 'Syncing';
-          if (modalBadge) {
-            modalBadge.textContent = 'Menyinkronkan...';
-            modalBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-400';
-          }
+          modalBadge.textContent = 'Menyinkronkan...';
+          modalBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-400';
         } else if (state.cloud.status === 'error') {
           dot.className = 'w-1.5 h-1.5 rounded-full bg-[#E05252]';
           label.textContent = 'Offline';
-          if (modalBadge) {
-            modalBadge.textContent = 'Gagal Koneksi';
-            modalBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-[#E05252]/15 text-[#E05252]';
-          }
+          modalBadge.textContent = 'Gagal Sync';
+          modalBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-[#E05252]/15 text-[#E05252]';
         } else {
           dot.className = 'w-1.5 h-1.5 rounded-full bg-[#22C55E]';
           label.textContent = 'Synced';
-          if (modalBadge) {
-            modalBadge.textContent = 'Terhubung';
-            modalBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]';
-          }
+          modalBadge.textContent = 'Terhubung';
+          modalBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]';
         }
       }
 
-      async function pullEntriesFromCloud(silent = false) {
+      async function pushToCloud(silent = false) {
         if (!state.cloud.url) return;
         state.cloud.status = 'syncing';
-        updateCloudStatusUI();
+        updateCloudBadgeUI();
         try {
-          const sep = state.cloud.url.includes('?') ? '&' : '?';
-          const res = await fetch(`${state.cloud.url}${sep}t=${Date.now()}`, { method: 'GET', redirect: 'follow' });
-          const data = await res.json();
-          if (data && Array.isArray(data.entries)) {
-            if (data.entries.length > 0) {
-              state.entries = data.entries
-                .map(item => ({
-                  date: normalizeToIsoDate(item.date),
-                  equity: Number(item.equity) || 0,
-                  netFlow: Number(item.netFlow) || 0,
-                  note: item.note ? String(item.note) : ''
-                }))
-                .filter(item => item.date)
-                .sort((a, b) => a.date.localeCompare(b.date));
-              if (data.currency === 'USD' || data.currency === 'IDR') {
-                state.settings.currency = data.currency;
-              }
-              saveLocal();
-              renderAll();
-            }
-            state.cloud.status = 'synced';
-            updateCloudStatusUI();
-            if (!silent) showToast(`Tersinkron (${state.entries.length} data)`);
-          } else {
-            throw new Error('Invalid response');
-          }
-        } catch (err) {
-          console.error('Pull cloud error:', err);
-          state.cloud.status = 'error';
-          updateCloudStatusUI();
-          if (!silent) showToast('Gagal memuat dari Google Sheets', true);
-        }
-      }
-
-      async function pushEntriesToCloud(silent = false) {
-        if (!state.cloud.url) return;
-        state.cloud.status = 'syncing';
-        updateCloudStatusUI();
-        try {
+          const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
           const res = await fetch(state.cloud.url, {
             method: 'POST',
-            redirect: 'follow',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
               currency: state.settings.currency,
-              entries: state.entries
+              entries: sorted
             })
           });
-          const data = await res.json();
-          if (data && data.status === 'ok') {
-            state.cloud.status = 'synced';
-            updateCloudStatusUI();
-            if (!silent) showToast('Tersimpan ke Google Sheets');
-          } else {
-            throw new Error('Save failed');
-          }
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          state.cloud.status = 'synced';
+          updateCloudBadgeUI();
+          if (!silent) showToast('Tersimpan ke Google Sheets');
         } catch (err) {
-          console.error('Push cloud error:', err);
+          console.error('Push to cloud failed:', err);
           state.cloud.status = 'error';
-          updateCloudStatusUI();
-          if (!silent) showToast('Gagal menyimpan ke Google Sheets', true);
+          updateCloudBadgeUI();
+          if (!silent) showToast('Gagal menyimpan ke Google Sheets', 'error');
         }
       }
 
-      // ==================== PORTFOLIO COMPUTATION ENGINE ====================
+      async function pullFromCloud(silent = false) {
+        if (!state.cloud.url) return;
+        state.cloud.status = 'syncing';
+        updateCloudBadgeUI();
+        try {
+          const res = await fetch(state.cloud.url);
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+          if (Array.isArray(data.entries)) {
+            state.entries = data.entries.map(item => ({
+              date: normalizeToIsoDate(item.date),
+              equity: Number(item.equity) || 0,
+              netFlow: Number(item.netFlow) || 0,
+              note: item.note ? String(item.note) : ''
+            }));
+            if (data.currency === 'USD' || data.currency === 'IDR') {
+              state.settings.currency = data.currency;
+            }
+            saveLocal();
+          }
+          state.cloud.status = 'synced';
+          updateCloudBadgeUI();
+          renderAll();
+          if (!silent) showToast('Data dimuat dari Google Sheets');
+        } catch (err) {
+          console.error('Pull from cloud failed:', err);
+          state.cloud.status = 'error';
+          updateCloudBadgeUI();
+          if (!silent) showToast('Gagal memuat dari Google Sheets', 'error');
+        }
+      }
+
+      // ==================== CORE P&L CALCULATIONS ====================
       function computeAllEntries() {
-        const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
-        return sorted.map((item, idx) => {
-          const netFlow = Number(item.netFlow) || 0;
+        const sorted = [...state.entries]
+          .map(e => ({
+            date: normalizeToIsoDate(e.date),
+            equity: Number(e.equity) || 0,
+            netFlow: Number(e.netFlow) || 0,
+            note: e.note ? String(e.note).trim() : ''
+          }))
+          .sort((a, b) => a.date.localeCompare(b.date));
+
+        return sorted.map((entry, idx) => {
           if (idx === 0) {
-            return { ...item, netFlow, pnl: 0, pnlPct: 0, prevEquity: item.equity };
+            return {
+              ...entry,
+              prevEquity: entry.equity,
+              pnl: 0,
+              pnlPct: 0
+            };
           }
           const prevEquity = sorted[idx - 1].equity;
-          const pnl = (item.equity - prevEquity) - netFlow;
-          const capitalBase = prevEquity + (netFlow > 0 ? netFlow : 0);
-          const pnlPct = capitalBase > 0 ? (pnl / capitalBase) * 100 : 0;
-          return { ...item, netFlow, pnl, pnlPct, prevEquity };
+          const pnl = entry.equity - prevEquity - entry.netFlow;
+          const baseCapital = prevEquity + entry.netFlow;
+          const pnlPct = baseCapital > 0 ? (pnl / baseCapital) * 100 : 0;
+          return {
+            ...entry,
+            prevEquity,
+            pnl,
+            pnlPct
+          };
         });
       }
 
@@ -1222,16 +1383,19 @@ function doPost(e) {
         const latestIso = computedList[computedList.length - 1].date;
         const latestDate = parseIsoLocal(latestIso);
 
-        if (period === 'MTD') {
-          const ymPrefix = latestIso.slice(0, 7);
-          return computedList.filter(e => e.date.startsWith(ymPrefix));
+        if (period === 'CUSTOM') {
+          const startIso = state.settings.customStart || computedList[0].date;
+          const endIso = state.settings.customEnd || latestIso;
+          const lo = startIso <= endIso ? startIso : endIso;
+          const hi = startIso <= endIso ? endIso : startIso;
+          return computedList.filter(e => e.date >= lo && e.date <= hi);
         }
         if (period === 'YTD') {
           const yearPrefix = latestIso.slice(0, 4);
           return computedList.filter(e => e.date.startsWith(yearPrefix));
         }
 
-        const daysBackMap = { '1M': 30, '3M': 90, '6M': 180, '1Y': 365 };
+        const daysBackMap = { '1W': 7, '1M': 30, '3M': 90, '1Y': 365 };
         const daysBack = daysBackMap[period] || 30;
         const cutoff = new Date(latestDate);
         cutoff.setDate(cutoff.getDate() - daysBack);
@@ -1240,64 +1404,66 @@ function doPost(e) {
       }
 
       function computeMonthlyMetrics(computedList) {
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         const groups = new Map();
+
         computedList.forEach(item => {
           const ym = item.date.slice(0, 7);
-          if (!groups.has(ym)) groups.set(ym, []);
+          if (!groups.has(ym)) {
+            groups.set(ym, []);
+          }
           groups.get(ym).push(item);
         });
 
-        const result = [];
+        const monthlyRows = [];
         groups.forEach((items, ym) => {
-          const lastItem = items[items.length - 1];
-          const monthPnl = items.reduce((sum, x) => sum + x.pnl, 0);
-          const startCap = items[0].prevEquity + (items[0].netFlow > 0 ? items[0].netFlow : 0);
-          const monthPct = startCap > 0 ? (monthPnl / startCap) * 100 : 0;
-          result.push({
+          const [y, m] = ym.split('-').map(Number);
+          const first = items[0];
+          const last = items[items.length - 1];
+          const monthPnl = items.reduce((sum, r) => sum + r.pnl, 0);
+          const monthFlows = items.slice(1).reduce((sum, r) => sum + r.netFlow, 0);
+          const startCapital = first.prevEquity + first.netFlow + monthFlows;
+          const monthPct = startCapital > 0 ? (monthPnl / startCapital) * 100 : 0;
+
+          monthlyRows.push({
             ym,
-            label: formatMonthLabel(ym),
-            equity: lastItem.equity,
+            label: `${monthNames[m - 1]} ${y}`,
+            endingEquity: last.equity,
             pnl: monthPnl,
             pnlPct: monthPct,
             daysCount: items.length
           });
         });
-        return result.sort((a, b) => b.ym.localeCompare(a.ym));
+
+        return monthlyRows;
       }
 
-      // ==================== RENDER FUNCTIONS ====================
-      function renderHeroSummary(computedList) {
-        const elPort = document.getElementById('heroTotalPortfolio');
-        const elInv = document.getElementById('heroTotalInvested');
-        const elPnl = document.getElementById('heroTotalPnl');
-        const elPct = document.getElementById('heroTotalPnlPct');
-
+      // ==================== RENDERING: PORTFOLIO & ANALYTICS ====================
+      function renderHeroPortfolioSummary(computedList) {
         if (!computedList.length) {
-          elPort.textContent = formatCurrency(0);
-          elInv.textContent = formatCurrency(0);
-          elPnl.textContent = formatCurrency(0);
-          elPnl.className = 'text-sm font-semibold text-[#D1D5DB] block [font-variant-numeric:tabular-nums]';
-          elPct.textContent = '0.00%';
-          elPct.className = 'text-xs font-medium text-[#D1D5DB] block [font-variant-numeric:tabular-nums]';
+          document.getElementById('heroTotalPortfolio').textContent = formatBalanceDisplay(0);
+          document.getElementById('heroTotalInvested').textContent = formatBalanceDisplay(0);
+          document.getElementById('heroTotalPnl').textContent = formatCurrency(0);
+          document.getElementById('heroTotalPnl').className = 'text-sm font-semibold text-[#D1D5DB] block [font-variant-numeric:tabular-nums]';
+          document.getElementById('heroTotalPnlPct').textContent = '0.00%';
+          document.getElementById('heroTotalPnlPct').className = 'text-xs font-medium text-[#D1D5DB] block [font-variant-numeric:tabular-nums]';
           return;
         }
 
-        const firstEq = computedList[0].equity;
-        const latestEq = computedList[computedList.length - 1].equity;
-        const subsequentFlows = computedList.slice(1).reduce((sum, x) => sum + (x.netFlow || 0), 0);
-        const netInvested = firstEq + subsequentFlows;
-        const totalReturn = latestEq - netInvested;
-        const totalReturnPct = netInvested > 0 ? (totalReturn / netInvested) * 100 : 0;
+        const first = computedList[0];
+        const latest = computedList[computedList.length - 1];
+        const totalNetFlows = computedList.slice(1).reduce((acc, e) => acc + e.netFlow, 0);
+        const totalInvested = first.equity + totalNetFlows;
+        const totalReturn = latest.equity - totalInvested;
+        const totalReturnPct = totalInvested > 0 ? (totalReturn / totalInvested) * 100 : 0;
+        const colorCls = getValueColorClass(totalReturn);
 
-        elPort.textContent = formatCurrency(latestEq);
-        elInv.textContent = formatCurrency(netInvested);
-
-        const sign = totalReturn > 0.005 ? '+' : totalReturn < -0.005 ? '-' : '';
-        const colorCls = getPnlColorClass(totalReturn);
-        elPnl.textContent = `${sign}${formatCurrency(Math.abs(totalReturn), false)}`;
-        elPnl.className = `text-sm font-semibold ${colorCls} block [font-variant-numeric:tabular-nums]`;
-        elPct.textContent = `${totalReturnPct > 0.005 ? '+' : ''}${totalReturnPct.toFixed(2)}%`;
-        elPct.className = `text-xs font-medium ${colorCls} block [font-variant-numeric:tabular-nums]`;
+        document.getElementById('heroTotalPortfolio').textContent = formatBalanceDisplay(latest.equity);
+        document.getElementById('heroTotalInvested').textContent = formatBalanceDisplay(totalInvested);
+        document.getElementById('heroTotalPnl').textContent = formatCurrency(totalReturn, true);
+        document.getElementById('heroTotalPnl').className = `text-sm font-semibold ${colorCls} block [font-variant-numeric:tabular-nums]`;
+        document.getElementById('heroTotalPnlPct').textContent = formatPercent(totalReturnPct);
+        document.getElementById('heroTotalPnlPct').className = `text-xs font-medium ${colorCls} block [font-variant-numeric:tabular-nums]`;
       }
 
       function renderPerformanceTable(computedList) {
@@ -1317,27 +1483,40 @@ function doPost(e) {
 
         if (state.settings.mode === 'monthly') {
           loadMoreBox.classList.add('hidden');
-          const monthlyRows = computeMonthlyMetrics(filtered);
-          tbody.innerHTML = monthlyRows.map(m => `
-            <div class="grid grid-cols-12 items-center py-3.5 text-[13px]">
-              <div class="col-span-4 text-left">
-                <span class="font-medium text-[#F3F4F6] block">${m.label}</span>
-                <span class="text-[11px] text-[#8E9591]">${m.daysCount} hari bursa</span>
+          const monthly = computeMonthlyMetrics(filtered).reverse();
+          if (!monthly.length) {
+            tbody.innerHTML = `<div class="py-10 text-center text-xs text-[#8E9591]">Tidak ada data pada rentang tanggal ini.</div>`;
+            return;
+          }
+          tbody.innerHTML = monthly.map(row => {
+            const colorCls = getValueColorClass(row.pnl);
+            return `
+              <div class="grid grid-cols-12 items-center py-3.5 hover:bg-[#181B19]/70 transition rounded-lg px-1">
+                <div class="col-span-4 text-left">
+                  <span class="text-[13px] font-medium text-[#F3F4F6] block">${row.label}</span>
+                  <span class="text-[10px] text-[#8E9591]">${row.daysCount} hari bursa</span>
+                </div>
+                <div class="col-span-3 text-center text-[13px] font-medium text-[#F3F4F6] [font-variant-numeric:tabular-nums]">
+                  ${formatBalanceDisplay(row.endingEquity)}
+                </div>
+                <div class="col-span-5 text-right text-[13px] font-medium ${colorCls} [font-variant-numeric:tabular-nums]">
+                  ${formatCurrency(row.pnl, true)} (${formatPercent(row.pnlPct)})
+                </div>
               </div>
-              <div class="col-span-3 text-center font-medium text-[#F3F4F6] [font-variant-numeric:tabular-nums]">
-                ${formatCurrency(m.equity)}
-              </div>
-              <div class="col-span-5 text-right font-medium ${getPnlColorClass(m.pnl)} [font-variant-numeric:tabular-nums]">
-                ${formatSignedPnl(m.pnl, m.pnlPct)}
-              </div>
-            </div>
-          `).join('');
+            `;
+          }).join('');
           return;
         }
 
-        const descRows = [...filtered].reverse();
-        const visibleRows = descRows.slice(0, state.visibleRowLimit);
-        const remaining = descRows.length - visibleRows.length;
+        const reversed = [...filtered].reverse();
+        if (!reversed.length) {
+          loadMoreBox.classList.add('hidden');
+          tbody.innerHTML = `<div class="py-10 text-center text-xs text-[#8E9591]">Tidak ada data pada rentang tanggal ini.</div>`;
+          return;
+        }
+
+        const visibleRows = reversed.slice(0, state.visibleRowLimit);
+        const remaining = reversed.length - visibleRows.length;
 
         if (remaining > 0) {
           loadMoreBox.classList.remove('hidden');
@@ -1347,37 +1526,38 @@ function doPost(e) {
         }
 
         tbody.innerHTML = visibleRows.map(row => {
-          const cfBadge = row.netFlow > 0
-            ? `<span class="ml-1.5 px-1.5 py-0.5 rounded bg-[#22C55E]/15 text-[#22C55E] text-[10px] font-medium">+TopUp</span>`
-            : row.netFlow < 0
-              ? `<span class="ml-1.5 px-1.5 py-0.5 rounded bg-[#E05252]/15 text-[#E05252] text-[10px] font-medium">-Tarik</span>`
-              : '';
-          const noteHtml = row.note
-            ? `<span class="block text-[11px] text-[#8E9591] truncate mt-0.5">${escapeHtml(row.note)}</span>`
+          const colorCls = getValueColorClass(row.pnl);
+          const flowBadge = row.netFlow !== 0
+            ? `<span class="inline-block mt-0.5 text-[10px] px-1.5 py-0.2 rounded bg-[#22C55E]/10 text-[#22C55E]">${row.netFlow > 0 ? 'Top-Up' : 'Tarik'} ${formatBalanceDisplay(row.netFlow, true)}</span>`
+            : '';
+          const noteLine = row.note
+            ? `<span class="block text-[10px] text-[#8E9591] truncate mt-0.5">${escapeHtml(row.note)}</span>`
             : '';
 
           return `
             <button
               type="button"
               data-edit-date="${row.date}"
-              class="entry-row-btn w-full grid grid-cols-12 items-center py-3.5 text-[13px] hover:bg-[#181B19]/80 active:bg-[#181B19] transition text-left"
+              class="w-full grid grid-cols-12 items-center py-3.5 hover:bg-[#181B19]/80 active:bg-[#1F2421] transition rounded-lg px-1 text-left"
             >
               <div class="col-span-4 pr-1">
-                <div class="flex items-center flex-wrap">
-                  <span class="font-medium text-[#F3F4F6]">${formatDisplayDate(row.date)}</span>
-                  ${cfBadge}
-                </div>
-                ${noteHtml}
+                <span class="text-[13px] font-medium text-[#F3F4F6] block">${formatDisplayDate(row.date)}</span>
+                ${flowBadge}
+                ${noteLine}
               </div>
-              <div class="col-span-3 text-center font-medium text-[#F3F4F6] [font-variant-numeric:tabular-nums]">
-                ${formatCurrency(row.equity)}
+              <div class="col-span-3 text-center text-[13px] font-medium text-[#F3F4F6] [font-variant-numeric:tabular-nums]">
+                ${formatBalanceDisplay(row.equity)}
               </div>
-              <div class="col-span-5 text-right font-medium ${getPnlColorClass(row.pnl)} [font-variant-numeric:tabular-nums]">
-                ${formatSignedPnl(row.pnl, row.pnlPct)}
+              <div class="col-span-5 text-right text-[13px] font-medium ${colorCls} [font-variant-numeric:tabular-nums]">
+                ${formatCurrency(row.pnl, true)} (${formatPercent(row.pnlPct)})
               </div>
             </button>
           `;
         }).join('');
+
+        tbody.querySelectorAll('[data-edit-date]').forEach(btn => {
+          btn.addEventListener('click', () => openEntryModal(btn.dataset.editDate));
+        });
       }
 
       function escapeHtml(str) {
@@ -1388,484 +1568,637 @@ function doPost(e) {
           .replace(/"/g, '&quot;');
       }
 
-      function renderTradeAnalytics(computedList) {
-        const filtered = filterEntriesByPeriod(computedList, state.settings.period);
-        const periodLabels = {
-          MTD: 'This Month',
-          '1M': 'Last 1 Month',
-          '3M': 'Last 3 Months',
-          '6M': 'Last 6 Months',
-          '1Y': '1 Year (252 Hari)',
-          YTD: 'YTD',
-          ALL: 'All Time'
-        };
-        document.getElementById('tradePeriodTag').textContent = periodLabels[state.settings.period] || 'All Time';
-
+      function renderSparklineChart(filtered) {
+        const svg = document.getElementById('equitySparklineSvg');
         if (!filtered.length) {
-          document.getElementById('chartActiveEquity').textContent = formatCurrency(0);
-          document.getElementById('chartActiveDate').textContent = '-';
-          document.getElementById('chartActivePnl').textContent = '0 (0.00%)';
-          document.getElementById('equitySparklineSvg').innerHTML = '';
+          svg.innerHTML = '';
           return;
         }
 
         const latest = filtered[filtered.length - 1];
-        document.getElementById('chartActiveEquity').textContent = formatCurrency(latest.equity);
-        document.getElementById('chartActiveDate').textContent = formatDisplayDate(latest.date);
-        const activePnlEl = document.getElementById('chartActivePnl');
-        activePnlEl.textContent = formatSignedPnl(latest.pnl, latest.pnlPct);
-        activePnlEl.className = `text-xs font-medium ${getPnlColorClass(latest.pnl)} [font-variant-numeric:tabular-nums]`;
+        const updateHeaderInfo = (item) => {
+          document.getElementById('chartActiveEquity').textContent = formatBalanceDisplay(item.equity);
+          document.getElementById('chartActiveDate').textContent = formatDisplayDate(item.date);
+          const pnlEl = document.getElementById('chartActivePnl');
+          pnlEl.textContent = `${formatCurrency(item.pnl, true)} (${formatPercent(item.pnlPct)})`;
+          pnlEl.className = `text-xs font-medium ${getValueColorClass(item.pnl)} [font-variant-numeric:tabular-nums]`;
+        };
+        updateHeaderInfo(latest);
 
-        // Trade days excluding day 0 if it's the very first entry
-        const tradeRows = filtered.filter((item, idx) => !(idx === 0 && item.date === computedList[0].date));
-        const activeDays = tradeRows.length ? tradeRows : filtered;
+        const width = 400;
+        const height = 140;
+        const padY = 14;
+        const equities = filtered.map(d => d.equity);
+        const minEq = Math.min(...equities);
+        const maxEq = Math.max(...equities);
+        const range = maxEq - minEq || 1;
+
+        const points = filtered.map((item, idx) => {
+          const x = filtered.length === 1 ? width / 2 : (idx / (filtered.length - 1)) * width;
+          const y = height - padY - ((item.equity - minEq) / range) * (height - padY * 2);
+          return { x, y, item };
+        });
+
+        const firstEq = filtered[0].equity;
+        const isOverallGain = latest.equity >= firstEq;
+        const strokeColor = isOverallGain ? '#22C55E' : '#E05252';
+        const gradId = 'sparkGrad_' + (isOverallGain ? 'gain' : 'loss');
+
+        const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+        const areaPath = `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${height} L ${points[0].x.toFixed(1)} ${height} Z`;
+        const lastPt = points[points.length - 1];
+
+        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+        svg.innerHTML = `
+          <defs>
+            <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="${strokeColor}" stop-opacity="0.28" />
+              <stop offset="100%" stop-color="${strokeColor}" stop-opacity="0.0" />
+            </linearGradient>
+          </defs>
+          <path d="${areaPath}" fill="url(#${gradId})" />
+          <path d="${linePath}" fill="none" stroke="${strokeColor}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+          <line id="chartCrosshairLine" x1="${lastPt.x}" y1="0" x2="${lastPt.x}" y2="${height}" stroke="#8E9591" stroke-width="1" stroke-dasharray="3 3" opacity="0.6" />
+          <circle id="chartActiveDot" cx="${lastPt.x}" cy="${lastPt.y}" r="4.5" fill="${strokeColor}" stroke="#111312" stroke-width="2" />
+        `;
+
+        const wrapper = document.getElementById('sparklineWrapper');
+        const handleScrub = (clientX) => {
+          const rect = wrapper.getBoundingClientRect();
+          if (!rect.width) return;
+          const relX = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+          const idx = Math.round(relX * (points.length - 1));
+          const target = points[idx];
+          if (!target) return;
+          const line = document.getElementById('chartCrosshairLine');
+          const dot = document.getElementById('chartActiveDot');
+          if (line) {
+            line.setAttribute('x1', target.x);
+            line.setAttribute('x2', target.x);
+          }
+          if (dot) {
+            dot.setAttribute('cx', target.x);
+            dot.setAttribute('cy', target.y);
+          }
+          updateHeaderInfo(target.item);
+        };
+
+        wrapper.onmousemove = (e) => handleScrub(e.clientX);
+        wrapper.ontouchmove = (e) => {
+          if (e.touches && e.touches[0]) handleScrub(e.touches[0].clientX);
+        };
+        wrapper.ontouchstart = (e) => {
+          if (e.touches && e.touches[0]) handleScrub(e.touches[0].clientX);
+        };
+      }
+
+      function renderTradeAnalytics(computedList) {
+        const filtered = filterEntriesByPeriod(computedList, state.settings.period);
+        let tagText = PERIOD_LABELS[state.settings.period] || 'Bulanan';
+        if (state.settings.period === 'CUSTOM' && state.settings.customStart && state.settings.customEnd) {
+          tagText = `${formatDisplayDate(state.settings.customStart)} – ${formatDisplayDate(state.settings.customEnd)}`;
+        }
+        document.getElementById('tradePeriodTag').textContent = tagText;
+
+        if (!filtered.length) {
+          document.getElementById('chartActiveEquity').textContent = formatBalanceDisplay(0);
+          document.getElementById('chartActiveDate').textContent = '-';
+          document.getElementById('chartActivePnl').textContent = '0 (0.00%)';
+          document.getElementById('equitySparklineSvg').innerHTML = '';
+          document.getElementById('statTotalPnl').textContent = formatCurrency(0);
+          document.getElementById('statTotalPnlPct').textContent = '0.00%';
+          document.getElementById('statWinRate').textContent = '0.0%';
+          document.getElementById('statWinCounts').textContent = '0W • 0L • 0D';
+          document.getElementById('statMaxProfit').textContent = formatCurrency(0);
+          document.getElementById('statMaxProfitDate').textContent = '-';
+          document.getElementById('statMaxLoss').textContent = formatCurrency(0);
+          document.getElementById('statMaxLossDate').textContent = '-';
+          document.getElementById('statMaxProfitPct').textContent = '0.00%';
+          document.getElementById('statMaxProfitPctDate').textContent = '-';
+          document.getElementById('statMaxLossPct').textContent = '0.00%';
+          document.getElementById('statMaxLossPctDate').textContent = '-';
+          document.getElementById('statAvgDaily').textContent = formatCurrency(0);
+          document.getElementById('statTradingDays').textContent = '0 hari bursa';
+          document.getElementById('statNetCashflow').textContent = formatBalanceDisplay(0);
+          document.getElementById('statInitialEquity').textContent = formatBalanceDisplay(0);
+          document.getElementById('statMaxDrawdownPct').textContent = '0.00%';
+          document.getElementById('statMaxDrawdownRange').textContent = 'Dari puncak tertinggi';
+          document.getElementById('statMaxDrawdownNominal').textContent = 'Drop nominal: 0';
+          document.getElementById('cashflowListContainer').innerHTML = '<p class="text-[#8E9591]">Belum ada data.</p>';
+          return;
+        }
+
+        renderSparklineChart(filtered);
+
+        const activeDays = filtered.filter((item, idx) => !(idx === 0 && item.date === computedList[0].date));
+        const totalPeriodPnl = activeDays.reduce((s, d) => s + d.pnl, 0);
+        const startCap = filtered[0].prevEquity + filtered[0].netFlow + activeDays.reduce((s, d) => s + d.netFlow, 0);
+        const totalPeriodPct = startCap > 0 ? (totalPeriodPnl / startCap) * 100 : 0;
+
+        const elTotalPnl = document.getElementById('statTotalPnl');
+        const elTotalPct = document.getElementById('statTotalPnlPct');
+        elTotalPnl.textContent = formatCurrency(totalPeriodPnl, true);
+        elTotalPnl.className = `text-sm font-semibold ${getValueColorClass(totalPeriodPnl)} block [font-variant-numeric:tabular-nums]`;
+        elTotalPct.textContent = formatPercent(totalPeriodPct);
+        elTotalPct.className = `text-xs ${getValueColorClass(totalPeriodPnl)} [font-variant-numeric:tabular-nums]`;
 
         let wins = 0;
         let losses = 0;
         let draws = 0;
-        let totalNetPnl = 0;
-        let maxProfitRow = activeDays[0];
-        let maxLossRow = activeDays[0];
-        let maxProfitPctRow = activeDays[0];
-        let maxLossPctRow = activeDays[0];
+        let maxProfitItem = null;
+        let maxLossItem = null;
+        let maxProfitPctItem = null;
+        let maxLossPctItem = null;
 
-        activeDays.forEach(r => {
-          totalNetPnl += r.pnl;
-          if (r.pnl > 0.005) wins++;
-          else if (r.pnl < -0.005) losses++;
+        activeDays.forEach(d => {
+          if (d.pnl > 0.0001) wins++;
+          else if (d.pnl < -0.0001) losses++;
           else draws++;
 
-          if (r.pnl > maxProfitRow.pnl) maxProfitRow = r;
-          if (r.pnl < maxLossRow.pnl) maxLossRow = r;
-          if (r.pnlPct > maxProfitPctRow.pnlPct) maxProfitPctRow = r;
-          if (r.pnlPct < maxLossPctRow.pnlPct) maxLossPctRow = r;
+          if (!maxProfitItem || d.pnl > maxProfitItem.pnl) maxProfitItem = d;
+          if (!maxLossItem || d.pnl < maxLossItem.pnl) maxLossItem = d;
+          if (!maxProfitPctItem || d.pnlPct > maxProfitPctItem.pnlPct) maxProfitPctItem = d;
+          if (!maxLossPctItem || d.pnlPct < maxLossPctItem.pnlPct) maxLossPctItem = d;
         });
 
-        const startCap = filtered[0].prevEquity + (filtered[0].netFlow > 0 ? filtered[0].netFlow : 0);
-        const totalNetPct = startCap > 0 ? (totalNetPnl / startCap) * 100 : 0;
-
-        const elStatTotalPnl = document.getElementById('statTotalPnl');
-        const elStatTotalPct = document.getElementById('statTotalPnlPct');
-        const sign = totalNetPnl > 0.005 ? '+' : totalNetPnl < -0.005 ? '-' : '';
-        elStatTotalPnl.textContent = `${sign}${formatCurrency(Math.abs(totalNetPnl), false)}`;
-        elStatTotalPnl.className = `text-sm font-semibold ${getPnlColorClass(totalNetPnl)} block [font-variant-numeric:tabular-nums]`;
-        elStatTotalPct.textContent = `${totalNetPct > 0.005 ? '+' : ''}${totalNetPct.toFixed(2)}%`;
-        elStatTotalPct.className = `text-xs ${getPnlColorClass(totalNetPnl)} [font-variant-numeric:tabular-nums]`;
-
-        const decidedDays = wins + losses;
-        const winRate = decidedDays > 0 ? (wins / decidedDays) * 100 : 0;
+        const totalEvaluated = wins + losses;
+        const winRate = totalEvaluated > 0 ? (wins / totalEvaluated) * 100 : 0;
         document.getElementById('statWinRate').textContent = `${winRate.toFixed(1)}%`;
         document.getElementById('statWinCounts').textContent = `${wins}W • ${losses}L • ${draws}D`;
 
-        // Max Profit & Loss (Nominal & %)
-        const mpVal = Math.max(0, maxProfitRow.pnl);
-        document.getElementById('statMaxProfit').textContent = `${mpVal > 0 ? '+' : ''}${formatCurrency(mpVal, false)}`;
-        document.getElementById('statMaxProfitDate').textContent = mpVal > 0 ? formatDisplayDate(maxProfitRow.date) : '-';
+        if (maxProfitItem && maxProfitItem.pnl > 0) {
+          document.getElementById('statMaxProfit').textContent = formatCurrency(maxProfitItem.pnl, true);
+          document.getElementById('statMaxProfitDate').textContent = formatDisplayDate(maxProfitItem.date);
+        } else {
+          document.getElementById('statMaxProfit').textContent = formatCurrency(0);
+          document.getElementById('statMaxProfitDate').textContent = '-';
+        }
 
-        const mlVal = Math.min(0, maxLossRow.pnl);
-        document.getElementById('statMaxLoss').textContent = `${mlVal < 0 ? '-' : ''}${formatCurrency(Math.abs(mlVal), false)}`;
-        document.getElementById('statMaxLossDate').textContent = mlVal < 0 ? formatDisplayDate(maxLossRow.date) : '-';
+        if (maxLossItem && maxLossItem.pnl < 0) {
+          document.getElementById('statMaxLoss').textContent = formatCurrency(maxLossItem.pnl, true);
+          document.getElementById('statMaxLossDate').textContent = formatDisplayDate(maxLossItem.date);
+        } else {
+          document.getElementById('statMaxLoss').textContent = formatCurrency(0);
+          document.getElementById('statMaxLossDate').textContent = '-';
+        }
 
-        const mpPct = Math.max(0, maxProfitPctRow.pnlPct);
-        document.getElementById('statMaxProfitPct').textContent = `${mpPct > 0 ? '+' : ''}${mpPct.toFixed(2)}%`;
-        document.getElementById('statMaxProfitPctDate').textContent = mpPct > 0 ? formatDisplayDate(maxProfitPctRow.date) : '-';
+        if (maxProfitPctItem && maxProfitPctItem.pnlPct > 0) {
+          document.getElementById('statMaxProfitPct').textContent = formatPercent(maxProfitPctItem.pnlPct);
+          document.getElementById('statMaxProfitPctDate').textContent = formatDisplayDate(maxProfitPctItem.date);
+        } else {
+          document.getElementById('statMaxProfitPct').textContent = '0.00%';
+          document.getElementById('statMaxProfitPctDate').textContent = '-';
+        }
 
-        const mlPct = Math.min(0, maxLossPctRow.pnlPct);
-        document.getElementById('statMaxLossPct').textContent = `${mlPct.toFixed(2)}%`;
-        document.getElementById('statMaxLossPctDate').textContent = mlPct < 0 ? formatDisplayDate(maxLossPctRow.date) : '-';
+        if (maxLossPctItem && maxLossPctItem.pnlPct < 0) {
+          document.getElementById('statMaxLossPct').textContent = formatPercent(maxLossPctItem.pnlPct);
+          document.getElementById('statMaxLossPctDate').textContent = formatDisplayDate(maxLossPctItem.date);
+        } else {
+          document.getElementById('statMaxLossPct').textContent = '0.00%';
+          document.getElementById('statMaxLossPctDate').textContent = '-';
+        }
 
-        // Avg Daily & Cashflow
-        const avgDaily = activeDays.length > 0 ? totalNetPnl / activeDays.length : 0;
-        const avgSign = avgDaily > 0.005 ? '+' : avgDaily < -0.005 ? '-' : '';
-        document.getElementById('statAvgDaily').textContent = `${avgSign}${formatCurrency(Math.abs(avgDaily), false)}`;
+        const avgDaily = activeDays.length > 0 ? totalPeriodPnl / activeDays.length : 0;
+        const elAvg = document.getElementById('statAvgDaily');
+        elAvg.textContent = formatCurrency(avgDaily, true);
+        elAvg.className = `text-sm font-semibold ${getValueColorClass(avgDaily)} block [font-variant-numeric:tabular-nums]`;
         document.getElementById('statTradingDays').textContent = `${activeDays.length} hari bursa`;
 
-        const totalFlow = filtered.reduce((sum, x) => sum + (x.netFlow || 0), 0);
-        const flowSign = totalFlow > 0.005 ? '+' : totalFlow < -0.005 ? '-' : '';
-        document.getElementById('statNetCashflow').textContent = `${flowSign}${formatCurrency(Math.abs(totalFlow))}`;
-        document.getElementById('statInitialEquity').textContent = formatCurrency(computedList[0].equity);
+        const periodFlows = filtered.slice(1).reduce((s, d) => s + d.netFlow, 0);
+        document.getElementById('statNetCashflow').textContent = formatBalanceDisplay(periodFlows, true);
+        document.getElementById('statInitialEquity').textContent = formatBalanceDisplay(computedList[0].equity);
 
-        // Max Drawdown (%) using pure cumulative return index (cashflow-neutral)
-        let peakIndex = 1;
-        let curIndex = 1;
+        // Max Drawdown (%) adjusted for cashflows
+        let peakWealth = 1;
         let peakDate = filtered[0].date;
-        let peakEquity = filtered[0].equity;
         let maxDdPct = 0;
-        let maxDdNom = 0;
-        let ddRangeText = 'Belum ada drawdown';
+        let maxDdNominal = 0;
+        let ddPeakDate = filtered[0].date;
+        let ddTroughDate = filtered[0].date;
+        let peakPortfolioEq = filtered[0].equity;
 
-        filtered.forEach(item => {
-          const dailyFactor = 1 + (item.pnlPct / 100);
-          curIndex = curIndex * (dailyFactor > 0 ? dailyFactor : 0);
-          if (curIndex >= peakIndex) {
-            peakIndex = curIndex;
-            peakDate = item.date;
-            peakEquity = item.equity;
+        filtered.forEach((d, idx) => {
+          if (idx > 0) {
+            const ret = d.pnlPct / 100;
+            peakWealth = peakWealth * (1 + ret);
+          }
+          if (peakWealth >= 1) {
+            peakWealth = 1;
+            peakDate = d.date;
+            peakPortfolioEq = d.equity;
           } else {
-            const ddPct = ((curIndex - peakIndex) / peakIndex) * 100;
+            const ddPct = (peakWealth - 1) * 100;
             if (ddPct < maxDdPct) {
               maxDdPct = ddPct;
-              maxDdNom = Math.abs(peakEquity * (ddPct / 100));
-              ddRangeText = `${formatDisplayDate(peakDate)} → ${formatDisplayDate(item.date)}`;
+              ddPeakDate = peakDate;
+              ddTroughDate = d.date;
+              maxDdNominal = Math.abs(peakPortfolioEq * (ddPct / 100));
             }
           }
         });
 
         document.getElementById('statMaxDrawdownPct').textContent = `${maxDdPct.toFixed(2)}%`;
-        document.getElementById('statMaxDrawdownRange').textContent = ddRangeText;
-        document.getElementById('statMaxDrawdownNominal').textContent = `Drop nominal: ${formatCurrency(maxDdNom)}`;
-
-        // Cashflow History List
-        const cfRows = [...computedList].filter(x => Math.abs(x.netFlow) > 0.005).reverse();
-        const cfContainer = document.getElementById('cashflowListContainer');
-        if (!cfRows.length) {
-          cfContainer.innerHTML = `<p class="text-[#8E9591] text-center py-3">Belum ada riwayat Top-Up atau penarikan dana.</p>`;
+        if (maxDdPct < -0.001) {
+          document.getElementById('statMaxDrawdownRange').textContent = `${formatDisplayDate(ddPeakDate)} → ${formatDisplayDate(ddTroughDate)}`;
+          document.getElementById('statMaxDrawdownNominal').textContent = `Drop nominal: -${formatCurrency(maxDdNominal)}`;
         } else {
-          cfContainer.innerHTML = cfRows.map(r => {
-            const isDep = r.netFlow > 0;
-            return `
-              <div class="flex items-center justify-between py-2 border-b border-[#222624] last:border-0">
-                <div>
-                  <span class="text-[#F3F4F6] font-medium">${formatDisplayDate(r.date)}</span>
-                  <span class="ml-2 text-[11px] ${isDep ? 'text-[#22C55E]' : 'text-[#E05252]'}">${isDep ? 'Top-Up Modal' : 'Tarik Dana'}</span>
-                </div>
-                <span class="font-semibold ${isDep ? 'text-[#22C55E]' : 'text-[#E05252]'} [font-variant-numeric:tabular-nums]">
-                  ${isDep ? '+' : '-'}${formatCurrency(Math.abs(r.netFlow))}
-                </span>
-              </div>
-            `;
-          }).join('');
+          document.getElementById('statMaxDrawdownRange').textContent = 'Belum ada drawdown';
+          document.getElementById('statMaxDrawdownNominal').textContent = 'Drop nominal: 0';
         }
 
-        renderSparklineChart(filtered);
+        // Render Monthly P&L Heatmap Calendar
+        renderPnlHeatmapCalendar(computedList);
+
+        // Cashflow History List
+        const flowEntries = computedList.filter(e => e.netFlow !== 0).reverse();
+        const cfContainer = document.getElementById('cashflowListContainer');
+        if (!flowEntries.length) {
+          cfContainer.innerHTML = `<p class="text-[#8E9591]">Belum ada catatan Top-Up atau Tarik Dana.</p>`;
+        } else {
+          cfContainer.innerHTML = flowEntries.map(f => `
+            <div class="flex items-center justify-between py-1.5 border-b border-[#222624] last:border-b-0">
+              <div>
+                <span class="text-[#F3F4F6] font-medium block">${formatDisplayDate(f.date)}</span>
+                <span class="text-[10px] text-[#8E9591]">${f.netFlow > 0 ? 'Top-Up Modal' : 'Tarik Dana'}</span>
+              </div>
+              <span class="font-semibold ${f.netFlow > 0 ? 'text-[#22C55E]' : 'text-[#E05252]'} [font-variant-numeric:tabular-nums]">
+                ${formatBalanceDisplay(f.netFlow, true)}
+              </span>
+            </div>
+          `).join('');
+        }
       }
 
-      function renderSparklineChart(series) {
-        const svg = document.getElementById('equitySparklineSvg');
-        if (!svg || !series.length) return;
+      function renderPnlHeatmapCalendar(computedList) {
+        const grid = document.getElementById('pnlHeatmapGrid');
+        const monthLabelEl = document.getElementById('heatmapMonthLabel');
+        const summaryEl = document.getElementById('heatmapMonthSummary');
+        const infoEl = document.getElementById('heatmapSelectedInfo');
+        const monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 
-        const w = 400;
-        const h = 150;
-        svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+        if (state.heatmapYear === null || state.heatmapMonth === null) {
+          if (computedList.length) {
+            const latestDate = parseIsoLocal(computedList[computedList.length - 1].date);
+            state.heatmapYear = latestDate.getFullYear();
+            state.heatmapMonth = latestDate.getMonth();
+          } else {
+            const now = new Date();
+            state.heatmapYear = now.getFullYear();
+            state.heatmapMonth = now.getMonth();
+          }
+        }
 
-        const values = series.map(s => s.equity);
-        const minVal = Math.min(...values);
-        const maxVal = Math.max(...values);
-        const range = maxVal - minVal || 1;
-        const padY = 14;
+        const year = state.heatmapYear;
+        const month = state.heatmapMonth;
+        monthLabelEl.textContent = `${monthNamesShort[month]} ${year}`;
 
-        const points = series.map((s, i) => {
-          const x = series.length === 1 ? w / 2 : (i / (series.length - 1)) * w;
-          const y = h - padY - ((s.equity - minVal) / range) * (h - padY * 2);
-          return { x, y, data: s };
+        const entryMap = new Map();
+        computedList.forEach(item => entryMap.set(item.date, item));
+
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const ymPrefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+        const monthEntries = computedList.filter(e => e.date.startsWith(ymPrefix));
+
+        let greenDays = 0;
+        let redDays = 0;
+        monthEntries.forEach(e => {
+          if (e.pnl > 0.0001) greenDays++;
+          else if (e.pnl < -0.0001) redDays++;
         });
 
-        const isPositive = series[series.length - 1].equity >= series[0].equity;
-        const strokeColor = isPositive ? '#22C55E' : '#E05252';
-        const linePath = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
-        const areaPath = `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${h} L ${points[0].x.toFixed(1)} ${h} Z`;
-        const lastPt = points[points.length - 1];
+        summaryEl.textContent = `${greenDays} hari hijau • ${redDays} hari merah`;
 
-        svg.innerHTML = `
-          <defs>
-            <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="${strokeColor}" stop-opacity="0.28" />
-              <stop offset="100%" stop-color="${strokeColor}" stop-opacity="0.0" />
-            </linearGradient>
-          </defs>
-          <path d="${areaPath}" fill="url(#sparkGrad)" />
-          <path d="${linePath}" fill="none" stroke="${strokeColor}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
-          <line id="sparkHoverLine" x1="${lastPt.x}" y1="0" x2="${lastPt.x}" y2="${h}" stroke="#4B5563" stroke-width="1" stroke-dasharray="3 3" opacity="0" />
-          <circle id="sparkHoverDot" cx="${lastPt.x}" cy="${lastPt.y}" r="4.5" fill="${strokeColor}" stroke="#111312" stroke-width="2" />
-        `;
-
-        const handlePointer = (clientX) => {
-          const rect = svg.getBoundingClientRect();
-          if (!rect.width) return;
-          const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-          const idx = Math.round(ratio * (points.length - 1));
-          const pt = points[idx];
-          if (!pt) return;
-
-          const hoverLine = document.getElementById('sparkHoverLine');
-          const hoverDot = document.getElementById('sparkHoverDot');
-          if (hoverLine) {
-            hoverLine.setAttribute('x1', pt.x);
-            hoverLine.setAttribute('x2', pt.x);
-            hoverLine.setAttribute('opacity', '1');
+        // Find first weekday (Mon-Fri) in this month to align columns (0=Mon .. 4=Fri)
+        let firstWeekdayDate = null;
+        for (let d = 1; d <= daysInMonth; d++) {
+          const dow = new Date(year, month, d).getDay();
+          if (dow >= 1 && dow <= 5) {
+            firstWeekdayDate = new Date(year, month, d);
+            break;
           }
-          if (hoverDot) {
-            hoverDot.setAttribute('cx', pt.x);
-            hoverDot.setAttribute('cy', pt.y);
+        }
+
+        let html = '';
+        if (firstWeekdayDate) {
+          const leadingEmpty = firstWeekdayDate.getDay() - 1;
+          for (let i = 0; i < leadingEmpty; i++) {
+            html += `<div class="h-12 rounded-xl bg-[#111312]/40 border border-transparent"></div>`;
+          }
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dateObj = new Date(year, month, day);
+          const dow = dateObj.getDay();
+          if (dow === 0 || dow === 6) continue; // Skip weekends (US Market closed)
+
+          const iso = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const item = entryMap.get(iso);
+
+          let cellCls = 'h-12 rounded-xl p-1.5 flex flex-col items-center justify-between border transition active:scale-95 ';
+          let pctText = '—';
+          let pctTextCls = 'text-[9px] text-[#5B635F]';
+          let dayTextCls = 'text-[11px] font-medium text-[#8E9591]';
+
+          if (item) {
+            if (item.pnl > 0.0001) {
+              cellCls += 'bg-[#22C55E]/25 border-[#22C55E]/55';
+              dayTextCls = 'text-[11px] font-semibold text-[#F3F4F6]';
+              pctText = `${item.pnlPct >= 0 ? '+' : ''}${item.pnlPct.toFixed(1)}%`;
+              pctTextCls = 'text-[9px] font-semibold text-[#22C55E] [font-variant-numeric:tabular-nums]';
+            } else if (item.pnl < -0.0001) {
+              cellCls += 'bg-[#E05252]/25 border-[#E05252]/55';
+              dayTextCls = 'text-[11px] font-semibold text-[#F3F4F6]';
+              pctText = `${item.pnlPct.toFixed(1)}%`;
+              pctTextCls = 'text-[9px] font-semibold text-[#E05252] [font-variant-numeric:tabular-nums]';
+            } else {
+              cellCls += 'bg-[#222724] border-[#2F3532]';
+              dayTextCls = 'text-[11px] font-semibold text-[#D1D5DB]';
+              pctText = '0.0%';
+              pctTextCls = 'text-[9px] text-[#9CA3AF]';
+            }
+          } else {
+            cellCls += 'bg-[#222724]/50 border-[#2F3532]/70 hover:border-[#3E4642]';
           }
 
-          document.getElementById('chartActiveEquity').textContent = formatCurrency(pt.data.equity);
-          document.getElementById('chartActiveDate').textContent = formatDisplayDate(pt.data.date);
-          const pnlEl = document.getElementById('chartActivePnl');
-          pnlEl.textContent = formatSignedPnl(pt.data.pnl, pt.data.pnlPct);
-          pnlEl.className = `text-xs font-medium ${getPnlColorClass(pt.data.pnl)} [font-variant-numeric:tabular-nums]`;
-        };
+          html += `
+            <button type="button" data-heatmap-iso="${iso}" class="${cellCls}">
+              <span class="${dayTextCls} leading-none">${day}</span>
+              <span class="${pctTextCls} leading-none">${pctText}</span>
+            </button>
+          `;
+        }
 
-        svg.onpointermove = (e) => handlePointer(e.clientX);
-        svg.onpointerdown = (e) => handlePointer(e.clientX);
+        grid.innerHTML = html;
+
+        grid.querySelectorAll('[data-heatmap-iso]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const iso = btn.dataset.heatmapIso;
+            const found = entryMap.get(iso);
+            if (found) {
+              const colorCls = getValueColorClass(found.pnl);
+              infoEl.innerHTML = `<span class="text-[#F3F4F6] font-medium">${formatDisplayDate(iso)}:</span> <span class="${colorCls} font-semibold">${formatCurrency(found.pnl, true)} (${formatPercent(found.pnlPct)})</span>`;
+            } else {
+              infoEl.innerHTML = `<span class="text-[#8E9591]">${formatDisplayDate(iso)}: Belum ada data</span>`;
+            }
+          });
+        });
       }
 
-      function syncControlsUI() {
+      function renderAll() {
+        const computedList = computeAllEntries();
+
+        // Tab Switch UI
         const isPortfolio = state.settings.tab === 'portfolio';
         document.getElementById('viewPortfolio').classList.toggle('hidden', !isPortfolio);
         document.getElementById('viewTrade').classList.toggle('hidden', isPortfolio);
 
-        const tabPort = document.getElementById('tabPortfolio');
-        const tabTrd = document.getElementById('tabTrade');
-        tabPort.className = `py-3 text-[13px] font-semibold tracking-wider uppercase text-center border-b-2 transition-colors ${isPortfolio ? 'text-[#22C55E] border-[#22C55E]' : 'text-[#8E9591] border-transparent hover:text-[#D1D5DB]'}`;
-        tabTrd.className = `py-3 text-[13px] font-semibold tracking-wider uppercase text-center border-b-2 transition-colors ${!isPortfolio ? 'text-[#22C55E] border-[#22C55E]' : 'text-[#8E9591] border-transparent hover:text-[#D1D5DB]'}`;
+        document.getElementById('tabPortfolio').className = `py-3 text-[13px] font-semibold tracking-wider uppercase text-center border-b-2 transition-colors ${isPortfolio ? 'text-[#22C55E] border-[#22C55E]' : 'text-[#8E9591] border-transparent hover:text-[#D1D5DB]'}`;
+        document.getElementById('tabTrade').className = `py-3 text-[13px] font-semibold tracking-wider uppercase text-center border-b-2 transition-colors ${!isPortfolio ? 'text-[#22C55E] border-[#22C55E]' : 'text-[#8E9591] border-transparent hover:text-[#D1D5DB]'}`;
 
+        // Mode & Period UI
         const isDaily = state.settings.mode === 'daily';
         document.getElementById('btnModeDaily').className = `px-4 py-1.5 rounded-full text-xs font-medium border transition ${isDaily ? 'border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E]' : 'border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB]'}`;
         document.getElementById('btnModeMonthly').className = `px-4 py-1.5 rounded-full text-xs font-medium border transition ${!isDaily ? 'border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E]' : 'border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB]'}`;
 
-        const periodNames = {
-          MTD: 'This Month',
-          '1M': 'Last 1 Month',
-          '3M': 'Last 3 Months',
-          '6M': 'Last 6 Months',
-          '1Y': '1 Year (252 Hari)',
-          YTD: 'YTD',
-          ALL: 'All Time'
-        };
-        document.getElementById('selectedPeriodLabel').textContent = periodNames[state.settings.period] || 'Last 1 Month';
-        document.querySelectorAll('.period-option').forEach(btn => {
+        let periodDisplay = PERIOD_LABELS[state.settings.period] || 'Bulanan';
+        if (state.settings.period === 'CUSTOM' && state.settings.customStart && state.settings.customEnd) {
+          periodDisplay = `${formatDisplayDate(state.settings.customStart)} – ${formatDisplayDate(state.settings.customEnd)}`;
+        }
+        document.getElementById('selectedPeriodLabel').textContent = periodDisplay;
+
+        document.querySelectorAll('.period-option, .trade-period-option').forEach(btn => {
           const active = btn.dataset.period === state.settings.period;
-          btn.className = `period-option w-full text-left px-3.5 py-2 text-xs ${active ? 'text-[#22C55E] font-medium bg-[#222724]/60' : 'text-[#D1D5DB] hover:bg-[#222724]'}`;
+          const baseCls = btn.classList.contains('trade-period-option') ? 'trade-period-option' : 'period-option';
+          btn.className = `${baseCls} w-full text-left px-3.5 py-2 text-xs ${active ? 'text-[#22C55E] font-medium bg-[#222724]/60' : 'text-[#D1D5DB] hover:bg-[#222724]'}`;
         });
+
+        const isCustom = state.settings.period === 'CUSTOM';
+        document.getElementById('customRangeBarPortfolio').classList.toggle('hidden', !isCustom);
+        document.getElementById('customRangeBarTrade').classList.toggle('hidden', !isCustom);
+        if (isCustom) {
+          document.getElementById('customStartPort').value = state.settings.customStart || '';
+          document.getElementById('customEndPort').value = state.settings.customEnd || '';
+          document.getElementById('customStartTrade').value = state.settings.customStart || '';
+          document.getElementById('customEndTrade').value = state.settings.customEnd || '';
+        }
 
         // Privacy icon toggle
         document.getElementById('iconEyeOpen').classList.toggle('hidden', state.settings.hideBalances);
         document.getElementById('iconEyeClosed').classList.toggle('hidden', !state.settings.hideBalances);
 
-        // Currency buttons
-        const isIDR = state.settings.currency === 'IDR';
-        document.getElementById('btnCurrencyIDR').className = `py-2.5 px-3 rounded-xl text-xs font-medium border text-center transition ${isIDR ? 'border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E]' : 'border-[#2F3532] bg-[#111312] text-[#8E9591]'}`;
-        document.getElementById('btnCurrencyUSD').className = `py-2.5 px-3 rounded-xl text-xs font-medium border text-center transition ${!isIDR ? 'border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E]' : 'border-[#2F3532] bg-[#111312] text-[#8E9591]'}`;
-        document.getElementById('equityInputPrefix').classList.toggle('hidden', isIDR);
+        // Currency buttons in Settings
+        const isUsd = state.settings.currency === 'USD';
+        document.getElementById('btnCurrencyIDR').className = `py-2.5 px-3 rounded-xl text-xs font-medium border text-center transition ${!isUsd ? 'border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E]' : 'border-[#2F3532] bg-[#111312] text-[#8E9591]'}`;
+        document.getElementById('btnCurrencyUSD').className = `py-2.5 px-3 rounded-xl text-xs font-medium border text-center transition ${isUsd ? 'border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E]' : 'border-[#2F3532] bg-[#111312] text-[#8E9591]'}`;
+        document.getElementById('equityInputPrefix').classList.toggle('hidden', !isUsd);
+        document.getElementById('inputEquity').classList.toggle('pl-8', isUsd);
+
+        renderHeroPortfolioSummary(computedList);
+        renderPerformanceTable(computedList);
+        renderTradeAnalytics(computedList);
       }
 
-      function renderAll() {
-        syncControlsUI();
-        const computed = computeAllEntries();
-        renderHeroSummary(computed);
-        renderPerformanceTable(computed);
-        renderTradeAnalytics(computed);
+      // ==================== ENTRY MODAL & CUSTOM CALENDAR ====================
+      function getPreviousEquityForDate(targetIso, ignoreOriginalIso = '') {
+        const sorted = [...state.entries]
+          .filter(e => e.date !== ignoreOriginalIso && e.date < targetIso)
+          .sort((a, b) => a.date.localeCompare(b.date));
+        return sorted.length ? Number(sorted[sorted.length - 1].equity) || 0 : null;
       }
 
-      // ==================== CUSTOM CALENDAR & ENTRY MODAL ====================
       function updateModalDateBadge() {
         const iso = document.getElementById('inputDate').value;
-        const dt = parseIsoLocal(iso);
-        const dayIdx = dt.getDay();
+        if (!iso) return;
+        document.getElementById('calendarSelectedText').textContent = formatDisplayDate(iso);
+        const dayName = getIndonesianDayName(iso);
         const badge = document.getElementById('dayNameBadge');
         const warn = document.getElementById('weekendWarning');
-        const selText = document.getElementById('calendarSelectedText');
+        const weekend = isWeekendDate(iso);
 
-        if (selText) selText.textContent = formatDisplayDate(iso);
-        if (badge) badge.textContent = DAYS_ID[dayIdx] || 'Senin';
-
-        const isWeekend = dayIdx === 0 || dayIdx === 6;
-        if (warn) warn.classList.toggle('hidden', !isWeekend);
-        if (badge) {
-          badge.className = isWeekend
-            ? 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-400'
-            : 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]';
+        badge.textContent = dayName;
+        if (weekend) {
+          badge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-400';
+          warn.classList.remove('hidden');
+        } else {
+          badge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]';
+          warn.classList.add('hidden');
         }
+
+        const orig = document.getElementById('editingOriginalDate').value;
+        const prevEq = getPreviousEquityForDate(iso, orig);
+        const hintEl = document.getElementById('prevEquityHint');
+        if (prevEq !== null) {
+          hintEl.textContent = `Sebelumnya: ${formatBalanceDisplay(prevEq)}`;
+        } else {
+          hintEl.textContent = 'Hari Pertama (Modal Awal)';
+        }
+        updateLivePnlPreview();
+      }
+
+      function updateLivePnlPreview() {
+        const iso = document.getElementById('inputDate').value;
+        const orig = document.getElementById('editingOriginalDate').value;
+        const eqVal = parseFloat(document.getElementById('inputEquity').value);
+        const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
+        const netFlow = cfRaw * state.cashflowSign;
+        const previewEl = document.getElementById('livePnlPreview');
+
+        if (isNaN(eqVal)) {
+          previewEl.textContent = '0 (0.00%)';
+          previewEl.className = 'text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]';
+          return;
+        }
+
+        const prevEq = getPreviousEquityForDate(iso, orig);
+        if (prevEq === null) {
+          previewEl.textContent = '0 (0.00%) • Modal Awal';
+          previewEl.className = 'text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]';
+          return;
+        }
+
+        const pnl = eqVal - prevEq - netFlow;
+        const base = prevEq + netFlow;
+        const pct = base > 0 ? (pnl / base) * 100 : 0;
+        previewEl.textContent = `${formatCurrency(pnl, true)} (${formatPercent(pct)})`;
+        previewEl.className = `text-sm font-semibold ${getValueColorClass(pnl)} [font-variant-numeric:tabular-nums]`;
       }
 
       function renderCustomCalendar() {
-        const titleEl = document.getElementById('calMonthYearTitle');
-        const gridEl = document.getElementById('customCalendarDays');
-        if (!titleEl || !gridEl) return;
-
         const year = state.calViewYear;
         const month = state.calViewMonth;
-        titleEl.textContent = `${MONTHS_FULL_ID[month]} ${year}`;
+        const monthNamesFull = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        document.getElementById('calMonthYearTitle').textContent = `${monthNamesFull[month]} ${year}`;
 
+        const firstDayOfMonth = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
         const selectedIso = document.getElementById('inputDate').value;
         const todayIso = toIsoDateLocal(new Date());
         const existingSet = new Set(state.entries.map(e => e.date));
 
-        const firstDayOfWeek = new Date(year, month, 1).getDay();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-
+        const grid = document.getElementById('customCalendarDays');
         let html = '';
-        for (let i = 0; i < firstDayOfWeek; i++) {
-          html += `<div></div>`;
+
+        for (let i = 0; i < firstDayOfMonth; i++) {
+          html += `<div class="h-9"></div>`;
         }
 
-        for (let d = 1; d <= daysInMonth; d++) {
-          const iso = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-          const dow = new Date(year, month, d).getDay();
+        for (let day = 1; day <= daysInMonth; day++) {
+          const iso = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const dow = new Date(year, month, day).getDay();
           const isWeekend = dow === 0 || dow === 6;
           const isSelected = iso === selectedIso;
           const isToday = iso === todayIso;
-          const hasEntry = existingSet.has(iso);
+          const hasData = existingSet.has(iso);
 
-          let btnCls = 'h-8 w-full rounded-lg text-xs font-medium flex flex-col items-center justify-center relative transition ';
+          let btnCls = 'h-9 rounded-xl text-xs font-medium flex flex-col items-center justify-center relative transition ';
           if (isSelected) {
             btnCls += 'bg-[#22C55E] text-[#090D0B] font-bold shadow-sm';
           } else if (isToday) {
-            btnCls += 'ring-1 ring-[#22C55E]/70 text-[#F3F4F6] hover:bg-[#1F2421]';
+            btnCls += 'ring-1 ring-[#22C55E] text-[#22C55E] bg-[#181B19]';
           } else if (isWeekend) {
-            btnCls += 'text-[#525855] hover:bg-[#181B19]';
+            btnCls += 'text-[#5A625E] hover:bg-[#181B19]';
           } else {
-            btnCls += 'text-[#D1D5DB] hover:bg-[#1F2421]';
+            btnCls += 'text-[#F3F4F6] hover:bg-[#1F2421]';
           }
 
-          const dotHtml = hasEntry
-            ? `<span class="w-1 h-1 rounded-full ${isSelected ? 'bg-[#090D0B]' : 'bg-[#22C55E]'} absolute bottom-1"></span>`
-            : '';
+          const dotHtml = hasData
+            ? `<span class="w-1 h-1 rounded-full ${isSelected ? 'bg-[#090D0B]' : 'bg-[#22C55E]'} mt-0.5"></span>`
+            : `<span class="w-1 h-1 mt-0.5"></span>`;
 
-          html += `<button type="button" data-cal-date="${iso}" class="${btnCls}"><span>${d}</span>${dotHtml}</button>`;
+          html += `
+            <button type="button" data-cal-iso="${iso}" class="${btnCls}">
+              <span class="leading-none">${day}</span>
+              ${dotHtml}
+            </button>
+          `;
         }
 
-        gridEl.innerHTML = html;
+        grid.innerHTML = html;
+        grid.querySelectorAll('[data-cal-iso]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const chosen = btn.dataset.calIso;
+            document.getElementById('inputDate').value = chosen;
+            document.getElementById('customCalendarBox').classList.add('hidden');
+            document.getElementById('calendarChevron').classList.remove('rotate-180');
+            updateModalDateBadge();
+          });
+        });
       }
 
-      function setSelectedCalendarDate(iso) {
-        const clean = normalizeToIsoDate(iso);
-        document.getElementById('inputDate').value = clean;
-        const dt = parseIsoLocal(clean);
-        state.calViewYear = dt.getFullYear();
-        state.calViewMonth = dt.getMonth();
-        updateModalDateBadge();
-        renderCustomCalendar();
-        updateLivePnlPreview();
-      }
-
-      function getReferencePrevEquityForDate(targetDate, originalEditDate) {
-        const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
-        const prior = sorted.filter(e => e.date < targetDate && e.date !== originalEditDate);
-        if (prior.length > 0) return prior[prior.length - 1].equity;
-        return null;
-      }
-
-      function updateLivePnlPreview() {
-        const targetDate = document.getElementById('inputDate').value;
-        const origDate = document.getElementById('editingOriginalDate').value;
-        const equityVal = parseFloat(document.getElementById('inputEquity').value);
-        const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
-        const netFlow = state.cashflowSign * Math.abs(cfRaw);
-
-        const prevEq = getReferencePrevEquityForDate(targetDate, origDate);
-        const hintEl = document.getElementById('prevEquityHint');
-        const previewEl = document.getElementById('livePnlPreview');
-
-        if (prevEq === null) {
-          hintEl.textContent = 'Hari pertama (Modal awal)';
-          previewEl.textContent = '0 (0.00%)';
-          previewEl.className = 'text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]';
-          return;
+      function setCashflowSign(sign) {
+        state.cashflowSign = sign;
+        const btnDep = document.getElementById('btnFlowDeposit');
+        const btnWit = document.getElementById('btnFlowWithdraw');
+        if (sign === 1) {
+          btnDep.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition';
+          btnWit.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#181B19] text-[#8E9591] border border-[#2F3532] transition';
+        } else {
+          btnDep.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#181B19] text-[#8E9591] border border-[#2F3532] transition';
+          btnWit.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#E05252]/15 text-[#E05252] border border-[#E05252]/40 transition';
         }
-
-        hintEl.textContent = `Sebelumnya: ${formatCurrency(prevEq, false)}`;
-        if (isNaN(equityVal)) {
-          previewEl.textContent = '0 (0.00%)';
-          previewEl.className = 'text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]';
-          return;
-        }
-
-        const pnl = (equityVal - prevEq) - netFlow;
-        const capBase = prevEq + (netFlow > 0 ? netFlow : 0);
-        const pct = capBase > 0 ? (pnl / capBase) * 100 : 0;
-        previewEl.textContent = formatSignedPnl(pnl, pct);
-        previewEl.className = `text-sm font-semibold ${getPnlColorClass(pnl)} [font-variant-numeric:tabular-nums]`;
       }
 
       function openEntryModal(editDateIso = null, expandCashflow = false) {
-        const backdrop = document.getElementById('entryModalBackdrop');
+        const modal = document.getElementById('entryModalBackdrop');
         const titleEl = document.getElementById('entryModalTitle');
         const origInput = document.getElementById('editingOriginalDate');
+        const dateInput = document.getElementById('inputDate');
         const eqInput = document.getElementById('inputEquity');
         const cfInput = document.getElementById('inputCashflowAmount');
         const noteInput = document.getElementById('inputNote');
-        const delBtn = document.getElementById('btnDeleteEntry');
+        const btnDelete = document.getElementById('btnDeleteEntry');
         const delConfirm = document.getElementById('inlineDeleteConfirm');
+        const cfContainer = document.getElementById('cashflowInputContainer');
 
         delConfirm.classList.add('hidden');
         document.getElementById('customCalendarBox').classList.add('hidden');
         document.getElementById('calendarChevron').classList.remove('rotate-180');
 
-        const existing = editDateIso ? state.entries.find(e => e.date === editDateIso) : null;
-
-        if (existing) {
+        if (editDateIso) {
+          const found = state.entries.find(e => e.date === editDateIso);
           titleEl.textContent = 'Edit Data Harian';
-          origInput.value = existing.date;
-          setSelectedCalendarDate(existing.date);
-          eqInput.value = existing.equity;
-          noteInput.value = existing.note || '';
-          delBtn.classList.remove('hidden');
+          origInput.value = editDateIso;
+          dateInput.value = editDateIso;
+          eqInput.value = found ? found.equity : '';
+          noteInput.value = found && found.note ? found.note : '';
+          btnDelete.classList.remove('hidden');
 
-          if (Math.abs(existing.netFlow) > 0.005) {
-            state.cashflowSign = existing.netFlow >= 0 ? 1 : -1;
-            cfInput.value = Math.abs(existing.netFlow);
-            document.getElementById('cashflowInputContainer').classList.remove('hidden');
+          if (found && found.netFlow !== 0) {
+            setCashflowSign(found.netFlow >= 0 ? 1 : -1);
+            cfInput.value = Math.abs(found.netFlow);
+            cfContainer.classList.remove('hidden');
           } else {
-            state.cashflowSign = 1;
+            setCashflowSign(1);
             cfInput.value = '';
-            document.getElementById('cashflowInputContainer').classList.toggle('hidden', !expandCashflow);
+            cfContainer.classList.toggle('hidden', !expandCashflow);
           }
         } else {
           titleEl.textContent = 'Update Equity Harian';
           origInput.value = '';
-          const nextIso = getNextTradingDayIso();
-          setSelectedCalendarDate(nextIso);
           const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
-          eqInput.value = sorted.length > 0 ? sorted[sorted.length - 1].equity : '';
+          const defaultDate = sorted.length ? getNextTradingDay(sorted[sorted.length - 1].date) : toIsoDateLocal(new Date());
+          dateInput.value = defaultDate;
+          eqInput.value = sorted.length ? sorted[sorted.length - 1].equity : '';
           noteInput.value = '';
-          state.cashflowSign = 1;
+          setCashflowSign(1);
           cfInput.value = '';
-          delBtn.classList.add('hidden');
-          document.getElementById('cashflowInputContainer').classList.toggle('hidden', !expandCashflow);
+          btnDelete.classList.add('hidden');
+          cfContainer.classList.toggle('hidden', !expandCashflow);
         }
 
-        syncCashflowButtonsUI();
-        updateLivePnlPreview();
-        backdrop.classList.remove('hidden');
+        const dObj = parseIsoLocal(dateInput.value);
+        state.calViewYear = dObj.getFullYear();
+        state.calViewMonth = dObj.getMonth();
+
+        updateModalDateBadge();
+        modal.classList.remove('hidden');
       }
 
       function closeEntryModal() {
         document.getElementById('entryModalBackdrop').classList.add('hidden');
       }
 
-      function syncCashflowButtonsUI() {
-        const isDep = state.cashflowSign === 1;
-        document.getElementById('btnFlowDeposit').className = `py-1.5 rounded-lg text-xs font-medium border transition ${isDep ? 'bg-[#22C55E]/15 text-[#22C55E] border-[#22C55E]/40' : 'bg-[#181B19] text-[#8E9591] border-[#2F3532]'}`;
-        document.getElementById('btnFlowWithdraw').className = `py-1.5 rounded-lg text-xs font-medium border transition ${!isDep ? 'bg-[#E05252]/15 text-[#E05252] border-[#E05252]/40' : 'bg-[#181B19] text-[#8E9591] border-[#2F3532]'}`;
-      }
-
-      function applyAutoCashflowToEquity() {
-        if (!document.getElementById('chkAutoAdjustEquity').checked) return;
-        const targetDate = document.getElementById('inputDate').value;
-        const origDate = document.getElementById('editingOriginalDate').value;
-        const prevEq = getReferencePrevEquityForDate(targetDate, origDate);
-        if (prevEq === null) return;
-        const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
-        const newEq = Math.max(0, prevEq + (state.cashflowSign * Math.abs(cfRaw)));
-        document.getElementById('inputEquity').value = newEq;
-      }
-
-      // ==================== TOAST HELPER ====================
-      let toastTimer = null;
-      function showToast(msg, isError = false) {
-        const banner = document.getElementById('toastBanner');
-        const dot = document.getElementById('toastDot');
-        const text = document.getElementById('toastMessage');
-        text.textContent = msg;
-        dot.className = `w-2 h-2 rounded-full ${isError ? 'bg-[#E05252]' : 'bg-[#22C55E]'}`;
-        banner.classList.remove('hidden');
-        if (toastTimer) clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => banner.classList.add('hidden'), 2800);
-      }
-
-      // ==================== EXPORT / SIMULATOR HELPERS ====================
+      // ==================== EXPORT / IMPORT HELPERS ====================
       function downloadFile(filename, content, mimeType) {
         const blob = new Blob([content], { type: mimeType });
         const url = URL.createObjectURL(blob);
@@ -1878,26 +2211,33 @@ function doPost(e) {
         URL.revokeObjectURL(url);
       }
 
-      function generate1YearSampleEntries() {
+      function generateOneYearSampleData() {
         const list = [];
-        let eq = 1200000;
-        const d = new Date();
-        d.setDate(d.getDate() - 365);
-        while (list.length < 252) {
-          const dow = d.getDay();
-          if (dow !== 0 && dow !== 6) {
-            const pctMove = (Math.random() - 0.455) * 0.024;
-            eq = Math.max(100000, Math.round(eq * (1 + pctMove)));
-            list.push({ date: toIsoDateLocal(d), equity: eq, netFlow: 0, note: '' });
+        let curDate = new Date(2025, 10, 24);
+        let equity = 1000000;
+        for (let i = 0; i < 252; i++) {
+          while (curDate.getDay() === 0 || curDate.getDay() === 6) {
+            curDate.setDate(curDate.getDate() + 1);
           }
-          d.setDate(d.getDate() + 1);
+          const drift = 0.00055;
+          const shock = (Math.sin(i * 0.7) * 0.0065) + (Math.cos(i * 1.9) * 0.0055);
+          if (i > 0) {
+            equity = Math.round(equity * (1 + drift + shock));
+          }
+          list.push({
+            date: toIsoDateLocal(curDate),
+            equity,
+            netFlow: 0,
+            note: i === 0 ? 'Modal awal simulasi' : ''
+          });
+          curDate.setDate(curDate.getDate() + 1);
         }
         return list;
       }
 
-      // ==================== EVENT LISTENERS ====================
+      // ==================== EVENT BINDINGS ====================
       function bindEvents() {
-        // Tabs
+        // Primary Tabs
         document.getElementById('tabPortfolio').addEventListener('click', () => {
           state.settings.tab = 'portfolio';
           saveLocal();
@@ -1909,7 +2249,7 @@ function doPost(e) {
           renderAll();
         });
 
-        // Daily / Monthly Toggle
+        // Daily / Monthly Mode
         document.getElementById('btnModeDaily').addEventListener('click', () => {
           state.settings.mode = 'daily';
           saveLocal();
@@ -1921,23 +2261,65 @@ function doPost(e) {
           renderAll();
         });
 
-        // Period Dropdown
+        // Period Dropdown (Portfolio & Trade)
         const btnPeriod = document.getElementById('btnPeriodDropdown');
         const menuPeriod = document.getElementById('periodDropdownMenu');
+        const btnTradePeriod = document.getElementById('btnTradePeriodDropdown');
+        const menuTradePeriod = document.getElementById('tradePeriodDropdownMenu');
+
+        const selectPeriod = (newPeriod) => {
+          state.settings.period = newPeriod;
+          state.visibleRowLimit = INITIAL_VISIBLE_ROWS;
+          if (newPeriod === 'CUSTOM' && state.entries.length > 0) {
+            const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
+            if (!state.settings.customStart) state.settings.customStart = sorted[0].date;
+            if (!state.settings.customEnd) state.settings.customEnd = sorted[sorted.length - 1].date;
+          }
+          menuPeriod.classList.add('hidden');
+          menuTradePeriod.classList.add('hidden');
+          saveLocal();
+          renderAll();
+        };
+
         btnPeriod.addEventListener('click', (e) => {
           e.stopPropagation();
+          menuTradePeriod.classList.add('hidden');
           menuPeriod.classList.toggle('hidden');
         });
-        document.querySelectorAll('.period-option').forEach(btn => {
-          btn.addEventListener('click', () => {
-            state.settings.period = btn.dataset.period;
-            state.visibleRowLimit = INITIAL_VISIBLE_ROWS;
-            menuPeriod.classList.add('hidden');
-            saveLocal();
-            renderAll();
-          });
+        btnTradePeriod.addEventListener('click', (e) => {
+          e.stopPropagation();
+          menuPeriod.classList.add('hidden');
+          menuTradePeriod.classList.toggle('hidden');
         });
-        document.addEventListener('click', () => menuPeriod.classList.add('hidden'));
+
+        document.querySelectorAll('.period-option, .trade-period-option').forEach(btn => {
+          btn.addEventListener('click', () => selectPeriod(btn.dataset.period));
+        });
+
+        const handleCustomRangeChange = (startVal, endVal) => {
+          state.settings.customStart = normalizeToIsoDate(startVal);
+          state.settings.customEnd = normalizeToIsoDate(endVal);
+          saveLocal();
+          renderAll();
+        };
+
+        document.getElementById('customStartPort').addEventListener('change', (e) => {
+          handleCustomRangeChange(e.target.value, document.getElementById('customEndPort').value);
+        });
+        document.getElementById('customEndPort').addEventListener('change', (e) => {
+          handleCustomRangeChange(document.getElementById('customStartPort').value, e.target.value);
+        });
+        document.getElementById('customStartTrade').addEventListener('change', (e) => {
+          handleCustomRangeChange(e.target.value, document.getElementById('customEndTrade').value);
+        });
+        document.getElementById('customEndTrade').addEventListener('change', (e) => {
+          handleCustomRangeChange(document.getElementById('customStartTrade').value, e.target.value);
+        });
+
+        document.addEventListener('click', () => {
+          menuPeriod.classList.add('hidden');
+          menuTradePeriod.classList.add('hidden');
+        });
 
         // Info Card
         document.getElementById('btnToggleInfo').addEventListener('click', () => {
@@ -1952,27 +2334,43 @@ function doPost(e) {
           state.settings.hideBalances = !state.settings.hideBalances;
           saveLocal();
           renderAll();
+          showToast(state.settings.hideBalances ? 'Saldo disembunyikan' : 'Saldo ditampilkan');
         });
 
-        // Manual Refresh Button (iOS Home Screen)
+        // Refresh Button (iOS Home Screen friendly)
         document.getElementById('btnRefreshApp').addEventListener('click', async () => {
           const icon = document.getElementById('refreshIconSvg');
           icon.classList.add('rotate-180');
           setTimeout(() => icon.classList.remove('rotate-180'), 550);
           if (state.cloud.url) {
-            await pullEntriesFromCloud(false);
+            await pullFromCloud(false);
           } else {
             renderAll();
             showToast('Tampilan diperbarui');
           }
         });
 
-        // Table Row Click Delegation (Edit Entry)
-        document.getElementById('performanceTableBody').addEventListener('click', (e) => {
-          const rowBtn = e.target.closest('[data-edit-date]');
-          if (rowBtn) {
-            openEntryModal(rowBtn.dataset.editDate);
+        // Heatmap Calendar Month Navigation
+        document.getElementById('btnHeatmapPrevMonth').addEventListener('click', () => {
+          if (state.heatmapMonth === null) return;
+          state.heatmapMonth--;
+          if (state.heatmapMonth < 0) {
+            state.heatmapMonth = 11;
+            state.heatmapYear--;
           }
+          document.getElementById('heatmapSelectedInfo').textContent = 'Ketuk tanggal untuk melihat P&L';
+          renderPnlHeatmapCalendar(computeAllEntries());
+        });
+
+        document.getElementById('btnHeatmapNextMonth').addEventListener('click', () => {
+          if (state.heatmapMonth === null) return;
+          state.heatmapMonth++;
+          if (state.heatmapMonth > 11) {
+            state.heatmapMonth = 0;
+            state.heatmapYear++;
+          }
+          document.getElementById('heatmapSelectedInfo').textContent = 'Ketuk tanggal untuk melihat P&L';
+          renderPnlHeatmapCalendar(computeAllEntries());
         });
 
         // Load More Rows
@@ -1992,9 +2390,15 @@ function doPost(e) {
         document.getElementById('btnOpenCustomCalendar').addEventListener('click', () => {
           const box = document.getElementById('customCalendarBox');
           const chev = document.getElementById('calendarChevron');
+          const willShow = box.classList.contains('hidden');
+          if (willShow) {
+            const dObj = parseIsoLocal(document.getElementById('inputDate').value);
+            state.calViewYear = dObj.getFullYear();
+            state.calViewMonth = dObj.getMonth();
+            renderCustomCalendar();
+          }
           box.classList.toggle('hidden');
-          chev.classList.toggle('rotate-180');
-          if (!box.classList.contains('hidden')) renderCustomCalendar();
+          chev.classList.toggle('rotate-180', willShow);
         });
 
         document.getElementById('btnCalPrevMonth').addEventListener('click', () => {
@@ -2015,86 +2419,93 @@ function doPost(e) {
           renderCustomCalendar();
         });
 
-        document.getElementById('customCalendarDays').addEventListener('click', (e) => {
-          const dayBtn = e.target.closest('[data-cal-date]');
-          if (!dayBtn) return;
-          setSelectedCalendarDate(dayBtn.dataset.calDate);
-          document.getElementById('customCalendarBox').classList.add('hidden');
-          document.getElementById('calendarChevron').classList.remove('rotate-180');
-        });
-
         document.getElementById('btnSuggestNextTradingDay').addEventListener('click', () => {
-          const cur = parseIsoLocal(document.getElementById('inputDate').value);
-          cur.setDate(cur.getDate() + 1);
-          while (cur.getDay() === 0 || cur.getDay() === 6) {
-            cur.setDate(cur.getDate() + 1);
-          }
-          setSelectedCalendarDate(toIsoDateLocal(cur));
+          const cur = document.getElementById('inputDate').value;
+          const next = getNextTradingDay(cur);
+          document.getElementById('inputDate').value = next;
+          const dObj = parseIsoLocal(next);
+          state.calViewYear = dObj.getFullYear();
+          state.calViewMonth = dObj.getMonth();
+          renderCustomCalendar();
+          updateModalDateBadge();
         });
 
         document.getElementById('btnSuggestToday').addEventListener('click', () => {
-          setSelectedCalendarDate(toIsoDateLocal(new Date()));
+          const today = toIsoDateLocal(new Date());
+          document.getElementById('inputDate').value = today;
+          const dObj = parseIsoLocal(today);
+          state.calViewYear = dObj.getFullYear();
+          state.calViewMonth = dObj.getMonth();
+          renderCustomCalendar();
+          updateModalDateBadge();
         });
 
-        // Cashflow Accordion & Auto-Adjust
+        // Cashflow Section & Auto-Adjust Equity
         document.getElementById('btnToggleCashflowSection').addEventListener('click', () => {
-          document.getElementById('cashflowInputContainer').classList.toggle('hidden');
-          document.getElementById('cashflowChevron').classList.toggle('rotate-180');
+          const box = document.getElementById('cashflowInputContainer');
+          const chev = document.getElementById('cashflowChevron');
+          box.classList.toggle('hidden');
+          chev.classList.toggle('rotate-180');
         });
 
         document.getElementById('btnFlowDeposit').addEventListener('click', () => {
-          state.cashflowSign = 1;
-          syncCashflowButtonsUI();
-          applyAutoCashflowToEquity();
+          setCashflowSign(1);
+          applyAutoAdjustEquity();
           updateLivePnlPreview();
         });
 
         document.getElementById('btnFlowWithdraw').addEventListener('click', () => {
-          state.cashflowSign = -1;
-          syncCashflowButtonsUI();
-          applyAutoCashflowToEquity();
+          setCashflowSign(-1);
+          applyAutoAdjustEquity();
           updateLivePnlPreview();
         });
+
+        function applyAutoAdjustEquity() {
+          if (!document.getElementById('chkAutoAdjustEquity').checked) return;
+          const iso = document.getElementById('inputDate').value;
+          const orig = document.getElementById('editingOriginalDate').value;
+          const prevEq = getPreviousEquityForDate(iso, orig);
+          if (prevEq === null) return;
+          const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
+          document.getElementById('inputEquity').value = prevEq + cfRaw * state.cashflowSign;
+        }
 
         document.getElementById('inputCashflowAmount').addEventListener('input', () => {
-          applyAutoCashflowToEquity();
-          updateLivePnlPreview();
-        });
-
-        document.getElementById('chkAutoAdjustEquity').addEventListener('change', () => {
-          applyAutoCashflowToEquity();
+          applyAutoAdjustEquity();
           updateLivePnlPreview();
         });
 
         document.getElementById('inputEquity').addEventListener('input', updateLivePnlPreview);
 
-        // Save Entry Form
+        // Entry Form Submit
         document.getElementById('entryForm').addEventListener('submit', async (e) => {
           e.preventDefault();
           const dateVal = normalizeToIsoDate(document.getElementById('inputDate').value);
-          const origDate = normalizeToIsoDate(document.getElementById('editingOriginalDate').value);
+          const origDate = document.getElementById('editingOriginalDate').value;
           const equityVal = parseFloat(document.getElementById('inputEquity').value);
           const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
-          const netFlow = state.cashflowSign * Math.abs(cfRaw);
+          const netFlowVal = cfRaw * state.cashflowSign;
           const noteVal = document.getElementById('inputNote').value.trim();
 
-          if (!dateVal || isNaN(equityVal) || equityVal < 0) {
-            showToast('Masukkan tanggal dan nominal valid', true);
+          if (isNaN(equityVal) || equityVal < 0) {
+            showToast('Masukkan nominal Equity yang valid', 'error');
             return;
           }
 
           state.entries = state.entries.filter(item => item.date !== dateVal && (!origDate || item.date !== origDate));
-          state.entries.push({ date: dateVal, equity: equityVal, netFlow, note: noteVal });
+          state.entries.push({
+            date: dateVal,
+            equity: equityVal,
+            netFlow: netFlowVal,
+            note: noteVal
+          });
           state.entries.sort((a, b) => a.date.localeCompare(b.date));
 
           saveLocal();
-          renderAll();
           closeEntryModal();
-          showToast('Data berhasil disimpan');
-
-          if (state.cloud.url) {
-            await pushEntriesToCloud(true);
-          }
+          renderAll();
+          showToast('Data harian berhasil disimpan');
+          await pushToCloud(true);
         });
 
         // Delete Entry
@@ -2105,22 +2516,21 @@ function doPost(e) {
           document.getElementById('inlineDeleteConfirm').classList.add('hidden');
         });
         document.getElementById('btnConfirmDelete').addEventListener('click', async () => {
-          const origDate = normalizeToIsoDate(document.getElementById('editingOriginalDate').value);
-          if (origDate) {
-            state.entries = state.entries.filter(e => e.date !== origDate);
-            saveLocal();
-            renderAll();
-            closeEntryModal();
-            showToast('Catatan dihapus');
-            if (state.cloud.url) await pushEntriesToCloud(true);
-          }
+          const origDate = document.getElementById('editingOriginalDate').value;
+          if (!origDate) return;
+          state.entries = state.entries.filter(item => item.date !== origDate);
+          saveLocal();
+          closeEntryModal();
+          renderAll();
+          showToast('Catatan tanggal dihapus');
+          await pushToCloud(true);
         });
 
         // Settings Modal
         const openSettings = () => {
           document.getElementById('inputAppsScriptUrl').value = state.cloud.url || '';
           document.getElementById('inlineResetConfirm').classList.add('hidden');
-          updateCloudStatusUI();
+          updateCloudBadgeUI();
           document.getElementById('settingsModalBackdrop').classList.remove('hidden');
         };
         document.getElementById('btnOpenSettingsLeft').addEventListener('click', openSettings);
@@ -2130,6 +2540,7 @@ function doPost(e) {
           document.getElementById('settingsModalBackdrop').classList.add('hidden');
         });
 
+        // Google Apps Script Setup & Sync Controls
         document.getElementById('btnToggleScriptGuide').addEventListener('click', () => {
           document.getElementById('appsScriptSetupGuide').classList.toggle('hidden');
         });
@@ -2142,86 +2553,115 @@ function doPost(e) {
           ta.select();
           document.execCommand('copy');
           document.body.removeChild(ta);
-          showToast('Kode Apps Script disalin');
+          showToast('Kode Apps Script disalin!');
         });
 
         document.getElementById('btnSaveAppsScriptUrl').addEventListener('click', async () => {
           const urlVal = document.getElementById('inputAppsScriptUrl').value.trim();
           if (!urlVal) {
-            showToast('Masukkan URL Apps Script valid', true);
+            showToast('Masukkan URL Web App Apps Script', 'error');
             return;
           }
           state.cloud.url = urlVal;
-          localStorage.setItem(STORAGE_KEY_CLOUD, urlVal);
-          await pullEntriesFromCloud(false);
+          saveLocal();
+          updateCloudBadgeUI();
+          await pullFromCloud(false);
         });
 
         document.getElementById('btnDisconnectCloud').addEventListener('click', () => {
           state.cloud.url = '';
           state.cloud.status = 'local';
-          localStorage.setItem(STORAGE_KEY_CLOUD, '');
           document.getElementById('inputAppsScriptUrl').value = '';
-          updateCloudStatusUI();
-          showToast('Koneksi cloud diputuskan');
+          saveLocal();
+          updateCloudBadgeUI();
+          showToast('Koneksi Cloud diputus (Mode Lokal)');
         });
 
-        document.getElementById('btnPushToCloud').addEventListener('click', () => pushEntriesToCloud(false));
-        document.getElementById('btnPullFromCloud').addEventListener('click', () => pullEntriesFromCloud(false));
+        document.getElementById('btnPushToCloud').addEventListener('click', () => pushToCloud(false));
+        document.getElementById('btnPullFromCloud').addEventListener('click', () => pullFromCloud(false));
 
-        // Currency
+        // Currency Switch
         document.getElementById('btnCurrencyIDR').addEventListener('click', () => {
           state.settings.currency = 'IDR';
           saveLocal();
           renderAll();
+          showToast('Format mata uang: IDR');
         });
         document.getElementById('btnCurrencyUSD').addEventListener('click', () => {
           state.settings.currency = 'USD';
           saveLocal();
           renderAll();
+          showToast('Format mata uang: USD ($)');
         });
 
-        // Export / Import
+        // Export CSV & JSON
         document.getElementById('btnExportCsv').addEventListener('click', () => {
           const computed = computeAllEntries();
-          const lines = ['Date,Equity,NetTopUp,PnL,PnL_Pct,Note'];
+          const lines = ['Date,Equity,NetTopUp,DailyPnL,DailyPnLPct,Note'];
           computed.forEach(r => {
-            lines.push(`${r.date},${r.equity},${r.netFlow},${r.pnl.toFixed(2)},${r.pnlPct.toFixed(2)}%,"${(r.note || '').replace(/"/g, '""')}"`);
+            const safeNote = `"${(r.note || '').replace(/"/g, '""')}"`;
+            lines.push(`${r.date},${r.equity},${r.netFlow},${r.pnl.toFixed(2)},${r.pnlPct.toFixed(4)},${safeNote}`);
           });
-          downloadFile(`etf-pnl-${toIsoDateLocal(new Date())}.csv`, lines.join('\n'), 'text/csv');
+          downloadFile(`etf-pnl-${toIsoDateLocal(new Date())}.csv`, lines.join('\n'), 'text/csv;charset=utf-8;');
+          showToast('File CSV berhasil diunduh');
         });
 
         document.getElementById('btnExportJson').addEventListener('click', () => {
-          downloadFile(`etf-pnl-backup-${toIsoDateLocal(new Date())}.json`, JSON.stringify({
+          const payload = JSON.stringify({
+            exportedAt: new Date().toISOString(),
             currency: state.settings.currency,
             entries: state.entries
-          }, null, 2), 'application/json');
+          }, null, 2);
+          downloadFile(`etf-pnl-backup-${toIsoDateLocal(new Date())}.json`, payload, 'application/json');
+          showToast('Backup JSON berhasil diunduh');
         });
 
-        document.getElementById('inputImportJson').addEventListener('change', async (e) => {
-          const file = e.target.files[0];
+        document.getElementById('inputImportJson').addEventListener('change', (e) => {
+          const file = e.target.files && e.target.files[0];
           if (!file) return;
-          try {
-            const parsed = JSON.parse(await file.text());
-            const list = Array.isArray(parsed) ? parsed : parsed.entries;
-            if (Array.isArray(list)) {
-              state.entries = list.map(x => ({
-                date: normalizeToIsoDate(x.date),
-                equity: Number(x.equity) || 0,
-                netFlow: Number(x.netFlow) || 0,
-                note: x.note ? String(x.note) : ''
-              })).filter(x => x.date).sort((a, b) => a.date.localeCompare(b.date));
+          const reader = new FileReader();
+          reader.onload = async (ev) => {
+            try {
+              const parsed = JSON.parse(ev.target.result);
+              const list = Array.isArray(parsed) ? parsed : parsed.entries;
+              if (!Array.isArray(list)) throw new Error('Invalid format');
+              state.entries = list.map(item => ({
+                date: normalizeToIsoDate(item.date),
+                equity: Number(item.equity) || 0,
+                netFlow: Number(item.netFlow) || 0,
+                note: item.note ? String(item.note) : ''
+              }));
               saveLocal();
               renderAll();
               showToast(`Berhasil import ${state.entries.length} data`);
-              if (state.cloud.url) await pushEntriesToCloud(true);
+              await pushToCloud(true);
+            } catch (err) {
+              showToast('Format file JSON tidak valid', 'error');
             }
-          } catch (err) {
-            showToast('File JSON tidak valid', true);
-          }
+          };
+          reader.readAsText(file);
           e.target.value = '';
         });
 
-        // Reset & Sample Simulators
+        // Simulator & Reset
+        document.getElementById('btnGenerate1YearSample').addEventListener('click', () => {
+          state.entries = generateOneYearSampleData();
+          state.visibleRowLimit = INITIAL_VISIBLE_ROWS;
+          saveLocal();
+          renderAll();
+          document.getElementById('settingsModalBackdrop').classList.add('hidden');
+          showToast('Simulasi 1 tahun (252 hari bursa) dimuat');
+        });
+
+        document.getElementById('btnRestoreSampleData').addEventListener('click', () => {
+          state.entries = [...SAMPLE_ENTRIES];
+          state.visibleRowLimit = INITIAL_VISIBLE_ROWS;
+          saveLocal();
+          renderAll();
+          document.getElementById('settingsModalBackdrop').classList.add('hidden');
+          showToast('Data contoh dipulihkan');
+        });
+
         document.getElementById('btnClearAllDataPrompt').addEventListener('click', () => {
           document.getElementById('inlineResetConfirm').classList.remove('hidden');
         });
@@ -2235,69 +2675,26 @@ function doPost(e) {
           document.getElementById('inlineResetConfirm').classList.add('hidden');
           document.getElementById('settingsModalBackdrop').classList.add('hidden');
           showToast('Semua data dikosongkan');
-          if (state.cloud.url) await pushEntriesToCloud(true);
-        });
-
-        document.getElementById('btnGenerate1YearSample').addEventListener('click', () => {
-          state.entries = generate1YearSampleEntries();
-          state.settings.period = '1Y';
-          saveLocal();
-          renderAll();
-          document.getElementById('settingsModalBackdrop').classList.add('hidden');
-          showToast('Simulasi 1 tahun (252 hari) dimuat');
-        });
-
-        document.getElementById('btnRestoreSampleData').addEventListener('click', () => {
-          state.entries = [...SAMPLE_ENTRIES];
-          saveLocal();
-          renderAll();
-          document.getElementById('settingsModalBackdrop').classList.add('hidden');
-          showToast('Data contoh dimuat');
+          await pushToCloud(true);
         });
       }
 
       // ==================== INITIALIZATION ====================
-      async function init() {
-        try {
-          const savedSettings = JSON.parse(localStorage.getItem(STORAGE_KEY_SETTINGS) || 'null');
-          if (savedSettings && typeof savedSettings === 'object') {
-            state.settings = { ...state.settings, ...savedSettings };
-          }
-
-          const savedCloud = localStorage.getItem(STORAGE_KEY_CLOUD);
-          if (savedCloud !== null) {
-            state.cloud.url = savedCloud;
-          }
-
-          const savedEntries = JSON.parse(localStorage.getItem(STORAGE_KEY_ENTRIES) || 'null');
-          if (Array.isArray(savedEntries)) {
-            state.entries = savedEntries
-              .map(x => ({
-                date: normalizeToIsoDate(x.date),
-                equity: Number(x.equity) || 0,
-                netFlow: Number(x.netFlow) || 0,
-                note: x.note ? String(x.note) : ''
-              }))
-              .filter(x => x.date)
-              .sort((a, b) => a.date.localeCompare(b.date));
-          } else if (!state.cloud.url) {
-            state.entries = [...SAMPLE_ENTRIES];
-            saveLocal();
-          }
-        } catch (err) {
-          console.error('Init storage error:', err);
-        }
-
+      function init() {
+        loadLocal();
         bindEvents();
-        updateCloudStatusUI();
+        updateCloudBadgeUI();
         renderAll();
-
         if (state.cloud.url) {
-          await pullEntriesFromCloud(true);
+          pullFromCloud(true);
         }
       }
 
-      window.addEventListener('DOMContentLoaded', init);
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
     })();
   </script>
 </body>
