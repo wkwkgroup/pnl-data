@@ -1528,8 +1528,33 @@ function doPost(e) {
       }
 
       function parseISODate(isoStr) {
-        const [y, m, d] = isoStr.split('-').map(Number);
-        return new Date(y, m - 1, d);
+        if (!isoStr) return new Date();
+        const clean = String(isoStr).trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
+          const [y, m, d] = clean.split('-').map(Number);
+          return new Date(y, m - 1, d);
+        }
+        const parsed = new Date(clean);
+        return isNaN(parsed.getTime()) ? new Date() : parsed;
+      }
+
+      function normalizeDateToISO(rawVal) {
+        if (!rawVal) return '';
+        if (rawVal instanceof Date && !isNaN(rawVal.getTime())) {
+          return formatISODate(rawVal);
+        }
+        const str = String(rawVal).trim();
+        // Match YYYY-MM-DD or YYYY/MM/DD at start
+        const ymdMatch = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+        if (ymdMatch) {
+          return `${ymdMatch[1]}-${ymdMatch[2].padStart(2, '0')}-${ymdMatch[3].padStart(2, '0')}`;
+        }
+        // Fallback for full JS Date strings like "Wed Nov 25 2026 00:00:00 GMT+0800"
+        const parsed = new Date(str);
+        if (!isNaN(parsed.getTime())) {
+          return formatISODate(parsed);
+        }
+        return '';
       }
 
       function formatISODate(dateObj) {
@@ -1720,13 +1745,13 @@ function doPost(e) {
           if (data && Array.isArray(data.entries)) {
             if (data.entries.length > 0) {
               state.entries = data.entries
-                .filter((item) => item && item.date && !isNaN(Number(item.equity)))
                 .map((item) => ({
-                  date: String(item.date).slice(0, 10),
-                  equity: Number(item.equity),
-                  netFlow: Number(item.netFlow) || 0,
-                  note: item.note ? String(item.note).slice(0, 60) : ''
-                }));
+                  date: item ? normalizeDateToISO(item.date) : '',
+                  equity: item ? Number(item.equity) : NaN,
+                  netFlow: item ? (Number(item.netFlow) || 0) : 0,
+                  note: item && item.note ? String(item.note).slice(0, 60) : ''
+                }))
+                .filter((item) => item.date && !isNaN(item.equity));
               if (data.currency === 'USD' || data.currency === 'IDR') {
                 state.currency = data.currency;
               }
@@ -1788,7 +1813,16 @@ function doPost(e) {
           }
           const parsed = JSON.parse(raw);
           state.currency = parsed.currency || 'IDR';
-          state.entries = Array.isArray(parsed.entries) ? parsed.entries : [];
+          state.entries = Array.isArray(parsed.entries)
+            ? parsed.entries
+                .map((item) => ({
+                  ...item,
+                  date: normalizeDateToISO(item.date),
+                  equity: Number(item.equity) || 0,
+                  netFlow: Number(item.netFlow) || 0
+                }))
+                .filter((item) => item.date)
+            : [];
           state.entries.sort((a, b) => a.date.localeCompare(b.date));
         } catch (err) {
           state.entries = [...DEFAULT_SAMPLE_DATA];
