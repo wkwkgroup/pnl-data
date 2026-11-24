@@ -70,6 +70,23 @@
             <span id="headerCloudLabel">Local</span>
           </button>
           <button
+            id="btnTogglePrivacy"
+            type="button"
+            aria-label="Sembunyikan atau Tampilkan Nominal Saldo"
+            title="Mode Privasi (Sensor Saldo)"
+            class="w-8 h-8 flex items-center justify-center rounded-full text-[#8E9591] hover:text-[#F3F4F6] hover:bg-[#181B19] active:scale-95 transition"
+          >
+            <!-- Eye Open Icon -->
+            <svg id="iconEyeOpen" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <!-- Eye Off Icon -->
+            <svg id="iconEyeClosed" class="hidden w-4 h-4 text-[#22C55E]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+            </svg>
+          </button>
+          <button
             id="btnRefreshApp"
             type="button"
             aria-label="Refresh & Sinkron Data"
@@ -579,6 +596,21 @@
             </span>
           </div>
 
+          <!-- Optional Short Journal / Note Field -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="inputNote" class="text-xs font-medium text-[#D1D5DB]">Catatan / Jurnal Singkat (Opsional)</label>
+              <span class="text-[10px] text-[#8E9591]">Maks. 60 karakter</span>
+            </div>
+            <input
+              type="text"
+              id="inputNote"
+              maxlength="60"
+              placeholder="Contoh: DCA VOO, Dividen masuk, CPI AS turun"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-xs text-[#F3F4F6] placeholder-[#5B635F] focus:outline-none focus:border-[#22C55E] transition"
+            />
+          </div>
+
           <!-- Action Buttons -->
           <div class="flex items-center gap-2.5 pt-1">
             <button
@@ -677,7 +709,8 @@
       entries.push({
         date: d,
         equity: Number(rows[i][1]) || 0,
-        netFlow: Number(rows[i][2]) || 0
+        netFlow: Number(rows[i][2]) || 0,
+        note: rows[i][5] ? String(rows[i][5]) : ''
       });
       if (rows[i][4]) currency = String(rows[i][4]);
     }
@@ -694,7 +727,7 @@ function doPost(e) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('ETF_PnL') || ss.insertSheet('ETF_PnL');
   sheet.clearContents();
-  var output = [['Date', 'Equity', 'NetTopUp', 'UpdatedAt', 'Currency']];
+  var output = [['Date', 'Equity', 'NetTopUp', 'UpdatedAt', 'Currency', 'Note']];
   var now = new Date().toISOString();
   var list = payload.entries || [];
   for (var i = 0; i &lt; list.length; i++) {
@@ -703,10 +736,11 @@ function doPost(e) {
       Number(list[i].equity) || 0,
       Number(list[i].netFlow) || 0,
       i === 0 ? now : '',
-      i === 0 ? (payload.currency || 'IDR') : ''
+      i === 0 ? (payload.currency || 'IDR') : '',
+      list[i].note || ''
     ]);
   }
-  sheet.getRange(1, 1, output.length, 5).setValues(output);
+  sheet.getRange(1, 1, output.length, 6).setValues(output);
   return ContentService.createTextOutput(JSON.stringify({
     status: 'ok',
     count: list.length
@@ -891,21 +925,21 @@ function doPost(e) {
       };
 
       const SAMPLE_ENTRIES = [
-        { date: '2026-11-04', equity: 1440000, netFlow: 0 },
-        { date: '2026-11-05', equity: 1444000, netFlow: 0 },
-        { date: '2026-11-06', equity: 1480000, netFlow: 0 },
-        { date: '2026-11-09', equity: 1484000, netFlow: 0 },
-        { date: '2026-11-10', equity: 1500000, netFlow: 0 },
-        { date: '2026-11-11', equity: 1508000, netFlow: 0 },
-        { date: '2026-11-12', equity: 1556000, netFlow: 0 },
-        { date: '2026-11-13', equity: 1556000, netFlow: 0 },
-        { date: '2026-11-16', equity: 1560000, netFlow: 0 },
-        { date: '2026-11-17', equity: 1576000, netFlow: 0 },
-        { date: '2026-11-18', equity: 1568000, netFlow: 0 },
-        { date: '2026-11-19', equity: 1564000, netFlow: 0 },
-        { date: '2026-11-20', equity: 1556000, netFlow: 0 },
-        { date: '2026-11-23', equity: 1552000, netFlow: 0 },
-        { date: '2026-11-24', equity: 1596000, netFlow: 0 }
+        { date: '2026-11-04', equity: 1440000, netFlow: 0, note: 'Modal awal ETF' },
+        { date: '2026-11-05', equity: 1444000, netFlow: 0, note: '' },
+        { date: '2026-11-06', equity: 1480000, netFlow: 0, note: 'Tech rally' },
+        { date: '2026-11-09', equity: 1484000, netFlow: 0, note: '' },
+        { date: '2026-11-10', equity: 1500000, netFlow: 0, note: '' },
+        { date: '2026-11-11', equity: 1508000, netFlow: 0, note: '' },
+        { date: '2026-11-12', equity: 1556000, netFlow: 0, note: 'CPI AS lebih rendah' },
+        { date: '2026-11-13', equity: 1556000, netFlow: 0, note: '' },
+        { date: '2026-11-16', equity: 1560000, netFlow: 0, note: '' },
+        { date: '2026-11-17', equity: 1576000, netFlow: 0, note: 'Dividen masuk' },
+        { date: '2026-11-18', equity: 1568000, netFlow: 0, note: '' },
+        { date: '2026-11-19', equity: 1564000, netFlow: 0, note: '' },
+        { date: '2026-11-20', equity: 1556000, netFlow: 0, note: '' },
+        { date: '2026-11-23', equity: 1552000, netFlow: 0, note: '' },
+        { date: '2026-11-24', equity: 1596000, netFlow: 0, note: 'Rebound S&P 500' }
       ];
 
       // ==================== APPLICATION STATE ====================
@@ -914,7 +948,8 @@ function doPost(e) {
         settings: {
           currency: 'IDR',
           period: '1M',
-          mode: 'daily'
+          mode: 'daily',
+          hideBalances: false
         },
         cloud: {
           url: DEFAULT_APPS_SCRIPT_URL,
@@ -925,6 +960,13 @@ function doPost(e) {
       };
 
       // ==================== UTILITY & FORMATTING HELPERS ====================
+      function toIsoDateLocal(dateObj) {
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const d = String(dateObj.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      }
+
       function normalizeToIsoDate(rawVal) {
         if (!rawVal) return '';
         const str = String(rawVal).trim();
@@ -948,22 +990,18 @@ function doPost(e) {
         return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
       }
 
-      function toIsoDateLocal(d) {
-        const yyyy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-        return `${yyyy}-${mm}-${dd}`;
-      }
-
       function formatDisplayDate(isoStr) {
         const d = parseDateLocal(isoStr);
         const day = d.getDate();
-        const month = MONTHS_SHORT[d.getMonth()];
-        const yearShort = String(d.getFullYear()).slice(-2);
-        return `${day} ${month} ${yearShort}`;
+        const mon = MONTHS_SHORT[d.getMonth()];
+        const yr = String(d.getFullYear()).slice(-2);
+        return `${day} ${mon} ${yr}`;
       }
 
-      function formatNumber(val, withSign = false) {
+      function formatNumber(val, withSign = false, bypassPrivacy = false) {
+        if (state.settings.hideBalances && !bypassPrivacy) {
+          return '••••••';
+        }
         const num = Number(val) || 0;
         const isUSD = state.settings.currency === 'USD';
         const absVal = Math.abs(num);
@@ -977,16 +1015,29 @@ function doPost(e) {
         return isUSD ? '$0.00' : '0';
       }
 
-      function formatPnlCombined(pnlVal, pnlPct) {
+      function formatPnlCombined(pnlVal, pnlPct, bypassPrivacy = false) {
         const val = Number(pnlVal) || 0;
         const pct = Number(pnlPct) || 0;
         const isZero = Math.abs(val) < 0.0001;
+        if (state.settings.hideBalances && !bypassPrivacy) {
+          if (isZero) return '•••••• (0.00%)';
+          const signStr = val > 0 ? '+' : '';
+          return `•••••• (${signStr}${pct.toFixed(2)}%)`;
+        }
         if (isZero) {
           return state.settings.currency === 'USD' ? '$0.00 (0.00%)' : '0 (0.00%)';
         }
         const signStr = val > 0 ? '+' : '';
         const pctStr = `${signStr}${pct.toFixed(2)}%`;
-        return `${formatNumber(val, true)} (${pctStr})`;
+        return `${formatNumber(val, true, bypassPrivacy)} (${pctStr})`;
+      }
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
       }
 
       function getPnlColorClass(pnlVal) {
@@ -1134,6 +1185,19 @@ function doPost(e) {
           btnIDR.className = 'py-2.5 px-3 rounded-xl text-xs font-medium border border-[#2F3532] bg-[#111312] text-[#8E9591] text-center transition';
         }
 
+        // Privacy Mode Eye Icon State
+        const eyeOpen = document.getElementById('iconEyeOpen');
+        const eyeClosed = document.getElementById('iconEyeClosed');
+        if (eyeOpen && eyeClosed) {
+          if (state.settings.hideBalances) {
+            eyeOpen.classList.add('hidden');
+            eyeClosed.classList.remove('hidden');
+          } else {
+            eyeOpen.classList.remove('hidden');
+            eyeClosed.classList.add('hidden');
+          }
+        }
+
         renderPerformanceTable(filtered);
         renderTradeAnalytics(filtered, allComputed);
         updatePortfolioHeroSummary(allComputed);
@@ -1229,7 +1293,10 @@ function doPost(e) {
         tbody.innerHTML = visibleItems.map(item => {
           const colorCls = getPnlColorClass(item.pnl);
           const flowTag = item.netFlow !== 0
-            ? `<span class="ml-1 text-[9px] px-1.5 py-0.5 rounded bg-[#222724] text-[#8E9591]">${item.netFlow > 0 ? '+TopUp' : '-Tarik'}</span>`
+            ? `<span class="ml-1 text-[9px] px-1.5 py-0.5 rounded bg-[#222724] text-[#8E9591] shrink-0">${item.netFlow > 0 ? '+TopUp' : '-Tarik'}</span>`
+            : '';
+          const noteHtml = item.note && item.note.trim()
+            ? `<span class="text-[10px] text-[#8E9591] truncate block mt-0.5 max-w-[135px]" title="${escapeHtml(item.note)}">📝 ${escapeHtml(item.note)}</span>`
             : '';
           return `
             <button
@@ -1237,9 +1304,12 @@ function doPost(e) {
               data-date="${item.date}"
               class="daily-row w-full grid grid-cols-12 items-center py-3.5 px-1 -mx-1 rounded-xl hover:bg-[#181B19] active:bg-[#1F2421] transition text-left cursor-pointer touch-manipulation"
             >
-              <div class="col-span-4 flex items-center text-[13px] font-normal text-[#E5E7EB]">
-                <span>${formatDisplayDate(item.date)}</span>
-                ${flowTag}
+              <div class="col-span-4 pr-1">
+                <div class="flex items-center text-[13px] font-normal text-[#E5E7EB]">
+                  <span>${formatDisplayDate(item.date)}</span>
+                  ${flowTag}
+                </div>
+                ${noteHtml}
               </div>
               <div class="col-span-4 text-right pr-2 text-[13px] font-normal text-[#E5E7EB] [font-variant-numeric:tabular-nums]">
                 ${formatNumber(item.equity, false)}
@@ -1582,7 +1652,8 @@ function doPost(e) {
                 .map(item => ({
                   date: normalizeToIsoDate(item.date),
                   equity: Number(item.equity) || 0,
-                  netFlow: Number(item.netFlow) || 0
+                  netFlow: Number(item.netFlow) || 0,
+                  note: item.note ? String(item.note).trim() : ''
                 }))
                 .filter(item => /^\d{4}-\d{2}-\d{2}$/.test(item.date))
                 .sort((a, b) => a.date.localeCompare(b.date));
@@ -1666,14 +1737,14 @@ function doPost(e) {
 
         if (prevEq === null) {
           hintEl.textContent = 'Modal Awal (Hari ke-1)';
-          previewEl.textContent = formatPnlCombined(0, 0);
+          previewEl.textContent = formatPnlCombined(0, 0, true);
           previewEl.className = 'text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]';
           return;
         }
 
-        hintEl.textContent = `Sebelumnya: ${formatNumber(prevEq)}`;
+        hintEl.textContent = `Sebelumnya: ${formatNumber(prevEq, false, true)}`;
         if (isNaN(eqVal)) {
-          previewEl.textContent = formatPnlCombined(0, 0);
+          previewEl.textContent = formatPnlCombined(0, 0, true);
           previewEl.className = 'text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]';
           return;
         }
@@ -1681,7 +1752,7 @@ function doPost(e) {
         const pnl = eqVal - prevEq - netFlow;
         const adjustedBase = prevEq + (netFlow > 0 ? netFlow : 0);
         const pnlPct = adjustedBase > 0 ? (pnl / adjustedBase) * 100 : 0;
-        previewEl.textContent = formatPnlCombined(pnl, pnlPct);
+        previewEl.textContent = formatPnlCombined(pnl, pnlPct, true);
         previewEl.className = `text-sm font-semibold ${getPnlColorClass(pnl)} [font-variant-numeric:tabular-nums]`;
       }
 
@@ -1692,6 +1763,7 @@ function doPost(e) {
         const dateInput = document.getElementById('inputDate');
         const eqInput = document.getElementById('inputEquity');
         const cfInput = document.getElementById('inputCashflowAmount');
+        const noteInput = document.getElementById('inputNote');
         const btnDel = document.getElementById('btnDeleteEntry');
         const delConfirm = document.getElementById('inlineDeleteConfirm');
         const cfContainer = document.getElementById('cashflowInputContainer');
@@ -1716,6 +1788,7 @@ function doPost(e) {
             const nf = Number(existing.netFlow) || 0;
             state.cashflowSign = nf < 0 ? -1 : 1;
             cfInput.value = nf !== 0 ? Math.abs(nf) : '';
+            noteInput.value = existing.note || '';
             btnDel.classList.remove('hidden');
             if (nf !== 0 || expandCashflow) cfContainer.classList.remove('hidden');
             else cfContainer.classList.add('hidden');
@@ -1729,6 +1802,7 @@ function doPost(e) {
           eqInput.value = sorted.length ? sorted[sorted.length - 1].equity : '';
           state.cashflowSign = 1;
           cfInput.value = '';
+          noteInput.value = '';
           btnDel.classList.add('hidden');
           if (expandCashflow) cfContainer.classList.remove('hidden');
           else cfContainer.classList.add('hidden');
@@ -1912,6 +1986,14 @@ function doPost(e) {
 
         document.getElementById('btnRefreshApp').addEventListener('click', triggerManualRefresh);
 
+        // Privacy Mode (Hide / Show Nominal Balances)
+        document.getElementById('btnTogglePrivacy').addEventListener('click', () => {
+          state.settings.hideBalances = !state.settings.hideBalances;
+          saveLocal();
+          renderAll();
+          showToast(state.settings.hideBalances ? 'Mode Privasi aktif (saldo disensor)' : 'Nominal saldo ditampilkan');
+        });
+
         // Entry Modal Controls & Form Submission
         document.getElementById('btnCloseEntryModal').addEventListener('click', closeEntryModal);
         document.getElementById('entryModalBackdrop').addEventListener('click', (e) => {
@@ -1964,11 +2046,12 @@ function doPost(e) {
           const eqVal = parseFloat(document.getElementById('inputEquity').value);
           const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
           const netFlow = cfRaw * state.cashflowSign;
+          const noteVal = document.getElementById('inputNote').value.trim();
 
           if (!dateVal || isNaN(eqVal)) return;
 
           state.entries = state.entries.filter(item => item.date !== origDate && item.date !== dateVal);
-          state.entries.push({ date: dateVal, equity: eqVal, netFlow });
+          state.entries.push({ date: dateVal, equity: eqVal, netFlow, note: noteVal });
           state.entries.sort((a, b) => a.date.localeCompare(b.date));
 
           saveLocal();
@@ -2062,9 +2145,10 @@ function doPost(e) {
         // Export CSV / JSON & Import JSON
         document.getElementById('btnExportCsv').addEventListener('click', () => {
           const computed = computeAllDailyMetrics(state.entries);
-          const rows = ['Date,Equity,NetTopUp,DailyPnL,DailyPnLPct'];
+          const rows = ['Date,Equity,NetTopUp,DailyPnL,DailyPnLPct,Note'];
           computed.forEach(r => {
-            rows.push(`${r.date},${r.equity},${r.netFlow || 0},${r.pnl.toFixed(2)},${r.pnlPct.toFixed(4)}`);
+            const safeNote = `"${String(r.note || '').replace(/"/g, '""')}"`;
+            rows.push(`${r.date},${r.equity},${r.netFlow || 0},${r.pnl.toFixed(2)},${r.pnlPct.toFixed(4)},${safeNote}`);
           });
           downloadFile(`etf-pnl-${toIsoDateLocal(new Date())}.csv`, rows.join('\n'), 'text/csv');
           showToast('File CSV diunduh');
@@ -2088,7 +2172,8 @@ function doPost(e) {
               state.entries = list.map(item => ({
                 date: String(item.date).slice(0, 10),
                 equity: Number(item.equity) || 0,
-                netFlow: Number(item.netFlow) || 0
+                netFlow: Number(item.netFlow) || 0,
+                note: item.note ? String(item.note).trim() : ''
               })).sort((a, b) => a.date.localeCompare(b.date));
               saveLocal();
               renderAll();
