@@ -194,6 +194,9 @@
             id="periodDropdownMenu"
             class="hidden absolute right-0 mt-1.5 w-44 rounded-xl bg-[#181B19] border border-[#2C322F] shadow-xl py-1 z-30"
           >
+            <button type="button" data-period="MTD" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724] transition">
+              This Month (Bulan Ini)
+            </button>
             <button type="button" data-period="1M" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#22C55E] font-medium hover:bg-[#222724] transition">
               Last 1 Month
             </button>
@@ -816,6 +819,7 @@ function doPost(e) {
       const DAYS_ID_SHORT = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 
       const PERIOD_LABELS = {
+        'MTD': 'This Month',
         '1M': 'Last 1 Month',
         '3M': 'Last 3 Months',
         '6M': 'Last 6 Months',
@@ -979,7 +983,9 @@ function doPost(e) {
         const latestDate = parseDateLocal(computedList[computedList.length - 1].date);
         const cutoff = new Date(latestDate);
 
-        if (period === '1M') cutoff.setMonth(cutoff.getMonth() - 1);
+        if (period === 'MTD') {
+          cutoff.setDate(1);
+        } else if (period === '1M') cutoff.setMonth(cutoff.getMonth() - 1);
         else if (period === '3M') cutoff.setMonth(cutoff.getMonth() - 3);
         else if (period === '6M') cutoff.setMonth(cutoff.getMonth() - 6);
         else if (period === '1Y') cutoff.setFullYear(cutoff.getFullYear() - 1);
