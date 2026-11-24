@@ -172,7 +172,7 @@
       <!-- Total Portfolio Summary Card -->
       <div class="mb-4 p-4 rounded-2xl bg-[#181B19] border border-[#262B28] flex items-center justify-between gap-3">
         <div>
-          <span class="text-[11px] text-[#8E9591] block mb-0.5">Total Portfolio (VOO)</span>
+          <span class="text-[11px] text-[#8E9591] block mb-0.5">Total Portfolio</span>
           <span id="heroTotalPortfolio" class="text-xl font-bold text-[#F3F4F6] block [font-variant-numeric:tabular-nums]">1,596,000</span>
           <span class="text-[11px] text-[#8E9591] mt-1 block [font-variant-numeric:tabular-nums]">
             Modal Bersih: <strong id="heroTotalInvested" class="font-medium text-[#D1D5DB]">1,440,000</strong>
@@ -190,7 +190,7 @@
         <div class="flex items-start justify-between gap-2">
           <p>
             <strong class="text-[#F3F4F6]">Aturan Bursa AS (Senin – Jumat):</strong>
-            P&amp;L harian dihitung otomatis dari selisih <em>Equity Penutupan VOO</em> terhadap hari bursa sebelumnya dikurangi Top-Up/Tarik dana. Ketuk baris tanggal mana saja untuk mengedit atau menghapus data.
+            P&amp;L harian dihitung otomatis dari selisih <em>Equity Penutupan</em> terhadap hari bursa sebelumnya dikurangi Top-Up/Tarik dana. Ketuk baris tanggal mana saja untuk mengedit atau menghapus data.
           </p>
           <button id="btnCloseInfo" type="button" class="text-[#8E9591] hover:text-white p-0.5">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -551,7 +551,7 @@
           <!-- Equity Input -->
           <div>
             <div class="flex items-center justify-between mb-1.5">
-              <label for="inputEquity" class="text-xs font-medium text-[#D1D5DB]">Total Equity Penutupan (VOO)</label>
+              <label for="inputEquity" class="text-xs font-medium text-[#D1D5DB]">Total Equity Penutupan</label>
               <span id="prevEquityHint" class="text-[11px] text-[#8E9591] [font-variant-numeric:tabular-nums]">
                 Sebelumnya: 1,596,000
               </span>
@@ -641,7 +641,7 @@
               type="text"
               id="inputNote"
               maxlength="60"
-              placeholder="Contoh: DCA VOO, Dividen masuk, CPI AS turun"
+              placeholder="Contoh: DCA ETF, Dividen masuk, CPI AS turun"
               class="w-full px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-xs text-[#F3F4F6] placeholder-[#5B635F] focus:outline-none focus:border-[#22C55E] transition"
             />
           </div>
@@ -957,7 +957,7 @@ function doPost(e) {
 
       // ==================== REFERENCE SAMPLE DATA ====================
       const SAMPLE_ENTRIES = [
-        { date: '2026-11-05', equity: 1440000, netFlow: 0, note: 'Modal awal VOO' },
+        { date: '2026-11-05', equity: 1440000, netFlow: 0, note: 'Modal awal' },
         { date: '2026-11-06', equity: 1452000, netFlow: 0, note: '' },
         { date: '2026-11-09', equity: 1468000, netFlow: 0, note: '' },
         { date: '2026-11-10', equity: 1461000, netFlow: 0, note: '' },
@@ -1041,8 +1041,8 @@ function doPost(e) {
         return `${MONTHS_SHORT[(m || 1) - 1] || 'Jan'} ${y}`;
       }
 
-      function formatCurrency(val) {
-        if (state.settings.hideBalances) return '••••••';
+      function formatCurrency(val, allowHide = true) {
+        if (allowHide && state.settings.hideBalances) return '••••••';
         const num = Number(val) || 0;
         if (state.settings.currency === 'USD') {
           return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1055,11 +1055,9 @@ function doPost(e) {
         const safePct = Math.abs(pct) < 0.005 ? 0 : pct;
         const sign = safePnl > 0 ? '+' : safePnl < 0 ? '-' : '';
         const absVal = Math.abs(safePnl);
-        const valText = state.settings.hideBalances
-          ? '••••••'
-          : (state.settings.currency === 'USD'
-            ? '$' + absVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-            : Math.round(absVal).toLocaleString('en-US'));
+        const valText = state.settings.currency === 'USD'
+          ? '$' + absVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+          : Math.round(absVal).toLocaleString('en-US');
         const pctSign = safePct > 0 ? '+' : safePct < 0 ? '-' : '';
         const pctText = `${pctSign}${Math.abs(safePct).toFixed(2)}%`;
         return `${sign}${valText} (${pctText})`;
@@ -1296,7 +1294,7 @@ function doPost(e) {
 
         const sign = totalReturn > 0.005 ? '+' : totalReturn < -0.005 ? '-' : '';
         const colorCls = getPnlColorClass(totalReturn);
-        elPnl.textContent = `${sign}${formatCurrency(Math.abs(totalReturn))}`;
+        elPnl.textContent = `${sign}${formatCurrency(Math.abs(totalReturn), false)}`;
         elPnl.className = `text-sm font-semibold ${colorCls} block [font-variant-numeric:tabular-nums]`;
         elPct.textContent = `${totalReturnPct > 0.005 ? '+' : ''}${totalReturnPct.toFixed(2)}%`;
         elPct.className = `text-xs font-medium ${colorCls} block [font-variant-numeric:tabular-nums]`;
@@ -1437,7 +1435,7 @@ function doPost(e) {
         const totalNetPnlPct = startCap > 0 ? (totalNetPnl / startCap) * 100 : 0;
 
         const elTotalPnl = document.getElementById('statTotalPnl');
-        elTotalPnl.textContent = `${totalNetPnl > 0.005 ? '+' : totalNetPnl < -0.005 ? '-' : ''}${formatCurrency(Math.abs(totalNetPnl))}`;
+        elTotalPnl.textContent = `${totalNetPnl > 0.005 ? '+' : totalNetPnl < -0.005 ? '-' : ''}${formatCurrency(Math.abs(totalNetPnl), false)}`;
         elTotalPnl.className = `text-sm font-semibold ${getPnlColorClass(totalNetPnl)} block [font-variant-numeric:tabular-nums]`;
         const elTotalPct = document.getElementById('statTotalPnlPct');
         elTotalPct.textContent = `${totalNetPnlPct > 0.005 ? '+' : ''}${totalNetPnlPct.toFixed(2)}%`;
@@ -1449,15 +1447,15 @@ function doPost(e) {
         document.getElementById('statWinCounts').textContent = `${wins}W • ${losses}L • ${flat}D`;
 
         document.getElementById('statMaxProfit').textContent = maxProfitItem && maxProfitItem.pnl > 0
-          ? `+${formatCurrency(maxProfitItem.pnl)}`
-          : formatCurrency(0);
+          ? `+${formatCurrency(maxProfitItem.pnl, false)}`
+          : formatCurrency(0, false);
         document.getElementById('statMaxProfitDate').textContent = maxProfitItem && maxProfitItem.pnl > 0
           ? formatDisplayDate(maxProfitItem.date)
           : '-';
 
         document.getElementById('statMaxLoss').textContent = maxLossItem && maxLossItem.pnl < 0
-          ? `-${formatCurrency(Math.abs(maxLossItem.pnl))}`
-          : formatCurrency(0);
+          ? `-${formatCurrency(Math.abs(maxLossItem.pnl), false)}`
+          : formatCurrency(0, false);
         document.getElementById('statMaxLossDate').textContent = maxLossItem && maxLossItem.pnl < 0
           ? formatDisplayDate(maxLossItem.date)
           : '-';
@@ -1477,7 +1475,7 @@ function doPost(e) {
           : '-';
 
         const avgDaily = activeDays.length > 0 ? totalNetPnl / activeDays.length : 0;
-        document.getElementById('statAvgDaily').textContent = `${avgDaily > 0.005 ? '+' : avgDaily < -0.005 ? '-' : ''}${formatCurrency(Math.abs(avgDaily))}`;
+        document.getElementById('statAvgDaily').textContent = `${avgDaily > 0.005 ? '+' : avgDaily < -0.005 ? '-' : ''}${formatCurrency(Math.abs(avgDaily), false)}`;
         document.getElementById('statTradingDays').textContent = `${activeDays.length} hari bursa`;
 
         const netCashflow = activeDays.reduce((sum, x) => sum + (x.netFlow || 0), 0);
@@ -1815,7 +1813,7 @@ function doPost(e) {
         const defaultDate = existing ? existing.date : getNextTradingDayIso();
         const prevEq = getPreviousEquityForDate(defaultDate, existing ? existing.date : '');
 
-        document.getElementById('entryModalTitle').textContent = existing ? 'Edit Data Harian VOO' : 'Update Equity Harian';
+        document.getElementById('entryModalTitle').textContent = existing ? 'Edit Data Harian' : 'Update Equity Harian';
         document.getElementById('editingOriginalDate').value = existing ? existing.date : '';
         document.getElementById('inputDate').value = defaultDate;
         document.getElementById('inputEquity').value = existing ? existing.equity : (prevEq !== null ? prevEq : '');
@@ -2050,7 +2048,7 @@ function doPost(e) {
           saveLocal();
           renderAll();
           closeEntryModal();
-          showToast('Data VOO berhasil disimpan');
+          showToast('Data berhasil disimpan');
           pushEntriesToCloud(true);
         });
 
