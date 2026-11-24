@@ -468,8 +468,8 @@
         </div>
 
         <!-- SVG Chart Container -->
-        <div class="relative w-full h-44 mt-3 mb-2 select-none touch-none" id="sparklineWrapper">
-          <svg id="equitySparklineSvg" class="w-full h-full overflow-visible" preserveAspectRatio="none"></svg>
+        <div class="relative w-full h-44 mt-3 mb-2 select-none touch-none overflow-hidden" id="sparklineWrapper">
+          <svg id="equitySparklineSvg" viewBox="0 0 400 165" class="w-full h-full" preserveAspectRatio="none"></svg>
         </div>
 
         <!-- Quick Period Tabs Bar: 1D | 1W | 1M | 3M | YTD | 1Y | All -->
@@ -2062,8 +2062,10 @@ function doPost(e) {
 
         const width = 400;
         const height = 165;
+        const padX = 6;
         const padTop = 12;
         const padBottom = 14;
+        const usableWidth = width - padX * 2;
         const usableHeight = height - padTop - padBottom;
 
         const values = filtered.map((d) => d.equity);
@@ -2072,7 +2074,7 @@ function doPost(e) {
         const range = maxVal - minVal || 1;
 
         const points = filtered.map((d, i) => {
-          const x = filtered.length === 1 ? width / 2 : (i / (filtered.length - 1)) * width;
+          const x = filtered.length === 1 ? width / 2 : padX + (i / (filtered.length - 1)) * usableWidth;
           const norm = (d.equity - minVal) / range;
           const y = padTop + usableHeight - norm * usableHeight;
           return { x, y, data: d };
@@ -2133,7 +2135,7 @@ function doPost(e) {
               <stop offset="100%" stop-color="${strokeColor}" stop-opacity="0.0" />
             </linearGradient>
           </defs>
-          <line x1="0" y1="${baselineY}" x2="${width}" y2="${baselineY}" stroke="${baselineStroke}" stroke-width="1.2" stroke-dasharray="4 4" />
+          <line x1="${padX}" y1="${baselineY}" x2="${width - padX}" y2="${baselineY}" stroke="${baselineStroke}" stroke-width="1.2" stroke-dasharray="4 4" />
           ${areaPath ? `<path d="${areaPath}" fill="url(#equityAreaGrad)" />` : ''}
           ${points.length > 1 ? `<path d="${linePath}" fill="none" stroke="${strokeColor}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />` : ''}
           <line id="chartHoverLine" x1="${lastPt.x}" y1="4" x2="${lastPt.x}" y2="${baselineY}" stroke="#3F4743" stroke-width="1" stroke-dasharray="3 3" opacity="0" />
