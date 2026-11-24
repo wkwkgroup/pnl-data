@@ -351,24 +351,60 @@
         </div>
       </div>
 
-      <!-- Interactive SVG Equity Sparkline Card -->
-      <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-4">
-        <div class="flex items-start justify-between mb-2">
+      <!-- Interactive Bibit-Style Portfolio Performance Card -->
+      <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-4 pb-3">
+        <!-- Top Header: Nilai Portofolio + Trend Arrow + Period Return -->
+        <div class="flex items-start justify-between gap-2 mb-1">
           <div>
-            <span class="text-[11px] text-[#8E9591] block">Current Portfolio Equity</span>
-            <span id="chartActiveEquity" class="text-xl font-bold text-[#F3F4F6] [font-variant-numeric:tabular-nums]">1,596,000</span>
-          </div>
-          <div class="text-right">
-            <span id="chartActiveDate" class="text-[11px] text-[#8E9591] block">24 Nov 26</span>
-            <span id="chartActivePnl" class="text-xs font-medium text-[#22C55E] [font-variant-numeric:tabular-nums]">+44,000 (+2.84%)</span>
+            <div class="flex items-center gap-1.5 mb-0.5">
+              <span class="text-xs font-medium text-[#8E9591]">Nilai Portofolio</span>
+              <span id="chartActiveDate" class="text-[11px] text-[#8E9591] bg-[#111312] px-2 py-0.5 rounded-full">24 Nov 26</span>
+            </div>
+            <span id="chartActiveEquity" class="text-2xl font-bold tracking-tight text-[#F3F4F6] block [font-variant-numeric:tabular-nums]">1,596,000</span>
+            <div class="flex items-center gap-1.5 mt-1 flex-wrap">
+              <span id="chartTrendArrow" class="text-xs font-bold text-[#22C55E]">↗</span>
+              <span id="chartActivePnl" class="text-xs font-semibold text-[#22C55E] [font-variant-numeric:tabular-nums]">+156,000 (+10.83%)</span>
+              <span id="chartPeriodSubLabel" class="text-xs text-[#8E9591]">1 bulan terakhir</span>
+            </div>
           </div>
         </div>
 
         <!-- SVG Chart Container -->
-        <div class="relative w-full h-40 mt-2 select-none touch-none" id="sparklineWrapper">
+        <div class="relative w-full h-44 mt-3 select-none touch-none" id="sparklineWrapper">
           <svg id="equitySparklineSvg" class="w-full h-full overflow-visible" preserveAspectRatio="none"></svg>
         </div>
-        <p class="text-[10px] text-[#8E9591] mt-2 text-center">Sentuh atau geser grafik untuk melihat rincian tiap hari bursa</p>
+
+        <!-- Quick Period Tabs Bar: 1D | 1W | 1M | 3M | YTD | 1Y | All -->
+        <div id="quickChartPeriodTabs" class="grid grid-cols-7 gap-1 pt-2.5 mt-1 border-t border-[#222624]">
+          <button type="button" data-chart-period="1D" class="chart-tab-btn py-1.5 text-xs font-medium text-[#8E9591] hover:text-[#F3F4F6] flex flex-col items-center gap-1 transition">
+            <span>1D</span>
+            <span class="tab-indicator w-5 h-0.5 rounded-full bg-transparent"></span>
+          </button>
+          <button type="button" data-chart-period="1W" class="chart-tab-btn py-1.5 text-xs font-medium text-[#8E9591] hover:text-[#F3F4F6] flex flex-col items-center gap-1 transition">
+            <span>1W</span>
+            <span class="tab-indicator w-5 h-0.5 rounded-full bg-transparent"></span>
+          </button>
+          <button type="button" data-chart-period="1M" class="chart-tab-btn py-1.5 text-xs font-semibold text-[#F3F4F6] flex flex-col items-center gap-1 transition">
+            <span>1M</span>
+            <span class="tab-indicator w-5 h-0.5 rounded-full bg-[#22C55E]"></span>
+          </button>
+          <button type="button" data-chart-period="3M" class="chart-tab-btn py-1.5 text-xs font-medium text-[#8E9591] hover:text-[#F3F4F6] flex flex-col items-center gap-1 transition">
+            <span>3M</span>
+            <span class="tab-indicator w-5 h-0.5 rounded-full bg-transparent"></span>
+          </button>
+          <button type="button" data-chart-period="YTD" class="chart-tab-btn py-1.5 text-xs font-medium text-[#8E9591] hover:text-[#F3F4F6] flex flex-col items-center gap-1 transition">
+            <span>YTD</span>
+            <span class="tab-indicator w-5 h-0.5 rounded-full bg-transparent"></span>
+          </button>
+          <button type="button" data-chart-period="1Y" class="chart-tab-btn py-1.5 text-xs font-medium text-[#8E9591] hover:text-[#F3F4F6] flex flex-col items-center gap-1 transition">
+            <span>1Y</span>
+            <span class="tab-indicator w-5 h-0.5 rounded-full bg-transparent"></span>
+          </button>
+          <button type="button" data-chart-period="ALL" class="chart-tab-btn py-1.5 text-xs font-medium text-[#8E9591] hover:text-[#F3F4F6] flex flex-col items-center gap-1 transition">
+            <span>All</span>
+            <span class="tab-indicator w-5 h-0.5 rounded-full bg-transparent"></span>
+          </button>
+        </div>
       </div>
 
       <!-- Key Metrics Grid -->
@@ -1211,6 +1247,7 @@ function doPost(e) {
       };
 
       const PERIOD_LABELS = {
+        '1D': '1 Hari (Hari Ini)',
         '1W': 'Mingguan',
         '1M': 'Bulanan',
         '3M': '3 Bulanan',
@@ -1218,6 +1255,17 @@ function doPost(e) {
         '1Y': '1 Tahun',
         'ALL': 'All',
         'CUSTOM': 'Kostum'
+      };
+
+      const PERIOD_SUB_TEXTS = {
+        '1D': 'hari bursa terakhir',
+        '1W': '1 minggu terakhir',
+        '1M': '1 bulan terakhir',
+        '3M': '3 bulan terakhir',
+        'YTD': 'sepanjang tahun ini (YTD)',
+        '1Y': '1 tahun terakhir',
+        'ALL': 'sejak awal investasi',
+        'CUSTOM': 'rentang tanggal pilihan'
       };
 
       // ==================== UTILITY HELPERS ====================
@@ -1484,6 +1532,9 @@ function doPost(e) {
         const latestIso = computedList[computedList.length - 1].date;
         const latestDate = parseIsoLocal(latestIso);
 
+        if (period === '1D') {
+          return computedList.slice(-2);
+        }
         if (period === 'CUSTOM') {
           const startIso = state.settings.customStart || computedList[0].date;
           const endIso = state.settings.customEnd || latestIso;
@@ -1611,28 +1662,28 @@ function doPost(e) {
 
         const reversed = [...filtered].reverse();
         if (!reversed.length) {
-          loadMoreBox.classList.add('hidden');
           tbody.innerHTML = `<div class="py-10 text-center text-xs text-[#8E9591]">Tidak ada data pada rentang tanggal ini.</div>`;
+          loadMoreBox.classList.add('hidden');
           return;
         }
 
-        const visibleRows = reversed.slice(0, state.visibleRowLimit);
-        const remaining = reversed.length - visibleRows.length;
+        const visibleItems = reversed.slice(0, state.visibleRowLimit);
+        const remainingCount = reversed.length - visibleItems.length;
 
-        if (remaining > 0) {
+        if (remainingCount > 0) {
           loadMoreBox.classList.remove('hidden');
-          document.getElementById('remainingRowsCount').textContent = remaining;
+          document.getElementById('remainingRowsCount').textContent = remainingCount;
         } else {
           loadMoreBox.classList.add('hidden');
         }
 
-        tbody.innerHTML = visibleRows.map(row => {
+        tbody.innerHTML = visibleItems.map(row => {
           const colorCls = getValueColorClass(row.pnl);
           const flowBadge = row.netFlow !== 0
-            ? `<span class="inline-block mt-0.5 text-[10px] px-1.5 py-0.2 rounded bg-[#22C55E]/10 text-[#22C55E]">${row.netFlow > 0 ? 'Top-Up' : 'Tarik'} ${formatBalanceDisplay(row.netFlow, true)}</span>`
+            ? `<span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${row.netFlow > 0 ? 'bg-[#22C55E]/15 text-[#22C55E]' : 'bg-[#E05252]/15 text-[#E05252]'}">${row.netFlow > 0 ? 'Top-Up' : 'Tarik'} ${formatBalanceDisplay(row.netFlow, true)}</span>`
             : '';
-          const noteLine = row.note
-            ? `<span class="block text-[10px] text-[#8E9591] truncate mt-0.5">${escapeHtml(row.note)}</span>`
+          const noteBadge = row.note
+            ? `<span class="block mt-0.5 text-[10px] text-[#8E9591] truncate">${row.note}</span>`
             : '';
 
           return `
@@ -1644,7 +1695,7 @@ function doPost(e) {
               <div class="col-span-4 pr-1">
                 <span class="text-[13px] font-medium text-[#F3F4F6] block">${formatDisplayDate(row.date)}</span>
                 ${flowBadge}
-                ${noteLine}
+                ${noteBadge}
               </div>
               <div class="col-span-3 text-center text-[13px] font-medium text-[#F3F4F6] [font-variant-numeric:tabular-nums]">
                 ${formatBalanceDisplay(row.equity)}
@@ -1661,66 +1712,102 @@ function doPost(e) {
         });
       }
 
-      function escapeHtml(str) {
-        return String(str)
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;');
-      }
-
-      function renderSparklineChart(filtered) {
+      function renderSparklineChart(filtered, allComputedList) {
         const svg = document.getElementById('equitySparklineSvg');
         if (!filtered.length) {
           svg.innerHTML = '';
           return;
         }
 
+        const period = state.settings.period;
+        const subText = PERIOD_SUB_TEXTS[period] || 'periode pilihan';
         const latest = filtered[filtered.length - 1];
-        const updateHeaderInfo = (item) => {
+
+        // Calculate cumulative period P&L up to any hovered index
+        const calcPeriodStatsAt = (idx) => {
+          if (period === '1D') {
+            const target = filtered[idx];
+            return { pnl: target.pnl, pct: target.pnlPct, label: idx === filtered.length - 1 ? subText : formatDisplayDate(target.date) };
+          }
+          const slice = filtered.slice(0, idx + 1);
+          const isFromVeryStart = slice[0].date === allComputedList[0].date;
+          const active = isFromVeryStart ? slice.slice(1) : slice;
+          const sumPnl = active.reduce((s, d) => s + d.pnl, 0);
+          const startCap = isFromVeryStart
+            ? slice[0].equity + active.reduce((s, d) => s + d.netFlow, 0)
+            : slice[0].prevEquity + slice[0].netFlow + slice.slice(1).reduce((s, d) => s + d.netFlow, 0);
+          const pct = startCap > 0 ? (sumPnl / startCap) * 100 : 0;
+          return { pnl: sumPnl, pct, label: idx === filtered.length - 1 ? subText : `s/d ${formatDisplayDate(slice[slice.length - 1].date)}` };
+        };
+
+        const updateHeaderInfo = (idx) => {
+          const item = filtered[idx];
+          const stats = calcPeriodStatsAt(idx);
+          const colorCls = getValueColorClass(stats.pnl);
+          const arrowEl = document.getElementById('chartTrendArrow');
+          const pnlEl = document.getElementById('chartActivePnl');
+
           document.getElementById('chartActiveEquity').textContent = formatBalanceDisplay(item.equity);
           document.getElementById('chartActiveDate').textContent = formatDisplayDate(item.date);
-          const pnlEl = document.getElementById('chartActivePnl');
-          pnlEl.textContent = `${formatCurrency(item.pnl, true)} (${formatPercent(item.pnlPct)})`;
-          pnlEl.className = `text-xs font-medium ${getValueColorClass(item.pnl)} [font-variant-numeric:tabular-nums]`;
+          document.getElementById('chartPeriodSubLabel').textContent = stats.label;
+
+          arrowEl.textContent = stats.pnl > 0.0001 ? '↗' : stats.pnl < -0.0001 ? '↘' : '→';
+          arrowEl.className = `text-xs font-bold ${colorCls}`;
+
+          pnlEl.textContent = `${formatCurrency(stats.pnl, true)} (${formatPercent(stats.pct)})`;
+          pnlEl.className = `text-xs font-semibold ${colorCls} [font-variant-numeric:tabular-nums]`;
         };
-        updateHeaderInfo(latest);
+        updateHeaderInfo(filtered.length - 1);
 
         const width = 400;
-        const height = 140;
-        const padY = 14;
-        const equities = filtered.map(d => d.equity);
-        const minEq = Math.min(...equities);
-        const maxEq = Math.max(...equities);
-        const range = maxEq - minEq || 1;
+        const height = 152;
+        const padTop = 14;
+        const padBottom = 16;
+        const baselineY = height - 6;
+
+        // Plot cumulative period P&L curve so Top-Up jumps don't distort visual gain/loss
+        let runningPnl = 0;
+        const seriesValues = filtered.map((item, idx) => {
+          if (idx === 0) {
+            runningPnl = period === '1D' && filtered.length > 1 ? 0 : item.pnl;
+          } else {
+            runningPnl += item.pnl;
+          }
+          return runningPnl;
+        });
+
+        const minVal = Math.min(...seriesValues);
+        const maxVal = Math.max(...seriesValues);
+        const range = maxVal - minVal || 1;
 
         const points = filtered.map((item, idx) => {
           const x = filtered.length === 1 ? width / 2 : (idx / (filtered.length - 1)) * width;
-          const y = height - padY - ((item.equity - minEq) / range) * (height - padY * 2);
-          return { x, y, item };
+          const y = height - padBottom - ((seriesValues[idx] - minVal) / range) * (height - padTop - padBottom);
+          return { x, y, idx };
         });
 
-        const firstEq = filtered[0].equity;
-        const isOverallGain = latest.equity >= firstEq;
+        const endStats = calcPeriodStatsAt(filtered.length - 1);
+        const isOverallGain = endStats.pnl >= 0;
         const strokeColor = isOverallGain ? '#22C55E' : '#E05252';
         const gradId = 'sparkGrad_' + (isOverallGain ? 'gain' : 'loss');
 
         const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
-        const areaPath = `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${height} L ${points[0].x.toFixed(1)} ${height} Z`;
+        const areaPath = `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${baselineY} L ${points[0].x.toFixed(1)} ${baselineY} Z`;
         const lastPt = points[points.length - 1];
 
         svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
         svg.innerHTML = `
           <defs>
             <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="${strokeColor}" stop-opacity="0.28" />
+              <stop offset="0%" stop-color="${strokeColor}" stop-opacity="0.26" />
               <stop offset="100%" stop-color="${strokeColor}" stop-opacity="0.0" />
             </linearGradient>
           </defs>
+          <line x1="0" y1="${baselineY}" x2="${width}" y2="${baselineY}" stroke="#3B423E" stroke-width="1.2" stroke-dasharray="4 4" />
           <path d="${areaPath}" fill="url(#${gradId})" />
-          <path d="${linePath}" fill="none" stroke="${strokeColor}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
-          <line id="chartCrosshairLine" x1="${lastPt.x}" y1="0" x2="${lastPt.x}" y2="${height}" stroke="#8E9591" stroke-width="1" stroke-dasharray="3 3" opacity="0.6" />
-          <circle id="chartActiveDot" cx="${lastPt.x}" cy="${lastPt.y}" r="4.5" fill="${strokeColor}" stroke="#111312" stroke-width="2" />
+          <path d="${linePath}" fill="none" stroke="${strokeColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+          <line id="chartCrosshairLine" x1="${lastPt.x}" y1="0" x2="${lastPt.x}" y2="${baselineY}" stroke="#8E9591" stroke-width="1" stroke-dasharray="3 3" opacity="0.55" />
+          <circle id="chartActiveDot" cx="${lastPt.x}" cy="${lastPt.y}" r="4.5" fill="${strokeColor}" stroke="#181B19" stroke-width="2" />
         `;
 
         const wrapper = document.getElementById('sparklineWrapper');
@@ -1741,7 +1828,7 @@ function doPost(e) {
             dot.setAttribute('cx', target.x);
             dot.setAttribute('cy', target.y);
           }
-          updateHeaderInfo(target.item);
+          updateHeaderInfo(target.idx);
         };
 
         wrapper.onmousemove = (e) => handleScrub(e.clientX);
@@ -1761,10 +1848,25 @@ function doPost(e) {
         }
         document.getElementById('tradePeriodTag').textContent = tagText;
 
+        // Update Bibit-style quick tabs active indicator
+        document.querySelectorAll('.chart-tab-btn').forEach(btn => {
+          const isActive = btn.dataset.chartPeriod === state.settings.period;
+          const labelSpan = btn.querySelector('span:first-child');
+          const indicator = btn.querySelector('.tab-indicator');
+          if (labelSpan) {
+            labelSpan.className = isActive ? 'font-bold text-[#F3F4F6]' : 'font-medium text-[#8E9591]';
+          }
+          if (indicator) {
+            indicator.className = `tab-indicator w-5 h-0.5 rounded-full transition-colors ${isActive ? 'bg-[#22C55E]' : 'bg-transparent'}`;
+          }
+        });
+
         if (!filtered.length) {
           document.getElementById('chartActiveEquity').textContent = formatBalanceDisplay(0);
           document.getElementById('chartActiveDate').textContent = '-';
           document.getElementById('chartActivePnl').textContent = '0 (0.00%)';
+          document.getElementById('chartTrendArrow').textContent = '→';
+          document.getElementById('chartPeriodSubLabel').textContent = '';
           document.getElementById('equitySparklineSvg').innerHTML = '';
           document.getElementById('statTotalPnl').textContent = formatCurrency(0);
           document.getElementById('statTotalPnlPct').textContent = '0.00%';
@@ -1789,7 +1891,7 @@ function doPost(e) {
           return;
         }
 
-        renderSparklineChart(filtered);
+        renderSparklineChart(filtered, computedList);
 
         const activeDays = filtered.filter((item, idx) => !(idx === 0 && item.date === computedList[0].date));
         const totalPeriodPnl = activeDays.reduce((s, d) => s + d.pnl, 0);
@@ -2433,6 +2535,10 @@ function doPost(e) {
 
         document.querySelectorAll('.period-option, .trade-period-option').forEach(btn => {
           btn.addEventListener('click', () => selectPeriod(btn.dataset.period));
+        });
+
+        document.querySelectorAll('.chart-tab-btn').forEach(btn => {
+          btn.addEventListener('click', () => selectPeriod(btn.dataset.chartPeriod));
         });
 
         const handleCustomRangeChange = (startVal, endVal) => {
