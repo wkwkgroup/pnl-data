@@ -70,6 +70,22 @@
             <span id="headerCloudLabel">Local</span>
           </button>
           <button
+            id="btnPinLockHeader"
+            type="button"
+            aria-label="Status Kunci PIN Keamanan"
+            title="Keamanan PIN (Ketuk untuk Kunci / Buka Kunci)"
+            class="w-8 h-8 flex items-center justify-center rounded-full text-[#22C55E] hover:bg-[#181B19] active:scale-95 transition"
+          >
+            <!-- Unlocked Icon -->
+            <svg id="iconPinUnlocked" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+            </svg>
+            <!-- Locked Icon -->
+            <svg id="iconPinLocked" class="hidden w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </button>
+          <button
             id="btnTogglePrivacy"
             type="button"
             aria-label="Sembunyikan atau Tampilkan Nominal Saldo"
@@ -172,7 +188,7 @@
       <!-- Total Portfolio Summary Card -->
       <div class="mb-4 p-4 rounded-2xl bg-[#181B19] border border-[#262B28] flex items-center justify-between gap-3">
         <div>
-          <span class="text-[11px] text-[#8E9591] block mb-0.5">Total Portfolio</span>
+          <span class="text-[11px] text-[#8E9591] block mb-0.5">Total Portfolio (VOO)</span>
           <span id="heroTotalPortfolio" class="text-xl font-bold text-[#F3F4F6] block [font-variant-numeric:tabular-nums]">1,596,000</span>
           <span class="text-[11px] text-[#8E9591] mt-1 block [font-variant-numeric:tabular-nums]">
             Modal Bersih: <strong id="heroTotalInvested" class="font-medium text-[#D1D5DB]">1,440,000</strong>
@@ -185,24 +201,23 @@
         </div>
       </div>
 
-      <!-- Collapsible Formula Tooltip Card -->
-      <div id="infoTooltipCard" class="hidden mb-4 p-3.5 rounded-xl bg-[#181B19] border border-[#2A302D] text-xs text-[#D1D5DB] space-y-1.5 shadow-lg">
-        <div class="flex items-center justify-between">
-          <span class="font-semibold text-[#22C55E]">Rumus P&amp;L Harian ETF</span>
-          <button id="btnCloseInfo" type="button" class="text-[#8E9591] hover:text-white text-xs px-1">Tutup</button>
+      <!-- Collapsible Info Tooltip Card -->
+      <div id="infoTooltipCard" class="hidden mb-4 p-3.5 rounded-2xl bg-[#181B19] border border-[#262B28] text-xs text-[#9CA3AF] leading-relaxed">
+        <div class="flex items-start justify-between gap-2">
+          <p>
+            <strong class="text-[#F3F4F6]">Aturan Bursa AS (Senin – Jumat):</strong>
+            P&amp;L harian dihitung otomatis dari selisih <em>Equity Penutupan VOO</em> terhadap hari bursa sebelumnya dikurangi Top-Up/Tarik dana. Ketuk baris tanggal mana saja untuk mengedit atau menghapus data.
+          </p>
+          <button id="btnCloseInfo" type="button" class="text-[#8E9591] hover:text-white p-0.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-        <p class="text-[#9CA3AF] leading-relaxed">
-          <code class="text-[#F3F4F6] bg-[#111312] px-1.5 py-0.5 rounded text-[11px]">(Equity Hari Ini − Equity Sebelumnya − Net Top-Up) ÷ Equity Sebelumnya</code>
-        </p>
-        <p class="text-[#8E9591] text-[11px] leading-relaxed">
-          • Update setiap hari bursa saham AS (<strong class="text-[#D1D5DB]">Senin – Jumat</strong>).<br />
-          • Ketuk baris tanggal mana saja untuk <strong class="text-[#D1D5DB]">mengedit</strong> atau <strong class="text-[#D1D5DB]">menghapus</strong> data.
-        </p>
       </div>
 
-      <!-- Controls Row: Daily / Monthly Pills + Period Dropdown -->
-      <div class="flex items-center justify-between mb-5">
-        <!-- Left Pill Switcher -->
+      <!-- Filter Controls Row: [Daily] [Monthly]  |  Period Dropdown -->
+      <div class="flex items-center justify-between gap-2 mb-5">
         <div class="flex items-center gap-2">
           <button
             id="btnModeDaily"
@@ -220,12 +235,11 @@
           </button>
         </div>
 
-        <!-- Right Period Dropdown -->
-        <div class="relative" id="periodDropdownWrapper">
+        <div class="relative">
           <button
             id="btnPeriodDropdown"
             type="button"
-            class="flex items-center gap-1.5 py-1.5 pl-2 pr-1 text-xs font-medium text-[#22C55E] hover:opacity-85 active:scale-95 transition"
+            class="flex items-center gap-1 text-xs font-medium text-[#22C55E] py-1.5 pl-2 pr-1 rounded-lg hover:bg-[#181B19] active:scale-95 transition"
           >
             <span id="selectedPeriodLabel">Last 1 Month</span>
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
@@ -233,32 +247,17 @@
             </svg>
           </button>
 
-          <!-- Dropdown Menu -->
           <div
             id="periodDropdownMenu"
-            class="hidden absolute right-0 mt-1.5 w-44 rounded-xl bg-[#181B19] border border-[#2C322F] shadow-xl py-1 z-30"
+            class="hidden absolute right-0 mt-1.5 w-44 rounded-2xl bg-[#181B19] border border-[#2B312E] shadow-xl py-1.5 z-30"
           >
-            <button type="button" data-period="MTD" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724] transition">
-              This Month (Bulan Ini)
-            </button>
-            <button type="button" data-period="1M" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#22C55E] font-medium hover:bg-[#222724] transition">
-              Last 1 Month
-            </button>
-            <button type="button" data-period="3M" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724] transition">
-              Last 3 Months
-            </button>
-            <button type="button" data-period="6M" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724] transition">
-              Last 6 Months
-            </button>
-            <button type="button" data-period="1Y" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724] transition">
-              1 Year (252 Hari)
-            </button>
-            <button type="button" data-period="YTD" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724] transition">
-              YTD
-            </button>
-            <button type="button" data-period="ALL" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724] transition">
-              All Time
-            </button>
+            <button type="button" data-period="MTD" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">This Month</button>
+            <button type="button" data-period="1M" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#22C55E] font-medium bg-[#222724]/60">Last 1 Month</button>
+            <button type="button" data-period="3M" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">Last 3 Months</button>
+            <button type="button" data-period="6M" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">Last 6 Months</button>
+            <button type="button" data-period="1Y" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">1 Year (252 Hari)</button>
+            <button type="button" data-period="YTD" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">YTD</button>
+            <button type="button" data-period="ALL" class="period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]">All Time</button>
           </div>
         </div>
       </div>
@@ -447,22 +446,19 @@
     <div id="entryModalBackdrop" class="hidden fixed inset-0 z-40 bg-black/75 backdrop-blur-xs transition-opacity flex items-end justify-center">
       <div
         id="entryModalSheet"
-        class="w-full max-w-[480px] bg-[#181B19] border-t border-[#2A302D] rounded-t-3xl p-5 pb-7 shadow-2xl transform transition-transform"
+        class="w-full max-w-[480px] max-h-[92vh] overflow-y-auto bg-[#181B19] border-t border-[#2A302D] rounded-t-3xl p-5 pb-7 shadow-2xl transform transition-transform"
       >
-        <!-- Drag Handle -->
         <div class="w-10 h-1 bg-[#343B37] rounded-full mx-auto mb-4"></div>
 
-        <!-- Modal Header -->
         <div class="flex items-center justify-between mb-4">
           <div>
             <h3 id="entryModalTitle" class="text-base font-semibold text-[#F3F4F6]">Update Equity Harian</h3>
-            <p class="text-xs text-[#8E9591]">Jadwal Bursa AS: Senin – Jumat</p>
+            <p class="text-[11px] text-[#8E9591]">Bursa Saham AS buka Senin – Jumat</p>
           </div>
           <button
             id="btnCloseEntryModal"
             type="button"
-            aria-label="Tutup Modal"
-            class="w-8 h-8 rounded-full bg-[#222724] text-[#8E9591] hover:text-white flex items-center justify-center transition"
+            class="w-8 h-8 rounded-full bg-[#222724] text-[#8E9591] hover:text-white flex items-center justify-center"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -473,50 +469,47 @@
         <form id="entryForm" class="space-y-4">
           <input type="hidden" id="editingOriginalDate" value="" />
 
-          <!-- Date Field with Auto-Suggested US Trading Day -->
+          <!-- Date Input + Quick Next Trading Day Helper -->
           <div>
             <div class="flex items-center justify-between mb-1.5">
-              <label for="inputDate" class="text-xs font-medium text-[#D1D5DB]">Tanggal Bursa</label>
+              <label for="inputDate" class="text-xs font-medium text-[#D1D5DB]">Tanggal Bursa (Senin – Jumat)</label>
               <span id="dayNameBadge" class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]">
-                Rabu
+                Selasa
               </span>
             </div>
-            <input
-              type="date"
-              id="inputDate"
-              required
-              class="w-full px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-sm text-[#F3F4F6] focus:outline-none focus:border-[#22C55E] transition [color-scheme:dark]"
-            />
-            <!-- Quick Date Chips -->
-            <div class="flex items-center gap-2 mt-2">
+            <div class="flex items-center gap-2">
+              <input
+                type="date"
+                id="inputDate"
+                required
+                class="flex-1 px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-sm text-[#F3F4F6] focus:outline-none focus:border-[#22C55E] transition"
+              />
               <button
                 type="button"
                 id="btnSuggestNextTradingDay"
-                class="text-[11px] px-2.5 py-1 rounded-full bg-[#222724] text-[#22C55E] hover:bg-[#2A302D] transition"
+                title="Lompat ke hari bursa berikutnya (lewati Sabtu & Minggu)"
+                class="px-3 py-2.5 rounded-xl bg-[#222724] hover:bg-[#2C332F] text-xs font-medium text-[#22C55E] whitespace-nowrap transition"
               >
-                Hari Bursa Berikutnya
+                +1 Hari Bursa
               </button>
               <button
                 type="button"
                 id="btnSuggestToday"
-                class="text-[11px] px-2.5 py-1 rounded-full bg-[#222724] text-[#D1D5DB] hover:bg-[#2A302D] transition"
+                title="Gunakan tanggal hari ini"
+                class="px-2.5 py-2.5 rounded-xl bg-[#222724] hover:bg-[#2C332F] text-xs font-medium text-[#D1D5DB] whitespace-nowrap transition"
               >
                 Hari Ini
               </button>
             </div>
-            <!-- Weekend Warning Banner -->
-            <div id="weekendWarning" class="hidden mt-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-300 flex items-center gap-2">
-              <svg class="w-4 h-4 shrink-0 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-              </svg>
-              <span>Akhir pekan (Sabtu/Minggu): Bursa saham AS libur. Pastikan tanggal ini memang sesuai catatan Anda.</span>
-            </div>
+            <p id="weekendWarning" class="hidden text-[11px] text-amber-400 mt-1.5">
+              Perhatian: Tanggal yang dipilih jatuh pada akhir pekan (bursa AS libur).
+            </p>
           </div>
 
           <!-- Equity Input -->
           <div>
             <div class="flex items-center justify-between mb-1.5">
-              <label for="inputEquity" class="text-xs font-medium text-[#D1D5DB]">Total Equity Penutupan</label>
+              <label for="inputEquity" class="text-xs font-medium text-[#D1D5DB]">Total Equity Penutupan (VOO)</label>
               <span id="prevEquityHint" class="text-[11px] text-[#8E9591] [font-variant-numeric:tabular-nums]">
                 Sebelumnya: 1,596,000
               </span>
@@ -530,7 +523,7 @@
                 min="0"
                 required
                 placeholder="Contoh: 1612000"
-                class="w-full px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-base font-medium text-[#F3F4F6] [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E] transition"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-base font-semibold text-[#F3F4F6] [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E] transition"
               />
             </div>
           </div>
@@ -640,6 +633,56 @@
       </div>
     </div>
 
+    <!-- ==================== MODAL: PIN VERIFICATION (ONCE PER DEVICE) ==================== -->
+    <div id="pinModalBackdrop" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="w-full max-w-[340px] bg-[#181B19] border border-[#2A302D] rounded-3xl p-5 shadow-2xl space-y-4 text-center">
+        <div class="w-11 h-11 rounded-2xl bg-[#22C55E]/15 border border-[#22C55E]/30 text-[#22C55E] flex items-center justify-center mx-auto">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-base font-semibold text-[#F3F4F6]">Masukkan PIN Keamanan</h3>
+          <p class="text-[11px] text-[#8E9591] mt-1 leading-relaxed">
+            Cukup masukkan <strong>1 kali</strong> di perangkat ini. Setelah terbuka, Anda bebas update data tanpa diminta PIN lagi.
+          </p>
+        </div>
+
+        <form id="pinVerifyForm" class="space-y-3">
+          <input
+            type="password"
+            id="inputVerifyPin"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="8"
+            placeholder="••••••"
+            required
+            class="w-full px-4 py-3 rounded-xl bg-[#111312] border border-[#2F3532] text-center text-lg tracking-[0.4em] font-bold text-[#F3F4F6] focus:outline-none focus:border-[#22C55E]"
+          />
+          <label class="flex items-center justify-center gap-2 text-[11px] text-[#D1D5DB] cursor-pointer select-none">
+            <input type="checkbox" id="chkRememberDevicePin" checked class="w-3.5 h-3.5 rounded accent-[#22C55E]" />
+            <span>Ingat perangkat ini (jangan tanya lagi)</span>
+          </label>
+          <p id="pinErrorText" class="hidden text-[11px] text-[#E05252] font-medium">PIN salah. Silakan coba lagi.</p>
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button
+              type="button"
+              id="btnCancelPinModal"
+              class="py-2.5 rounded-xl bg-[#222724] text-xs font-medium text-[#D1D5DB] hover:bg-[#2B312E] transition"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              class="py-2.5 rounded-xl bg-[#22C55E] hover:bg-[#1EB054] text-[#090D0B] text-xs font-semibold transition"
+            >
+              Buka Akses
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- ==================== MODAL: SETTINGS, CLOUD SYNC & BACKUP ==================== -->
     <div id="settingsModalBackdrop" class="hidden fixed inset-0 z-40 bg-black/75 backdrop-blur-xs flex items-end justify-center">
       <div class="w-full max-w-[480px] max-h-[90vh] overflow-y-auto bg-[#181B19] border-t border-[#2A302D] rounded-t-3xl p-5 pb-8 shadow-2xl space-y-5">
@@ -706,11 +749,16 @@
       var d = rows[i][0] instanceof Date
         ? Utilities.formatDate(rows[i][0], ss.getSpreadsheetTimeZone(), 'yyyy-MM-dd')
         : String(rows[i][0]).trim();
+      var eq = Number(rows[i][1]) || 0;
+      var voo = rows[i][6] !== undefined &amp;&amp; rows[i][6] !== '' ? Number(rows[i][6]) : eq;
+      var schd = rows[i][7] !== undefined &amp;&amp; rows[i][7] !== '' ? Number(rows[i][7]) : 0;
       entries.push({
         date: d,
-        equity: Number(rows[i][1]) || 0,
+        equity: eq,
         netFlow: Number(rows[i][2]) || 0,
-        note: rows[i][5] ? String(rows[i][5]) : ''
+        note: rows[i][5] ? String(rows[i][5]) : '',
+        voo: voo,
+        schd: schd
       });
       if (rows[i][4]) currency = String(rows[i][4]);
     }
@@ -727,20 +775,25 @@ function doPost(e) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('ETF_PnL') || ss.insertSheet('ETF_PnL');
   sheet.clearContents();
-  var output = [['Date', 'Equity', 'NetTopUp', 'UpdatedAt', 'Currency', 'Note']];
+  var output = [['Date', 'Equity', 'NetTopUp', 'UpdatedAt', 'Currency', 'Note', 'VOO', 'SCHD']];
   var now = new Date().toISOString();
   var list = payload.entries || [];
   for (var i = 0; i &lt; list.length; i++) {
+    var eq = Number(list[i].equity) || 0;
+    var voo = list[i].voo !== undefined ? Number(list[i].voo) : eq;
+    var schd = list[i].schd !== undefined ? Number(list[i].schd) : 0;
     output.push([
       list[i].date,
-      Number(list[i].equity) || 0,
+      eq,
       Number(list[i].netFlow) || 0,
       i === 0 ? now : '',
       i === 0 ? (payload.currency || 'IDR') : '',
-      list[i].note || ''
+      list[i].note || '',
+      voo,
+      schd
     ]);
   }
-  sheet.getRange(1, 1, output.length, 6).setValues(output);
+  sheet.getRange(1, 1, output.length, 8).setValues(output);
   return ContentService.createTextOutput(JSON.stringify({
     status: 'ok',
     count: list.length
@@ -796,6 +849,42 @@ function doPost(e) {
               </button>
             </div>
           </div>
+        </div>
+
+        <!-- Security PIN Settings -->
+        <div class="rounded-2xl bg-[#111312] border border-[#262B28] p-3.5 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-[#F3F4F6]">Keamanan PIN Edit Data</span>
+            <span id="pinDeviceStatusBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]">Perangkat Terverifikasi</span>
+          </div>
+          <p class="text-[11px] text-[#8E9591] leading-relaxed">
+            Mencegah orang lain menambah/mengedit data dari perangkat lain. Perangkat yang sudah memasukkan PIN otomatis diingat.
+          </p>
+          <div class="flex items-center gap-2">
+            <input
+              type="password"
+              id="inputNewPin"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              maxlength="8"
+              placeholder="PIN baru (4-8 angka)"
+              class="flex-1 px-3 py-2 rounded-xl bg-[#181B19] border border-[#2F3532] text-xs text-[#F3F4F6] focus:outline-none focus:border-[#22C55E]"
+            />
+            <button
+              type="button"
+              id="btnSaveNewPin"
+              class="px-3.5 py-2 rounded-xl bg-[#22C55E] hover:bg-[#1EB054] text-[#090D0B] text-xs font-semibold transition"
+            >
+              Ubah PIN
+            </button>
+          </div>
+          <button
+            type="button"
+            id="btnLockDeviceNow"
+            class="w-full py-2 px-3 rounded-xl bg-[#181B19] border border-[#2F3532] text-[11px] font-medium text-amber-400 hover:bg-[#222724] transition"
+          >
+            Kunci Perangkat Ini Sekarang (Minta PIN Lagi)
+          </button>
         </div>
 
         <!-- Currency Display Mode -->
@@ -901,65 +990,63 @@ function doPost(e) {
     (function () {
       'use strict';
 
-      // ==================== KONFIGURASI CLOUD PERMANEN (OPSI 1) ====================
+      // ==================== KONFIGURASI CLOUD & PIN PERMANEN ====================
       const DEFAULT_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzDa1zDUwAIkAn1EMLEPlevp84hkLgMsZ77Wnkp232rk20xlkY6a8QPx4cWaz-o_b5Z/exec';
+      const DEFAULT_SECURITY_PIN = '123456'; // Ganti angka ini jika ingin PIN permanen di semua device
 
       // ==================== CONSTANTS & STORAGE KEYS ====================
       const STORAGE_KEY_ENTRIES = 'etf_pnl_entries_v1';
       const STORAGE_KEY_SETTINGS = 'etf_pnl_settings_v1';
       const STORAGE_KEY_CLOUD = 'etf_pnl_apps_script_v1';
+      const STORAGE_KEY_PIN_CODE = 'etf_pnl_pin_code_v1';
+      const STORAGE_KEY_PIN_TRUSTED = 'etf_pnl_device_trusted_v1';
       const INITIAL_VISIBLE_ROWS = 60;
 
-      const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      const DAYS_ID_FULL = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-      const DAYS_ID_SHORT = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-
-      const PERIOD_LABELS = {
-        'MTD': 'This Month',
-        '1M': 'Last 1 Month',
-        '3M': 'Last 3 Months',
-        '6M': 'Last 6 Months',
-        '1Y': '1 Year (252 Hari)',
-        'YTD': 'YTD',
-        'ALL': 'All Time'
-      };
-
+      // ==================== REFERENCE SAMPLE DATA ====================
       const SAMPLE_ENTRIES = [
-        { date: '2026-11-04', equity: 1440000, netFlow: 0, note: 'Modal awal ETF' },
-        { date: '2026-11-05', equity: 1444000, netFlow: 0, note: '' },
-        { date: '2026-11-06', equity: 1480000, netFlow: 0, note: 'Tech rally' },
-        { date: '2026-11-09', equity: 1484000, netFlow: 0, note: '' },
-        { date: '2026-11-10', equity: 1500000, netFlow: 0, note: '' },
-        { date: '2026-11-11', equity: 1508000, netFlow: 0, note: '' },
-        { date: '2026-11-12', equity: 1556000, netFlow: 0, note: 'CPI AS lebih rendah' },
-        { date: '2026-11-13', equity: 1556000, netFlow: 0, note: '' },
-        { date: '2026-11-16', equity: 1560000, netFlow: 0, note: '' },
-        { date: '2026-11-17', equity: 1576000, netFlow: 0, note: 'Dividen masuk' },
-        { date: '2026-11-18', equity: 1568000, netFlow: 0, note: '' },
-        { date: '2026-11-19', equity: 1564000, netFlow: 0, note: '' },
-        { date: '2026-11-20', equity: 1556000, netFlow: 0, note: '' },
+        { date: '2026-11-05', equity: 1440000, netFlow: 0, note: 'Modal awal VOO' },
+        { date: '2026-11-06', equity: 1452000, netFlow: 0, note: '' },
+        { date: '2026-11-09', equity: 1468000, netFlow: 0, note: '' },
+        { date: '2026-11-10', equity: 1461000, netFlow: 0, note: '' },
+        { date: '2026-11-11', equity: 1485000, netFlow: 0, note: '' },
+        { date: '2026-11-12', equity: 1533000, netFlow: 0, note: 'CPI AS melandai' },
+        { date: '2026-11-13', equity: 1528000, netFlow: 0, note: '' },
+        { date: '2026-11-16', equity: 1545000, netFlow: 0, note: '' },
+        { date: '2026-11-17', equity: 1559000, netFlow: 0, note: '' },
+        { date: '2026-11-18', equity: 1552000, netFlow: 0, note: '' },
+        { date: '2026-11-19', equity: 1574000, netFlow: 0, note: '' },
+        { date: '2026-11-20', equity: 1566000, netFlow: 0, note: '' },
         { date: '2026-11-23', equity: 1552000, netFlow: 0, note: '' },
-        { date: '2026-11-24', equity: 1596000, netFlow: 0, note: 'Rebound S&P 500' }
+        { date: '2026-11-24', equity: 1596000, netFlow: 0, note: '' }
       ];
 
       // ==================== APPLICATION STATE ====================
       let state = {
         entries: [],
         settings: {
-          currency: 'IDR',
-          period: '1M',
+          tab: 'portfolio',
           mode: 'daily',
+          period: '1M',
+          currency: 'IDR',
           hideBalances: false
         },
         cloud: {
           url: DEFAULT_APPS_SCRIPT_URL,
           status: 'local'
         },
+        security: {
+          pinCode: DEFAULT_SECURITY_PIN,
+          isTrustedDevice: false,
+          pendingAction: null
+        },
         visibleRowLimit: INITIAL_VISIBLE_ROWS,
         cashflowSign: 1
       };
 
-      // ==================== UTILITY & FORMATTING HELPERS ====================
+      // ==================== DATE & FORMAT UTILITIES ====================
+      const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const DAYS_ID = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
       function toIsoDateLocal(dateObj) {
         const y = dateObj.getFullYear();
         const m = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -967,321 +1054,306 @@ function doPost(e) {
         return `${y}-${m}-${d}`;
       }
 
-      function normalizeToIsoDate(rawVal) {
-        if (!rawVal) return '';
-        const str = String(rawVal).trim();
-        // Sudah format YYYY-MM-DD
-        const isoMatch = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-        if (isoMatch) {
-          return `${isoMatch[1]}-${isoMatch[2].padStart(2, '0')}-${isoMatch[3].padStart(2, '0')}`;
+      function normalizeToIsoDate(raw) {
+        if (!raw) return '';
+        const str = String(raw).trim();
+        if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+          return str.slice(0, 10);
         }
-        // Format Date string JS dari Google Sheets, misal "Mon Nov 23 2026 ..." atau "23 Nov 2026"
         const parsed = new Date(str);
         if (!isNaN(parsed.getTime())) {
           return toIsoDateLocal(parsed);
         }
-        return str.slice(0, 10);
+        return str;
       }
 
-      function parseDateLocal(isoStr) {
-        const cleanIso = normalizeToIsoDate(isoStr);
-        const parts = String(cleanIso).split('-');
-        if (parts.length !== 3) return new Date();
-        return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      function parseIsoLocal(isoStr) {
+        const clean = normalizeToIsoDate(isoStr);
+        const parts = clean.split('-').map(Number);
+        if (parts.length !== 3 || parts.some(isNaN)) return new Date();
+        return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
       }
 
       function formatDisplayDate(isoStr) {
-        const d = parseDateLocal(isoStr);
+        const d = parseIsoLocal(isoStr);
         const day = d.getDate();
         const mon = MONTHS_SHORT[d.getMonth()];
         const yr = String(d.getFullYear()).slice(-2);
         return `${day} ${mon} ${yr}`;
       }
 
-      function formatNumber(val, withSign = false, bypassPrivacy = false) {
-        if (state.settings.hideBalances && !bypassPrivacy) {
+      function formatMonthLabel(ymStr) {
+        const parts = String(ymStr).split('-');
+        if (parts.length !== 2) return ymStr;
+        const mIdx = parseInt(parts[1], 10) - 1;
+        return `${MONTHS_SHORT[mIdx] || parts[1]} ${parts[0]}`;
+      }
+
+      function formatNumber(val, forceSign = false, maskIfPrivate = true) {
+        if (maskIfPrivate && state.settings.hideBalances) {
           return '••••••';
         }
         const num = Number(val) || 0;
-        const isUSD = state.settings.currency === 'USD';
+        const isUsd = state.settings.currency === 'USD';
         const absVal = Math.abs(num);
-        const formatted = isUSD
+        const formatted = isUsd
           ? '$' + absVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
           : Math.round(absVal).toLocaleString('en-US');
 
-        if (!withSign) return formatted;
-        if (num > 0) return '+' + formatted;
-        if (num < 0) return '-' + formatted;
-        return isUSD ? '$0.00' : '0';
+        if (Math.abs(num) < 0.005) return isUsd ? '$0.00' : '0';
+        if (num < 0) return `-${formatted}`;
+        return forceSign ? `+${formatted}` : formatted;
       }
 
-      function formatPnlCombined(pnlVal, pnlPct, bypassPrivacy = false) {
-        const val = Number(pnlVal) || 0;
-        const pct = Number(pnlPct) || 0;
-        const isZero = Math.abs(val) < 0.0001;
-        if (state.settings.hideBalances && !bypassPrivacy) {
-          if (isZero) return '•••••• (0.00%)';
-          const signStr = val > 0 ? '+' : '';
-          return `•••••• (${signStr}${pct.toFixed(2)}%)`;
+      function formatPercent(pct, forceSign = true) {
+        const val = Number(pct) || 0;
+        if (Math.abs(val) < 0.0005) return '0.00%';
+        const sign = val > 0 && forceSign ? '+' : '';
+        return `${sign}${val.toFixed(2)}%`;
+      }
+
+      function saveLocal() {
+        try {
+          localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(state.entries));
+          localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(state.settings));
+        } catch (err) {
+          console.error('Save local error:', err);
         }
-        if (isZero) {
-          return state.settings.currency === 'USD' ? '$0.00 (0.00%)' : '0 (0.00%)';
-        }
-        const signStr = val > 0 ? '+' : '';
-        const pctStr = `${signStr}${pct.toFixed(2)}%`;
-        return `${formatNumber(val, true, bypassPrivacy)} (${pctStr})`;
       }
 
-      function escapeHtml(str) {
-        return String(str || '')
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;');
-      }
-
-      function getPnlColorClass(pnlVal) {
-        const val = Number(pnlVal) || 0;
-        if (val > 0.0001) return 'text-[#22C55E]';
-        if (val < -0.0001) return 'text-[#E05252]';
-        return 'text-[#D1D5DB]';
-      }
-
-      function showToast(msg, isError = false) {
-        const banner = document.getElementById('toastBanner');
-        const dot = document.getElementById('toastDot');
-        const text = document.getElementById('toastMessage');
-        if (!banner || !text) return;
-
-        text.textContent = msg;
-        dot.className = `w-2 h-2 rounded-full ${isError ? 'bg-[#E05252]' : 'bg-[#22C55E]'}`;
-        banner.classList.remove('hidden');
-
-        clearTimeout(window.__toastTimer);
-        window.__toastTimer = setTimeout(() => {
-          banner.classList.add('hidden');
-        }, 2800);
-      }
-
-      // ==================== CORE P&L & PERIOD CALCULATIONS ====================
-      function computeAllDailyMetrics(entries) {
-        const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
+      // ==================== CORE P&L & PERIOD COMPUTATION ====================
+      function computeAllEntries() {
+        const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
         return sorted.map((item, idx) => {
-          if (idx === 0) {
-            return {
-              ...item,
-              prevEquity: item.equity,
-              pnl: 0,
-              pnlPct: 0,
-              isInitial: true
-            };
-          }
-          const prev = sorted[idx - 1].equity;
-          const netFlow = Number(item.netFlow) || 0;
-          const pnl = item.equity - prev - netFlow;
-          const adjustedBase = prev + (netFlow > 0 ? netFlow : 0);
-          const base = adjustedBase > 0 ? adjustedBase : (prev > 0 ? prev : 1);
-          const pnlPct = (pnl / base) * 100;
+          const prev = idx > 0 ? sorted[idx - 1] : null;
+          const prevEq = prev ? prev.equity : item.equity;
+          const flow = Number(item.netFlow) || 0;
+          const pnl = idx === 0 ? 0 : (item.equity - prevEq - flow);
+          const capitalBase = prevEq + (flow > 0 ? flow : 0);
+          const pnlPct = idx === 0 || capitalBase <= 0 ? 0 : (pnl / capitalBase) * 100;
           return {
             ...item,
-            prevEquity: prev,
+            prevEquity: prevEq,
             pnl,
-            pnlPct,
-            isInitial: false
-          };
-        });
-      }
-
-      function filterEntriesByPeriod(computedList, period) {
-        if (!computedList.length || period === 'ALL') return computedList;
-        const latestDate = parseDateLocal(computedList[computedList.length - 1].date);
-        const cutoff = new Date(latestDate);
-
-        if (period === 'MTD') {
-          cutoff.setDate(1);
-        } else if (period === '1M') cutoff.setMonth(cutoff.getMonth() - 1);
-        else if (period === '3M') cutoff.setMonth(cutoff.getMonth() - 3);
-        else if (period === '6M') cutoff.setMonth(cutoff.getMonth() - 6);
-        else if (period === '1Y') cutoff.setFullYear(cutoff.getFullYear() - 1);
-        else if (period === 'YTD') {
-          cutoff.setMonth(0);
-          cutoff.setDate(1);
-        }
-
-        const cutoffIso = toIsoDateLocal(cutoff);
-        const filtered = computedList.filter(item => item.date >= cutoffIso);
-        return filtered.length ? filtered : computedList;
-      }
-
-      function computeMonthlyMetrics(computedList) {
-        const map = new Map();
-        computedList.forEach(item => {
-          const cleanIso = normalizeToIsoDate(item.date);
-          const monthKey = cleanIso.slice(0, 7);
-          if (!map.has(monthKey)) {
-            map.set(monthKey, {
-              monthKey,
-              startPrevEquity: item.isInitial ? item.equity : item.prevEquity,
-              endEquity: item.equity,
-              totalPnl: 0,
-              tradingDays: 0
-            });
-          }
-          const group = map.get(monthKey);
-          group.endEquity = item.equity;
-          group.totalPnl += item.pnl;
-          group.tradingDays += 1;
-        });
-
-        return Array.from(map.values()).map(g => {
-          const base = g.startPrevEquity > 0 ? g.startPrevEquity : 1;
-          const pnlPct = (g.totalPnl / base) * 100;
-          const [yyyy, mm] = g.monthKey.split('-');
-          const monthIdx = Number(mm) - 1;
-          const monthName = MONTHS_SHORT[monthIdx] || mm;
-          const label = yyyy ? `${monthName} ${yyyy}` : g.monthKey;
-          return {
-            ...g,
-            label,
             pnlPct
           };
         });
       }
 
-      // ==================== RENDERING: TABLE, ANALYTICS & CHART ====================
-      function renderAll() {
-        const allComputed = computeAllDailyMetrics(state.entries);
-        const filtered = filterEntriesByPeriod(allComputed, state.settings.period);
+      function filterEntriesByPeriod(allComputed) {
+        if (!allComputed.length || state.settings.period === 'ALL') return allComputed;
+        const latestDate = parseIsoLocal(allComputed[allComputed.length - 1].date);
+        let cutoff = new Date(latestDate);
 
-        // Update Dropdown & Mode Pills
-        document.getElementById('selectedPeriodLabel').textContent = PERIOD_LABELS[state.settings.period] || 'Last 1 Month';
-        document.getElementById('tradePeriodTag').textContent = PERIOD_LABELS[state.settings.period] || 'All Time';
+        switch (state.settings.period) {
+          case 'MTD':
+            cutoff = new Date(latestDate.getFullYear(), latestDate.getMonth(), 1);
+            break;
+          case '1M':
+            cutoff.setMonth(cutoff.getMonth() - 1);
+            break;
+          case '3M':
+            cutoff.setMonth(cutoff.getMonth() - 3);
+            break;
+          case '6M':
+            cutoff.setMonth(cutoff.getMonth() - 6);
+            break;
+          case '1Y':
+            cutoff.setFullYear(cutoff.getFullYear() - 1);
+            break;
+          case 'YTD':
+            cutoff = new Date(latestDate.getFullYear(), 0, 1);
+            break;
+        }
+        const cutoffIso = toIsoDateLocal(cutoff);
+        return allComputed.filter(e => e.date >= cutoffIso);
+      }
 
-        document.querySelectorAll('.period-option').forEach(btn => {
-          const isActive = btn.dataset.period === state.settings.period;
-          btn.className = `period-option w-full text-left px-3.5 py-2 text-xs transition ${
-            isActive ? 'text-[#22C55E] font-medium bg-[#222724]/60' : 'text-[#D1D5DB] hover:bg-[#222724]'
-          }`;
+      function computeMonthlyMetrics(filteredList) {
+        const groups = {};
+        filteredList.forEach(item => {
+          const ym = item.date.slice(0, 7);
+          if (!groups[ym]) {
+            groups[ym] = {
+              month: ym,
+              endEquity: item.equity,
+              startBase: item.prevEquity,
+              totalPnl: 0,
+              days: 0
+            };
+          }
+          groups[ym].endEquity = item.equity;
+          groups[ym].totalPnl += item.pnl;
+          groups[ym].days += 1;
         });
 
-        const btnDaily = document.getElementById('btnModeDaily');
-        const btnMonthly = document.getElementById('btnModeMonthly');
-        if (state.settings.mode === 'daily') {
-          btnDaily.className = 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition';
-          btnMonthly.className = 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
-        } else {
-          btnMonthly.className = 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition';
-          btnDaily.className = 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
-        }
+        return Object.values(groups)
+          .sort((a, b) => b.month.localeCompare(a.month))
+          .map(g => ({
+            ...g,
+            pnlPct: g.startBase > 0 ? (g.totalPnl / g.startBase) * 100 : 0
+          }));
+      }
 
-        // Currency Buttons
-        const btnIDR = document.getElementById('btnCurrencyIDR');
-        const btnUSD = document.getElementById('btnCurrencyUSD');
-        if (state.settings.currency === 'IDR') {
-          btnIDR.className = 'py-2.5 px-3 rounded-xl text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] text-center transition';
-          btnUSD.className = 'py-2.5 px-3 rounded-xl text-xs font-medium border border-[#2F3532] bg-[#111312] text-[#8E9591] text-center transition';
-        } else {
-          btnUSD.className = 'py-2.5 px-3 rounded-xl text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] text-center transition';
-          btnIDR.className = 'py-2.5 px-3 rounded-xl text-xs font-medium border border-[#2F3532] bg-[#111312] text-[#8E9591] text-center transition';
-        }
+      // ==================== RENDERING UI ====================
+      function renderAll() {
+        const allComputed = computeAllEntries();
+        const filtered = filterEntriesByPeriod(allComputed);
 
-        // Privacy Mode Eye Icon State
-        const eyeOpen = document.getElementById('iconEyeOpen');
-        const eyeClosed = document.getElementById('iconEyeClosed');
-        if (eyeOpen && eyeClosed) {
-          if (state.settings.hideBalances) {
-            eyeOpen.classList.add('hidden');
-            eyeClosed.classList.remove('hidden');
-          } else {
-            eyeOpen.classList.remove('hidden');
-            eyeClosed.classList.add('hidden');
-          }
-        }
+        // Tabs & Mode Buttons
+        const isPortfolio = state.settings.tab === 'portfolio';
+        document.getElementById('viewPortfolio').classList.toggle('hidden', !isPortfolio);
+        document.getElementById('viewTrade').classList.toggle('hidden', isPortfolio);
+
+        const tabPortfolio = document.getElementById('tabPortfolio');
+        const tabTrade = document.getElementById('tabTrade');
+        tabPortfolio.className = isPortfolio
+          ? 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors'
+          : 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] border-b-2 border-transparent hover:text-[#D1D5DB] transition-colors';
+        tabTrade.className = !isPortfolio
+          ? 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors'
+          : 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] border-b-2 border-transparent hover:text-[#D1D5DB] transition-colors';
+
+        const isDaily = state.settings.mode === 'daily';
+        document.getElementById('btnModeDaily').className = isDaily
+          ? 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition'
+          : 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
+        document.getElementById('btnModeMonthly').className = !isDaily
+          ? 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition'
+          : 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
+
+        const periodLabels = {
+          MTD: 'This Month',
+          '1M': 'Last 1 Month',
+          '3M': 'Last 3 Months',
+          '6M': 'Last 6 Months',
+          '1Y': '1 Year (252 Hari)',
+          YTD: 'YTD',
+          ALL: 'All Time'
+        };
+        document.getElementById('selectedPeriodLabel').textContent = periodLabels[state.settings.period] || 'Last 1 Month';
+        document.getElementById('tradePeriodTag').textContent = periodLabels[state.settings.period] || 'All Time';
+
+        // Privacy Icons
+        document.getElementById('iconEyeOpen').classList.toggle('hidden', state.settings.hideBalances);
+        document.getElementById('iconEyeClosed').classList.toggle('hidden', !state.settings.hideBalances);
 
         renderPerformanceTable(filtered);
         renderTradeAnalytics(filtered, allComputed);
         updatePortfolioHeroSummary(allComputed);
         updateCloudStatusUI();
+        updatePinStatusUI();
       }
 
       function updatePortfolioHeroSummary(allComputed) {
-        const elPort = document.getElementById('heroTotalPortfolio');
-        const elInv = document.getElementById('heroTotalInvested');
-        const elPnl = document.getElementById('heroTotalPnl');
-        const elPct = document.getElementById('heroTotalPnlPct');
-        if (!elPort || !elInv || !elPnl || !elPct) return;
+        const eqEl = document.getElementById('heroTotalPortfolio');
+        const invEl = document.getElementById('heroTotalInvested');
+        const pnlEl = document.getElementById('heroTotalPnl');
+        const pctEl = document.getElementById('heroTotalPnlPct');
+        if (!eqEl) return;
 
         if (!allComputed.length) {
-          elPort.textContent = formatNumber(0);
-          elInv.textContent = formatNumber(0);
-          elPnl.textContent = formatNumber(0);
-          elPnl.className = 'text-sm font-semibold text-[#D1D5DB] block [font-variant-numeric:tabular-nums]';
-          elPct.textContent = '0.00%';
-          elPct.className = 'text-xs font-medium text-[#D1D5DB] block [font-variant-numeric:tabular-nums]';
+          eqEl.textContent = formatNumber(0);
+          invEl.textContent = formatNumber(0);
+          pnlEl.textContent = formatNumber(0);
+          pctEl.textContent = '0.00%';
           return;
         }
 
         const latest = allComputed[allComputed.length - 1];
         const initialEq = allComputed[0].equity;
-        const totalNetTopUp = allComputed.reduce((acc, item) => acc + (Number(item.netFlow) || 0), 0);
-        const totalInvested = initialEq + totalNetTopUp;
-        const totalReturnNominal = latest.equity - totalInvested;
-        const totalReturnPct = totalInvested > 0 ? (totalReturnNominal / totalInvested) * 100 : 0;
-        const colorCls = getPnlColorClass(totalReturnNominal);
+        const extraFlows = allComputed.slice(1).reduce((sum, e) => sum + (Number(e.netFlow) || 0), 0);
+        const netInvested = initialEq + extraFlows;
+        const totalNetPnl = latest.equity - netInvested;
+        const totalPct = netInvested > 0 ? (totalNetPnl / netInvested) * 100 : 0;
 
-        elPort.textContent = formatNumber(latest.equity);
-        elInv.textContent = formatNumber(totalInvested);
-        elPnl.textContent = formatNumber(totalReturnNominal, true);
-        elPnl.className = `text-sm font-semibold ${colorCls} block [font-variant-numeric:tabular-nums]`;
-        elPct.textContent = `${totalReturnNominal >= 0 ? '+' : ''}${totalReturnPct.toFixed(2)}%`;
-        elPct.className = `text-xs font-medium ${colorCls} block [font-variant-numeric:tabular-nums]`;
+        const colorClass = totalNetPnl > 0.005 ? 'text-[#22C55E]' : totalNetPnl < -0.005 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
+        eqEl.textContent = formatNumber(latest.equity);
+        invEl.textContent = formatNumber(netInvested);
+        pnlEl.textContent = formatNumber(totalNetPnl, true);
+        pnlEl.className = `text-sm font-semibold ${colorClass} block [font-variant-numeric:tabular-nums]`;
+        pctEl.textContent = formatPercent(totalPct, true);
+        pctEl.className = `text-xs font-medium ${colorClass} block [font-variant-numeric:tabular-nums]`;
+      }
+
+      function updatePinStatusUI() {
+        const iconUnlocked = document.getElementById('iconPinUnlocked');
+        const iconLocked = document.getElementById('iconPinLocked');
+        const badge = document.getElementById('pinDeviceStatusBadge');
+        if (!iconUnlocked || !iconLocked) return;
+
+        if (state.security.isTrustedDevice) {
+          iconUnlocked.classList.remove('hidden');
+          iconLocked.classList.add('hidden');
+          if (badge) {
+            badge.textContent = 'Perangkat Diingat (Bebas Edit)';
+            badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]';
+          }
+        } else {
+          iconUnlocked.classList.add('hidden');
+          iconLocked.classList.remove('hidden');
+          if (badge) {
+            badge.textContent = 'Terkunci (Butuh PIN)';
+            badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400';
+          }
+        }
+      }
+
+      function requirePinThen(actionFn) {
+        if (state.security.isTrustedDevice) {
+          actionFn();
+          return;
+        }
+        state.security.pendingAction = actionFn;
+        const pinModal = document.getElementById('pinModalBackdrop');
+        const pinInput = document.getElementById('inputVerifyPin');
+        const pinErr = document.getElementById('pinErrorText');
+        pinInput.value = '';
+        pinErr.classList.add('hidden');
+        pinModal.classList.remove('hidden');
+        setTimeout(() => pinInput.focus(), 100);
       }
 
       function renderPerformanceTable(filteredList) {
         const tbody = document.getElementById('performanceTableBody');
-        const emptyState = document.getElementById('emptyStateContainer');
+        const emptyBox = document.getElementById('emptyStateContainer');
         const loadMoreBox = document.getElementById('loadMoreContainer');
 
         if (!filteredList.length) {
           tbody.innerHTML = '';
-          emptyState.classList.remove('hidden');
+          emptyBox.classList.remove('hidden');
           loadMoreBox.classList.add('hidden');
           return;
         }
 
-        emptyState.classList.add('hidden');
+        emptyBox.classList.add('hidden');
 
         if (state.settings.mode === 'monthly') {
           loadMoreBox.classList.add('hidden');
-          const monthly = computeMonthlyMetrics(filteredList).reverse();
+          const monthly = computeMonthlyMetrics(filteredList);
           tbody.innerHTML = monthly.map(m => {
-            const colorCls = getPnlColorClass(m.totalPnl);
+            const color = m.totalPnl > 0.005 ? 'text-[#22C55E]' : m.totalPnl < -0.005 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
             return `
-              <button
-                type="button"
-                data-month="${m.monthKey}"
-                class="month-row w-full grid grid-cols-12 items-center py-3.5 px-1 -mx-1 rounded-xl hover:bg-[#181B19] active:bg-[#1F2421] transition text-left cursor-pointer touch-manipulation"
-              >
-                <div class="col-span-4">
-                  <span class="text-[13px] font-medium text-[#E5E7EB] block">${m.label}</span>
-                  <span class="text-[10px] text-[#8E9591]">${m.tradingDays} hari bursa</span>
+              <div data-month="${m.month}" class="month-row grid grid-cols-12 items-center py-3.5 cursor-pointer hover:bg-[#181B19]/70 active:bg-[#181B19] transition">
+                <div class="col-span-4 text-left">
+                  <span class="text-[13px] font-medium text-[#F3F4F6] block">${formatMonthLabel(m.month)}</span>
+                  <span class="text-[11px] text-[#8E9591]">${m.days} hari bursa</span>
                 </div>
-                <div class="col-span-4 text-right pr-2 text-[13px] font-normal text-[#E5E7EB] [font-variant-numeric:tabular-nums]">
-                  ${formatNumber(m.endEquity, false)}
+                <div class="col-span-4 text-right pr-2 text-[13px] font-medium text-[#F3F4F6] [font-variant-numeric:tabular-nums]">
+                  ${formatNumber(m.endEquity)}
                 </div>
-                <div class="col-span-4 text-right text-[13px] font-normal ${colorCls} [font-variant-numeric:tabular-nums]">
-                  ${formatPnlCombined(m.totalPnl, m.pnlPct)}
+                <div class="col-span-4 text-right text-[13px] font-medium ${color} [font-variant-numeric:tabular-nums]">
+                  ${formatNumber(m.totalPnl, true)} (${formatPercent(m.pnlPct, true)})
                 </div>
-              </button>
+              </div>
             `;
           }).join('');
           return;
         }
 
-        // Daily Mode (Newest first)
-        const reversed = [...filteredList].reverse();
-        const visibleItems = reversed.slice(0, state.visibleRowLimit);
-        const remaining = reversed.length - visibleItems.length;
+        const descList = [...filteredList].reverse();
+        const visible = descList.slice(0, state.visibleRowLimit);
+        const remaining = descList.length - visible.length;
 
         if (remaining > 0) {
           loadMoreBox.classList.remove('hidden');
@@ -1290,295 +1362,323 @@ function doPost(e) {
           loadMoreBox.classList.add('hidden');
         }
 
-        tbody.innerHTML = visibleItems.map(item => {
-          const colorCls = getPnlColorClass(item.pnl);
-          const flowTag = item.netFlow !== 0
-            ? `<span class="ml-1 text-[9px] px-1.5 py-0.5 rounded bg-[#222724] text-[#8E9591] shrink-0">${item.netFlow > 0 ? '+TopUp' : '-Tarik'}</span>`
+        tbody.innerHTML = visible.map(item => {
+          const color = item.pnl > 0.005 ? 'text-[#22C55E]' : item.pnl < -0.005 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
+          const flowBadge = item.netFlow > 0
+            ? `<span class="ml-1.5 text-[10px] px-1.5 py-0.5 rounded bg-[#22C55E]/15 text-[#22C55E]">+TopUp</span>`
+            : item.netFlow < 0
+              ? `<span class="ml-1.5 text-[10px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400">-Tarik</span>`
+              : '';
+          const noteHtml = item.note
+            ? `<span class="text-[11px] text-[#8E9591] block truncate mt-0.5">${escapeHtml(item.note)}</span>`
             : '';
-          const noteHtml = item.note && item.note.trim()
-            ? `<span class="text-[10px] text-[#8E9591] truncate block mt-0.5 max-w-[135px]" title="${escapeHtml(item.note)}">📝 ${escapeHtml(item.note)}</span>`
-            : '';
+
           return `
-            <button
-              type="button"
-              data-date="${item.date}"
-              class="daily-row w-full grid grid-cols-12 items-center py-3.5 px-1 -mx-1 rounded-xl hover:bg-[#181B19] active:bg-[#1F2421] transition text-left cursor-pointer touch-manipulation"
-            >
-              <div class="col-span-4 pr-1">
-                <div class="flex items-center text-[13px] font-normal text-[#E5E7EB]">
-                  <span>${formatDisplayDate(item.date)}</span>
-                  ${flowTag}
+            <div data-date="${item.date}" class="daily-row grid grid-cols-12 items-center py-3.5 cursor-pointer hover:bg-[#181B19]/70 active:bg-[#181B19] transition">
+              <div class="col-span-4 text-left pr-1">
+                <div class="flex items-center flex-wrap">
+                  <span class="text-[13px] font-normal text-[#F3F4F6]">${formatDisplayDate(item.date)}</span>
+                  ${flowBadge}
                 </div>
                 ${noteHtml}
               </div>
-              <div class="col-span-4 text-right pr-2 text-[13px] font-normal text-[#E5E7EB] [font-variant-numeric:tabular-nums]">
-                ${formatNumber(item.equity, false)}
+              <div class="col-span-4 text-right pr-2 text-[13px] font-normal text-[#F3F4F6] [font-variant-numeric:tabular-nums]">
+                ${formatNumber(item.equity)}
               </div>
-              <div class="col-span-4 text-right text-[13px] font-normal ${colorCls} [font-variant-numeric:tabular-nums]">
-                ${formatPnlCombined(item.pnl, item.pnlPct)}
+              <div class="col-span-4 text-right text-[13px] font-normal ${color} [font-variant-numeric:tabular-nums]">
+                ${formatNumber(item.pnl, true)} (${formatPercent(item.pnlPct, true)})
               </div>
-            </button>
+            </div>
           `;
         }).join('');
       }
 
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
       function renderTradeAnalytics(filteredList, allComputed) {
-        if (!filteredList.length) {
-          document.getElementById('chartActiveEquity').textContent = formatNumber(0);
-          document.getElementById('chartActiveDate').textContent = '-';
-          document.getElementById('chartActivePnl').textContent = formatPnlCombined(0, 0);
-          document.getElementById('equitySparklineSvg').innerHTML = '';
-          return;
-        }
+        const list = filteredList.length ? filteredList : allComputed;
+        if (!list.length) return;
 
-        const latest = filteredList[filteredList.length - 1];
-        const first = filteredList[0];
-        const baseStart = first.isInitial ? first.equity : first.prevEquity;
-
+        const latest = list[list.length - 1];
         document.getElementById('chartActiveEquity').textContent = formatNumber(latest.equity);
         document.getElementById('chartActiveDate').textContent = formatDisplayDate(latest.date);
+        const activeColor = latest.pnl > 0.005 ? 'text-[#22C55E]' : latest.pnl < -0.005 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
         const activePnlEl = document.getElementById('chartActivePnl');
-        activePnlEl.textContent = formatPnlCombined(latest.pnl, latest.pnlPct);
-        activePnlEl.className = `text-xs font-medium ${getPnlColorClass(latest.pnl)} [font-variant-numeric:tabular-nums]`;
+        activePnlEl.textContent = `${formatNumber(latest.pnl, true)} (${formatPercent(latest.pnlPct, true)})`;
+        activePnlEl.className = `text-xs font-medium ${activeColor} [font-variant-numeric:tabular-nums]`;
 
-        // Aggregate metrics
-        const activeDays = filteredList.filter(d => !d.isInitial);
-        const totalPnl = activeDays.reduce((acc, d) => acc + d.pnl, 0);
-        const totalPnlPct = baseStart > 0 ? (totalPnl / baseStart) * 100 : 0;
+        // Sparkline SVG
+        renderSparkline(list);
 
-        const wins = activeDays.filter(d => d.pnl > 0.0001).length;
-        const losses = activeDays.filter(d => d.pnl < -0.0001).length;
-        const draws = activeDays.length - wins - losses;
-        const winRate = activeDays.length ? (wins / activeDays.length) * 100 : 0;
+        // Stats computation
+        let totalPnl = 0;
+        let wins = 0;
+        let losses = 0;
+        let flat = 0;
+        let maxProfit = null;
+        let maxLoss = null;
+        let maxProfitPct = null;
+        let maxLossPct = null;
 
-        let maxProfitItem = null;
-        let maxLossItem = null;
-        let maxProfitPctItem = null;
-        let maxLossPctItem = null;
+        list.forEach((item, idx) => {
+          if (idx === 0 && allComputed[0] && item.date === allComputed[0].date) return;
+          totalPnl += item.pnl;
+          if (item.pnl > 0.005) wins++;
+          else if (item.pnl < -0.005) losses++;
+          else flat++;
 
-        activeDays.forEach(d => {
-          if (d.pnl > 0.0001) {
-            if (!maxProfitItem || d.pnl > maxProfitItem.pnl) maxProfitItem = d;
-            if (!maxProfitPctItem || d.pnlPct > maxProfitPctItem.pnlPct) maxProfitPctItem = d;
-          }
-          if (d.pnl < -0.0001) {
-            if (!maxLossItem || d.pnl < maxLossItem.pnl) maxLossItem = d;
-            if (!maxLossPctItem || d.pnlPct < maxLossPctItem.pnlPct) maxLossPctItem = d;
-          }
+          if (!maxProfit || item.pnl > maxProfit.pnl) maxProfit = item;
+          if (!maxLoss || item.pnl < maxLoss.pnl) maxLoss = item;
+          if (!maxProfitPct || item.pnlPct > maxProfitPct.pnlPct) maxProfitPct = item;
+          if (!maxLossPct || item.pnlPct < maxLossPct.pnlPct) maxLossPct = item;
         });
 
-        const avgDaily = activeDays.length ? totalPnl / activeDays.length : 0;
-        const netCashflow = filteredList.reduce((acc, d) => acc + (Number(d.netFlow) || 0), 0);
-        const initialEquity = allComputed.length ? allComputed[0].equity : 0;
+        const baseStart = list[0].prevEquity || list[0].equity;
+        const totalPct = baseStart > 0 ? (totalPnl / baseStart) * 100 : 0;
+        const pnlColor = totalPnl > 0.005 ? 'text-[#22C55E]' : totalPnl < -0.005 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
 
-        const elTotalPnl = document.getElementById('statTotalPnl');
-        const elTotalPct = document.getElementById('statTotalPnlPct');
-        elTotalPnl.textContent = formatNumber(totalPnl, true);
-        elTotalPnl.className = `text-sm font-semibold ${getPnlColorClass(totalPnl)} block [font-variant-numeric:tabular-nums]`;
-        elTotalPct.textContent = `${totalPnl >= 0 ? '+' : ''}${totalPnlPct.toFixed(2)}%`;
-        elTotalPct.className = `text-xs ${getPnlColorClass(totalPnl)} [font-variant-numeric:tabular-nums]`;
+        const statTotalPnl = document.getElementById('statTotalPnl');
+        const statTotalPnlPct = document.getElementById('statTotalPnlPct');
+        statTotalPnl.textContent = formatNumber(totalPnl, true);
+        statTotalPnl.className = `text-sm font-semibold ${pnlColor} block [font-variant-numeric:tabular-nums]`;
+        statTotalPnlPct.textContent = formatPercent(totalPct, true);
+        statTotalPnlPct.className = `text-xs ${pnlColor} [font-variant-numeric:tabular-nums]`;
 
+        const totalTrades = wins + losses + flat;
+        const winRate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
         document.getElementById('statWinRate').textContent = `${winRate.toFixed(1)}%`;
-        document.getElementById('statWinCounts').textContent = `${wins}W • ${losses}L • ${draws}D`;
+        document.getElementById('statWinCounts').textContent = `${wins}W • ${losses}L • ${flat}D`;
 
-        // Max Profit (Nominal)
-        const elMaxProfit = document.getElementById('statMaxProfit');
-        const elMaxProfitDate = document.getElementById('statMaxProfitDate');
-        if (maxProfitItem) {
-          elMaxProfit.textContent = formatNumber(maxProfitItem.pnl, true);
-          elMaxProfit.className = 'text-sm font-semibold text-[#22C55E] block [font-variant-numeric:tabular-nums]';
-          elMaxProfitDate.textContent = formatDisplayDate(maxProfitItem.date);
-        } else {
-          elMaxProfit.textContent = formatNumber(0);
-          elMaxProfit.className = 'text-sm font-semibold text-[#D1D5DB] block [font-variant-numeric:tabular-nums]';
-          elMaxProfitDate.textContent = '-';
-        }
+        document.getElementById('statMaxProfit').textContent = maxProfit && maxProfit.pnl > 0 ? formatNumber(maxProfit.pnl, true) : formatNumber(0);
+        document.getElementById('statMaxProfitDate').textContent = maxProfit && maxProfit.pnl > 0 ? formatDisplayDate(maxProfit.date) : '-';
 
-        // Max Loss (Nominal)
-        const elMaxLoss = document.getElementById('statMaxLoss');
-        const elMaxLossDate = document.getElementById('statMaxLossDate');
-        if (maxLossItem) {
-          elMaxLoss.textContent = formatNumber(maxLossItem.pnl, true);
-          elMaxLoss.className = 'text-sm font-semibold text-[#E05252] block [font-variant-numeric:tabular-nums]';
-          elMaxLossDate.textContent = formatDisplayDate(maxLossItem.date);
-        } else {
-          elMaxLoss.textContent = formatNumber(0);
-          elMaxLoss.className = 'text-sm font-semibold text-[#D1D5DB] block [font-variant-numeric:tabular-nums]';
-          elMaxLossDate.textContent = '-';
-        }
+        document.getElementById('statMaxLoss').textContent = maxLoss && maxLoss.pnl < 0 ? formatNumber(maxLoss.pnl, true) : formatNumber(0);
+        document.getElementById('statMaxLossDate').textContent = maxLoss && maxLoss.pnl < 0 ? formatDisplayDate(maxLoss.date) : '-';
 
-        // Max Profit (%)
-        const elMaxProfitPct = document.getElementById('statMaxProfitPct');
-        const elMaxProfitPctDate = document.getElementById('statMaxProfitPctDate');
-        if (maxProfitPctItem) {
-          elMaxProfitPct.textContent = `+${maxProfitPctItem.pnlPct.toFixed(2)}%`;
-          elMaxProfitPct.className = 'text-sm font-semibold text-[#22C55E] block [font-variant-numeric:tabular-nums]';
-          elMaxProfitPctDate.textContent = formatDisplayDate(maxProfitPctItem.date);
-        } else {
-          elMaxProfitPct.textContent = '0.00%';
-          elMaxProfitPct.className = 'text-sm font-semibold text-[#D1D5DB] block [font-variant-numeric:tabular-nums]';
-          elMaxProfitPctDate.textContent = '-';
-        }
+        document.getElementById('statMaxProfitPct').textContent = maxProfitPct && maxProfitPct.pnlPct > 0 ? formatPercent(maxProfitPct.pnlPct, true) : '0.00%';
+        document.getElementById('statMaxProfitPctDate').textContent = maxProfitPct && maxProfitPct.pnlPct > 0 ? formatDisplayDate(maxProfitPct.date) : '-';
 
-        // Max Loss (%)
-        const elMaxLossPct = document.getElementById('statMaxLossPct');
-        const elMaxLossPctDate = document.getElementById('statMaxLossPctDate');
-        if (maxLossPctItem) {
-          elMaxLossPct.textContent = `${maxLossPctItem.pnlPct.toFixed(2)}%`;
-          elMaxLossPct.className = 'text-sm font-semibold text-[#E05252] block [font-variant-numeric:tabular-nums]';
-          elMaxLossPctDate.textContent = formatDisplayDate(maxLossPctItem.date);
-        } else {
-          elMaxLossPct.textContent = '0.00%';
-          elMaxLossPct.className = 'text-sm font-semibold text-[#D1D5DB] block [font-variant-numeric:tabular-nums]';
-          elMaxLossPctDate.textContent = '-';
-        }
+        document.getElementById('statMaxLossPct').textContent = maxLossPct && maxLossPct.pnlPct < 0 ? formatPercent(maxLossPct.pnlPct, true) : '0.00%';
+        document.getElementById('statMaxLossPctDate').textContent = maxLossPct && maxLossPct.pnlPct < 0 ? formatDisplayDate(maxLossPct.date) : '-';
 
+        const avgDaily = totalTrades > 0 ? totalPnl / totalTrades : 0;
         document.getElementById('statAvgDaily').textContent = formatNumber(avgDaily, true);
-        document.getElementById('statAvgDaily').className = `text-sm font-semibold ${getPnlColorClass(avgDaily)} block [font-variant-numeric:tabular-nums]`;
-        document.getElementById('statTradingDays').textContent = `${activeDays.length} hari bursa`;
+        document.getElementById('statTradingDays').textContent = `${list.length} hari bursa`;
 
-        document.getElementById('statNetCashflow').textContent = formatNumber(netCashflow, true);
-        document.getElementById('statInitialEquity').textContent = formatNumber(initialEquity);
+        const netFlows = list.reduce((s, e) => s + (Number(e.netFlow) || 0), 0);
+        document.getElementById('statNetCashflow').textContent = formatNumber(netFlows, true);
+        document.getElementById('statInitialEquity').textContent = formatNumber(allComputed[0].equity);
 
-        // Risk Calculation: Max Drawdown (Peak-to-Trough on Pure Cumulative Return)
-        let cumulativeWealth = 100;
-        let peakWealth = 100;
-        let peakDate = filteredList[0].date;
-        let maxDrawdownPct = 0;
-        let maxDdPeakDate = filteredList[0].date;
-        let maxDdTroughDate = filteredList[0].date;
+        // Max Drawdown (%) on cumulative pure P&L curve
+        let cumCurve = 100;
+        let peakVal = 100;
+        let peakDate = list[0].date;
+        let maxDdPct = 0;
+        let ddPeakDate = list[0].date;
+        let ddTroughDate = list[0].date;
+        let peakEq = list[0].equity;
+        let maxDdNominal = 0;
 
-        let peakEquityVal = filteredList[0].equity;
-        let maxDrawdownNominal = 0;
-
-        filteredList.forEach(d => {
-          if (!d.isInitial) {
-            cumulativeWealth = cumulativeWealth * (1 + (d.pnlPct / 100));
-            if (cumulativeWealth >= peakWealth) {
-              peakWealth = cumulativeWealth;
-              peakDate = d.date;
-            }
-            const ddPct = peakWealth > 0 ? ((cumulativeWealth - peakWealth) / peakWealth) * 100 : 0;
-            if (ddPct < maxDrawdownPct) {
-              maxDrawdownPct = ddPct;
-              maxDdPeakDate = peakDate;
-              maxDdTroughDate = d.date;
-            }
-
-            if (d.equity >= peakEquityVal) {
-              peakEquityVal = d.equity;
-            }
-            const ddNom = d.equity - peakEquityVal;
-            if (ddNom < maxDrawdownNominal) {
-              maxDrawdownNominal = ddNom;
-            }
+        list.forEach((item, idx) => {
+          if (idx > 0) {
+            cumCurve = cumCurve * (1 + item.pnlPct / 100);
+          }
+          if (cumCurve > peakVal) {
+            peakVal = cumCurve;
+            peakDate = item.date;
+            peakEq = item.equity;
+          }
+          const dd = peakVal > 0 ? ((cumCurve - peakVal) / peakVal) * 100 : 0;
+          if (dd < maxDdPct) {
+            maxDdPct = dd;
+            ddPeakDate = peakDate;
+            ddTroughDate = item.date;
+            maxDdNominal = item.equity - peakEq;
           }
         });
 
-        const elDdPct = document.getElementById('statMaxDrawdownPct');
-        const elDdRange = document.getElementById('statMaxDrawdownRange');
-        const elDdNom = document.getElementById('statMaxDrawdownNominal');
-        if (maxDrawdownPct < -0.0001) {
-          elDdPct.textContent = `${maxDrawdownPct.toFixed(2)}%`;
-          elDdPct.className = 'text-base font-semibold text-[#E05252] block [font-variant-numeric:tabular-nums]';
-          elDdRange.textContent = `${formatDisplayDate(maxDdPeakDate)} → ${formatDisplayDate(maxDdTroughDate)}`;
-          elDdNom.textContent = `Drop nominal: ${formatNumber(maxDrawdownNominal, true)}`;
-        } else {
-          elDdPct.textContent = '0.00%';
-          elDdPct.className = 'text-base font-semibold text-[#D1D5DB] block [font-variant-numeric:tabular-nums]';
-          elDdRange.textContent = 'Belum ada drawdown';
-          elDdNom.textContent = 'Drop nominal: 0';
-        }
+        document.getElementById('statMaxDrawdownPct').textContent = `${maxDdPct.toFixed(2)}%`;
+        document.getElementById('statMaxDrawdownRange').textContent = maxDdPct < 0
+          ? `${formatDisplayDate(ddPeakDate)} → ${formatDisplayDate(ddTroughDate)}`
+          : 'Dari puncak tertinggi';
+        document.getElementById('statMaxDrawdownNominal').textContent = `Drop nominal: ${formatNumber(maxDdNominal, true)}`;
 
-        // Render Cashflow History
-        const cashflows = [...allComputed].filter(d => Number(d.netFlow) !== 0).reverse();
+        // Cashflow history list
         const cfContainer = document.getElementById('cashflowListContainer');
-        if (!cashflows.length) {
-          cfContainer.innerHTML = '<p class="text-[#8E9591] text-center py-3">Belum ada catatan top-up atau penarikan dana.</p>';
+        const cfEntries = [...allComputed].filter(e => Math.abs(e.netFlow) > 0).reverse();
+        if (!cfEntries.length) {
+          cfContainer.innerHTML = `<p class="text-[#8E9591] text-center py-3">Belum ada catatan Top-Up atau penarikan dana.</p>`;
         } else {
-          cfContainer.innerHTML = cashflows.map(c => {
-            const isPos = c.netFlow > 0;
+          cfContainer.innerHTML = cfEntries.map(e => {
+            const isDep = e.netFlow > 0;
             return `
-              <button
-                type="button"
-                data-date="${c.date}"
-                class="daily-row w-full flex items-center justify-between py-2 px-2.5 rounded-xl bg-[#111312] hover:bg-[#1E2320] transition text-left"
-              >
+              <div data-date="${e.date}" class="daily-row flex items-center justify-between py-1.5 border-b border-[#222624] last:border-0 cursor-pointer">
                 <div>
-                  <span class="text-[#F3F4F6] font-medium block">${isPos ? 'Top-Up Modal' : 'Tarik Dana'}</span>
-                  <span class="text-[11px] text-[#8E9591]">${formatDisplayDate(c.date)}</span>
+                  <span class="text-[#F3F4F6] font-medium">${formatDisplayDate(e.date)}</span>
+                  <span class="text-[#8E9591] ml-1.5">${isDep ? 'Top-Up Modal' : 'Tarik Dana'}</span>
                 </div>
-                <span class="font-semibold ${isPos ? 'text-[#22C55E]' : 'text-[#E05252]'} [font-variant-numeric:tabular-nums]">
-                  ${formatNumber(c.netFlow, true)}
+                <span class="${isDep ? 'text-[#22C55E]' : 'text-amber-400'} font-semibold [font-variant-numeric:tabular-nums]">
+                  ${formatNumber(e.netFlow, true)}
                 </span>
-              </button>
+              </div>
             `;
           }).join('');
         }
-
-        renderSparkline(filteredList);
       }
 
-      function renderSparkline(data) {
+      function renderSparkline(list) {
         const svg = document.getElementById('equitySparklineSvg');
         if (!svg) return;
-        const w = 360;
+        const w = 400;
         const h = 150;
         svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
 
-        if (data.length === 1) {
-          const d = data[0];
-          svg.innerHTML = `
-            <line x1="0" y1="${h / 2}" x2="${w}" y2="${h / 2}" stroke="#22C55E" stroke-width="2.5" stroke-dasharray="4 4" />
-            <circle cx="${w / 2}" cy="${h / 2}" r="5" fill="#22C55E" />
-          `;
+        if (list.length < 2) {
+          svg.innerHTML = `<line x1="0" y1="${h / 2}" x2="${w}" y2="${h / 2}" stroke="#22C55E" stroke-width="2" />`;
           return;
         }
 
-        const values = data.map(d => d.equity);
-        const minVal = Math.min(...values);
-        const maxVal = Math.max(...values);
-        const span = maxVal - minVal || 1;
-        const padY = 14;
+        const values = list.map(e => e.equity);
+        const minV = Math.min(...values);
+        const maxV = Math.max(...values);
+        const range = maxV - minV || 1;
 
-        const points = data.map((d, idx) => {
-          const x = (idx / (data.length - 1)) * w;
-          const y = h - padY - ((d.equity - minVal) / span) * (h - padY * 2);
-          return { x, y, item: d };
+        const pts = list.map((e, i) => {
+          const x = (i / (list.length - 1)) * w;
+          const y = h - 12 - ((e.equity - minV) / range) * (h - 24);
+          return `${x.toFixed(1)},${y.toFixed(1)}`;
         });
 
-        const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
-        const areaD = `${pathD} L ${w} ${h} L 0 ${h} Z`;
-        const isUp = data[data.length - 1].equity >= data[0].equity;
-        const strokeHex = isUp ? '#22C55E' : '#E05252';
-        const lastPt = points[points.length - 1];
-
+        const areaPts = `0,${h} ${pts.join(' ')} ${w},${h}`;
         svg.innerHTML = `
           <defs>
-            <linearGradient id="eqAreaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="${strokeHex}" stop-opacity="0.28" />
-              <stop offset="100%" stop-color="${strokeHex}" stop-opacity="0.0" />
+            <linearGradient id="eqGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#22C55E" stop-opacity="0.28" />
+              <stop offset="100%" stop-color="#22C55E" stop-opacity="0.0" />
             </linearGradient>
           </defs>
-          <path d="${areaD}" fill="url(#eqAreaGrad)" />
-          <path d="${pathD}" fill="none" stroke="${strokeHex}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
-          <line id="chartHoverLine" x1="${lastPt.x}" y1="0" x2="${lastPt.x}" y2="${h}" stroke="#4B5563" stroke-width="1" stroke-dasharray="3 3" />
-          <circle id="chartHoverDot" cx="${lastPt.x}" cy="${lastPt.y}" r="4.5" fill="${strokeHex}" stroke="#111312" stroke-width="2" />
+          <polygon points="${areaPts}" fill="url(#eqGrad)" />
+          <polyline fill="none" stroke="#22C55E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" points="${pts.join(' ')}" />
         `;
-
-        window.__sparklinePoints = points;
       }
 
-      // ==================== STORAGE & GOOGLE APPS SCRIPT SYNC ====================
-      function saveLocal() {
-        try {
-          localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(state.entries));
-          localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(state.settings));
-        } catch (err) {
-          console.error('Local storage error:', err);
+      // ==================== MODAL & INPUT HELPERS ====================
+      function getNextTradingDayIso() {
+        const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
+        const base = sorted.length ? parseIsoLocal(sorted[sorted.length - 1].date) : new Date();
+        base.setDate(base.getDate() + 1);
+        while (base.getDay() === 0 || base.getDay() === 6) {
+          base.setDate(base.getDate() + 1);
         }
+        return toIsoDateLocal(base);
       }
 
+      function updateModalDateBadge(isoStr) {
+        const d = parseIsoLocal(isoStr);
+        const dayIdx = d.getDay();
+        const badge = document.getElementById('dayNameBadge');
+        const warn = document.getElementById('weekendWarning');
+        badge.textContent = DAYS_ID[dayIdx] || '';
+        const isWeekend = dayIdx === 0 || dayIdx === 6;
+        warn.classList.toggle('hidden', !isWeekend);
+      }
+
+      function syncCashflowSignButtons() {
+        const isDep = state.cashflowSign === 1;
+        document.getElementById('btnFlowDeposit').className = isDep
+          ? 'py-1.5 rounded-lg text-xs font-medium bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition'
+          : 'py-1.5 rounded-lg text-xs font-medium bg-[#181B19] text-[#8E9591] border border-[#2F3532] transition';
+        document.getElementById('btnFlowWithdraw').className = !isDep
+          ? 'py-1.5 rounded-lg text-xs font-medium bg-amber-500/15 text-amber-400 border border-amber-500/40 transition'
+          : 'py-1.5 rounded-lg text-xs font-medium bg-[#181B19] text-[#8E9591] border border-[#2F3532] transition';
+      }
+
+      function getPreviousEquityForDate(targetDateIso) {
+        const sorted = [...state.entries]
+          .filter(e => e.date < targetDateIso)
+          .sort((a, b) => a.date.localeCompare(b.date));
+        return sorted.length ? sorted[sorted.length - 1].equity : null;
+      }
+
+      function updateLivePnlPreview() {
+        const dateVal = normalizeToIsoDate(document.getElementById('inputDate').value);
+        const prevEq = getPreviousEquityForDate(dateVal);
+        const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
+        const netFlow = cfRaw * state.cashflowSign;
+        const autoAdjust = document.getElementById('chkAutoAdjustEquity').checked;
+        const eqInput = document.getElementById('inputEquity');
+
+        if (autoAdjust && prevEq !== null && cfRaw > 0) {
+          eqInput.value = prevEq + netFlow;
+        }
+
+        const eqVal = parseFloat(eqInput.value);
+        const previewEl = document.getElementById('livePnlPreview');
+        if (prevEq === null || isNaN(eqVal)) {
+          previewEl.textContent = '0 (0.00%)';
+          previewEl.className = 'text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]';
+          return;
+        }
+
+        const pnl = eqVal - prevEq - netFlow;
+        const base = prevEq + (netFlow > 0 ? netFlow : 0);
+        const pct = base > 0 ? (pnl / base) * 100 : 0;
+        const color = pnl > 0.005 ? 'text-[#22C55E]' : pnl < -0.005 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
+        previewEl.textContent = `${formatNumber(pnl, true, false)} (${formatPercent(pct, true)})`;
+        previewEl.className = `text-sm font-semibold ${color} [font-variant-numeric:tabular-nums]`;
+      }
+
+      function openEntryModal(editDateIso = null, expandCashflow = false) {
+        const modal = document.getElementById('entryModalBackdrop');
+        const existing = editDateIso ? state.entries.find(e => e.date === editDateIso) : null;
+
+        document.getElementById('inlineDeleteConfirm').classList.add('hidden');
+        document.getElementById('editingOriginalDate').value = existing ? existing.date : '';
+        document.getElementById('entryModalTitle').textContent = existing ? 'Edit Data Equity Harian' : 'Update Equity Harian';
+        document.getElementById('btnDeleteEntry').classList.toggle('hidden', !existing);
+
+        const targetDate = existing ? existing.date : toIsoDateLocal(new Date());
+        document.getElementById('inputDate').value = targetDate;
+        updateModalDateBadge(targetDate);
+
+        const prevEq = getPreviousEquityForDate(targetDate);
+        document.getElementById('prevEquityHint').textContent = prevEq !== null
+          ? `Sebelumnya: ${formatNumber(prevEq, false, false)}`
+          : 'Data awal portofolio';
+
+        document.getElementById('inputEquity').value = existing ? existing.equity : (prevEq !== null ? prevEq : '');
+        document.getElementById('inputNote').value = existing && existing.note ? existing.note : '';
+
+        const cfContainer = document.getElementById('cashflowInputContainer');
+        const hasCf = existing && Math.abs(existing.netFlow) > 0;
+        if (hasCf || expandCashflow) {
+          cfContainer.classList.remove('hidden');
+          state.cashflowSign = existing && existing.netFlow < 0 ? -1 : 1;
+          document.getElementById('inputCashflowAmount').value = hasCf ? Math.abs(existing.netFlow) : '';
+          document.getElementById('chkAutoAdjustEquity').checked = !existing;
+        } else {
+          cfContainer.classList.add('hidden');
+          state.cashflowSign = 1;
+          document.getElementById('inputCashflowAmount').value = '';
+          document.getElementById('chkAutoAdjustEquity').checked = true;
+        }
+        syncCashflowSignButtons();
+        updateLivePnlPreview();
+
+        modal.classList.remove('hidden');
+      }
+
+      function closeEntryModal() {
+        document.getElementById('entryModalBackdrop').classList.add('hidden');
+      }
+
+      // ==================== CLOUD SYNC (GOOGLE APPS SCRIPT) ====================
       function updateCloudStatusUI() {
         const dot = document.getElementById('headerCloudDot');
         const label = document.getElementById('headerCloudLabel');
@@ -1589,7 +1689,6 @@ function doPost(e) {
           dot.className = 'w-1.5 h-1.5 rounded-full bg-[#8E9591]';
           label.textContent = 'Local';
           badge.textContent = 'Belum Terhubung';
-          badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-[#222724] text-[#8E9591]';
           manualBox.classList.add('hidden');
           return;
         }
@@ -1597,44 +1696,16 @@ function doPost(e) {
         manualBox.classList.remove('hidden');
         if (state.cloud.status === 'syncing') {
           dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse';
-          label.textContent = 'Syncing...';
+          label.textContent = 'Syncing';
           badge.textContent = 'Menyinkronkan...';
-          badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300';
-        } else if (state.cloud.status === 'synced') {
-          dot.className = 'w-1.5 h-1.5 rounded-full bg-[#22C55E]';
-          label.textContent = 'Synced';
-          badge.textContent = 'Terhubung (Google Sheets)';
-          badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]';
         } else if (state.cloud.status === 'error') {
           dot.className = 'w-1.5 h-1.5 rounded-full bg-[#E05252]';
           label.textContent = 'Offline';
           badge.textContent = 'Gagal Koneksi';
-          badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-[#E05252]/15 text-[#E05252]';
-        }
-      }
-
-      async function pushEntriesToCloud(silent = false) {
-        if (!state.cloud.url) return;
-        state.cloud.status = 'syncing';
-        updateCloudStatusUI();
-        try {
-          const res = await fetch(state.cloud.url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({
-              currency: state.settings.currency,
-              entries: state.entries
-            })
-          });
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          state.cloud.status = 'synced';
-          updateCloudStatusUI();
-          if (!silent) showToast('Data tersimpan ke Google Sheets');
-        } catch (err) {
-          console.error('Push cloud failed:', err);
-          state.cloud.status = 'error';
-          updateCloudStatusUI();
-          if (!silent) showToast('Gagal sinkron ke Google Sheets', true);
+        } else {
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-[#22C55E]';
+          label.textContent = 'Synced';
+          badge.textContent = 'Terhubung ke Sheets';
         }
       }
 
@@ -1643,256 +1714,89 @@ function doPost(e) {
         state.cloud.status = 'syncing';
         updateCloudStatusUI();
         try {
-          const res = await fetch(state.cloud.url);
-          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const res = await fetch(`${state.cloud.url}?t=${Date.now()}`);
           const data = await res.json();
-          if (data && Array.isArray(data.entries)) {
+          if (data && data.status === 'ok' && Array.isArray(data.entries)) {
             if (data.entries.length > 0) {
               state.entries = data.entries
                 .map(item => ({
                   date: normalizeToIsoDate(item.date),
                   equity: Number(item.equity) || 0,
                   netFlow: Number(item.netFlow) || 0,
-                  note: item.note ? String(item.note).trim() : ''
+                  note: item.note ? String(item.note) : ''
                 }))
-                .filter(item => /^\d{4}-\d{2}-\d{2}$/.test(item.date))
+                .filter(e => e.date)
                 .sort((a, b) => a.date.localeCompare(b.date));
               if (data.currency === 'USD' || data.currency === 'IDR') {
                 state.settings.currency = data.currency;
               }
               saveLocal();
-              renderAll();
-              if (!silent) showToast(`Berhasil memuat ${state.entries.length} data dari Sheets`);
-            } else if (!silent) {
-              showToast('Sheet masih kosong (0 baris)');
             }
+            state.cloud.status = 'synced';
+            renderAll();
+            if (!silent) showToast('Data terbaru berhasil dimuat dari Google Sheets');
+          } else {
+            throw new Error('Invalid cloud payload');
           }
-          state.cloud.status = 'synced';
-          updateCloudStatusUI();
         } catch (err) {
-          console.error('Pull cloud failed:', err);
+          console.error('Pull cloud error:', err);
           state.cloud.status = 'error';
           updateCloudStatusUI();
           if (!silent) showToast('Gagal memuat dari Google Sheets', true);
         }
       }
 
-      // ==================== MODAL & FORM INTERACTIONS ====================
-      function getNextTradingDayIso() {
-        if (!state.entries.length) {
-          const today = new Date();
-          while (today.getDay() === 0 || today.getDay() === 6) {
-            today.setDate(today.getDate() - 1);
-          }
-          return toIsoDateLocal(today);
-        }
-        const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
-        const last = parseDateLocal(sorted[sorted.length - 1].date);
-        last.setDate(last.getDate() + 1);
-        while (last.getDay() === 0 || last.getDay() === 6) {
-          last.setDate(last.getDate() + 1);
-        }
-        return toIsoDateLocal(last);
-      }
-
-      function updateModalDateBadge(isoStr) {
-        const d = parseDateLocal(isoStr);
-        const dayIdx = d.getDay();
-        const badge = document.getElementById('dayNameBadge');
-        const warning = document.getElementById('weekendWarning');
-        badge.textContent = DAYS_ID_FULL[dayIdx];
-        if (dayIdx === 0 || dayIdx === 6) {
-          badge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300';
-          warning.classList.remove('hidden');
-        } else {
-          badge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]';
-          warning.classList.add('hidden');
+      async function pushEntriesToCloud(silent = false) {
+        if (!state.cloud.url) return;
+        state.cloud.status = 'syncing';
+        updateCloudStatusUI();
+        try {
+          await fetch(state.cloud.url, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+              currency: state.settings.currency,
+              entries: state.entries
+            })
+          });
+          state.cloud.status = 'synced';
+          updateCloudStatusUI();
+          if (!silent) showToast('Tersimpan ke Google Sheets');
+        } catch (err) {
+          console.error('Push cloud error:', err);
+          state.cloud.status = 'error';
+          updateCloudStatusUI();
+          if (!silent) showToast('Gagal mengirim ke Google Sheets', true);
         }
       }
 
-      function getPreviousEquityForDate(targetIso, ignoreOriginalIso = '') {
-        const sorted = [...state.entries]
-          .filter(e => e.date !== ignoreOriginalIso && e.date < targetIso)
-          .sort((a, b) => a.date.localeCompare(b.date));
-        return sorted.length ? sorted[sorted.length - 1].equity : null;
+      function showToast(msg, isError = false) {
+        const banner = document.getElementById('toastBanner');
+        const dot = document.getElementById('toastDot');
+        const text = document.getElementById('toastMessage');
+        text.textContent = msg;
+        dot.className = isError ? 'w-2 h-2 rounded-full bg-[#E05252]' : 'w-2 h-2 rounded-full bg-[#22C55E]';
+        banner.classList.remove('hidden');
+        clearTimeout(window.__toastTimer);
+        window.__toastTimer = setTimeout(() => banner.classList.add('hidden'), 2600);
       }
 
-      function updateLivePnlPreview() {
-        const dateVal = document.getElementById('inputDate').value;
-        const origDate = document.getElementById('editingOriginalDate').value;
-        const eqInput = document.getElementById('inputEquity');
-        const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
-        const netFlow = cfRaw * state.cashflowSign;
-        const autoAdjust = document.getElementById('chkAutoAdjustEquity')?.checked;
-
-        const prevEq = getPreviousEquityForDate(dateVal, origDate);
-        const hintEl = document.getElementById('prevEquityHint');
-        const previewEl = document.getElementById('livePnlPreview');
-
-        if (prevEq !== null && autoAdjust && document.activeElement === document.getElementById('inputCashflowAmount')) {
-          eqInput.value = Math.max(0, prevEq + netFlow);
-        }
-
-        const eqVal = parseFloat(eqInput.value);
-
-        if (prevEq === null) {
-          hintEl.textContent = 'Modal Awal (Hari ke-1)';
-          previewEl.textContent = formatPnlCombined(0, 0, true);
-          previewEl.className = 'text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]';
-          return;
-        }
-
-        hintEl.textContent = `Sebelumnya: ${formatNumber(prevEq, false, true)}`;
-        if (isNaN(eqVal)) {
-          previewEl.textContent = formatPnlCombined(0, 0, true);
-          previewEl.className = 'text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]';
-          return;
-        }
-
-        const pnl = eqVal - prevEq - netFlow;
-        const adjustedBase = prevEq + (netFlow > 0 ? netFlow : 0);
-        const pnlPct = adjustedBase > 0 ? (pnl / adjustedBase) * 100 : 0;
-        previewEl.textContent = formatPnlCombined(pnl, pnlPct, true);
-        previewEl.className = `text-sm font-semibold ${getPnlColorClass(pnl)} [font-variant-numeric:tabular-nums]`;
-      }
-
-      function openEntryModal(editDateIso = null, expandCashflow = false) {
-        const modal = document.getElementById('entryModalBackdrop');
-        const title = document.getElementById('entryModalTitle');
-        const origInput = document.getElementById('editingOriginalDate');
-        const dateInput = document.getElementById('inputDate');
-        const eqInput = document.getElementById('inputEquity');
-        const cfInput = document.getElementById('inputCashflowAmount');
-        const noteInput = document.getElementById('inputNote');
-        const btnDel = document.getElementById('btnDeleteEntry');
-        const delConfirm = document.getElementById('inlineDeleteConfirm');
-        const cfContainer = document.getElementById('cashflowInputContainer');
-        const prefixEl = document.getElementById('equityInputPrefix');
-
-        delConfirm.classList.add('hidden');
-        if (state.settings.currency === 'USD') {
-          prefixEl.classList.remove('hidden');
-          eqInput.classList.add('pl-8');
-        } else {
-          prefixEl.classList.add('hidden');
-          eqInput.classList.remove('pl-8');
-        }
-
-        if (editDateIso) {
-          const existing = state.entries.find(e => e.date === editDateIso);
-          if (existing) {
-            title.textContent = 'Edit Equity Harian';
-            origInput.value = existing.date;
-            dateInput.value = existing.date;
-            eqInput.value = existing.equity;
-            const nf = Number(existing.netFlow) || 0;
-            state.cashflowSign = nf < 0 ? -1 : 1;
-            cfInput.value = nf !== 0 ? Math.abs(nf) : '';
-            noteInput.value = existing.note || '';
-            btnDel.classList.remove('hidden');
-            if (nf !== 0 || expandCashflow) cfContainer.classList.remove('hidden');
-            else cfContainer.classList.add('hidden');
-          }
-        } else {
-          title.textContent = 'Update Equity Harian';
-          origInput.value = '';
-          const nextIso = getNextTradingDayIso();
-          dateInput.value = nextIso;
-          const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
-          eqInput.value = sorted.length ? sorted[sorted.length - 1].equity : '';
-          state.cashflowSign = 1;
-          cfInput.value = '';
-          noteInput.value = '';
-          btnDel.classList.add('hidden');
-          if (expandCashflow) cfContainer.classList.remove('hidden');
-          else cfContainer.classList.add('hidden');
-        }
-
-        syncCashflowSignButtons();
-        updateModalDateBadge(dateInput.value);
-        updateLivePnlPreview();
-        modal.classList.remove('hidden');
-      }
-
-      function closeEntryModal() {
-        document.getElementById('entryModalBackdrop').classList.add('hidden');
-      }
-
-      function syncCashflowSignButtons() {
-        const btnDep = document.getElementById('btnFlowDeposit');
-        const btnWit = document.getElementById('btnFlowWithdraw');
-        if (state.cashflowSign === 1) {
-          btnDep.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition';
-          btnWit.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#181B19] text-[#8E9591] border border-[#2F3532] transition';
-        } else {
-          btnWit.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#E05252]/15 text-[#E05252] border border-[#E05252]/40 transition';
-          btnDep.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#181B19] text-[#8E9591] border border-[#2F3532] transition';
-        }
-      }
-
-      // ==================== 1-YEAR GENERATOR & EXPORT ====================
-      function generate1YearSampleEntries() {
-        const list = [];
-        let eq = 1440000;
-        const cur = new Date(2025, 10, 24);
-        const end = new Date(2026, 10, 24);
-        let seed = 42;
-        while (cur <= end) {
-          const day = cur.getDay();
-          if (day !== 0 && day !== 6) {
-            seed = (seed * 1664525 + 1013904223) % 4294967296;
-            const rand = seed / 4294967296;
-            const dailyReturn = (rand - 0.465) * 0.024;
-            if (list.length > 0) {
-              eq = Math.max(10000, Math.round((eq * (1 + dailyReturn)) / 1000) * 1000);
-            }
-            list.push({
-              date: toIsoDateLocal(cur),
-              equity: eq,
-              netFlow: 0
-            });
-          }
-          cur.setDate(cur.getDate() + 1);
-        }
-        return list;
-      }
-
-      function downloadFile(filename, content, mimeType) {
-        const blob = new Blob([content], { type: mimeType });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
-
-      // ==================== EVENT BINDINGS & INITIALIZATION ====================
+      // ==================== EVENT LISTENERS ====================
       function bindEvents() {
-        // Primary Tabs: PORTFOLIO | TRADE
-        const tabPortfolio = document.getElementById('tabPortfolio');
-        const tabTrade = document.getElementById('tabTrade');
-        const viewPortfolio = document.getElementById('viewPortfolio');
-        const viewTrade = document.getElementById('viewTrade');
-
-        tabPortfolio.addEventListener('click', () => {
-          tabPortfolio.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors';
-          tabTrade.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] border-b-2 border-transparent hover:text-[#D1D5DB] transition-colors';
-          viewPortfolio.classList.remove('hidden');
-          viewTrade.classList.add('hidden');
+        // Primary Tabs
+        document.getElementById('tabPortfolio').addEventListener('click', () => {
+          state.settings.tab = 'portfolio';
+          saveLocal();
+          renderAll();
         });
-
-        tabTrade.addEventListener('click', () => {
-          tabTrade.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors';
-          tabPortfolio.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] border-b-2 border-transparent hover:text-[#D1D5DB] transition-colors';
-          viewTrade.classList.remove('hidden');
-          viewPortfolio.classList.add('hidden');
+        document.getElementById('tabTrade').addEventListener('click', () => {
+          state.settings.tab = 'trade';
+          saveLocal();
           renderAll();
         });
 
-        // Info Tooltip Toggle
+        // Info Tooltip
         document.getElementById('btnToggleInfo').addEventListener('click', () => {
           document.getElementById('infoTooltipCard').classList.toggle('hidden');
         });
@@ -1900,7 +1804,7 @@ function doPost(e) {
           document.getElementById('infoTooltipCard').classList.add('hidden');
         });
 
-        // Daily / Monthly Switcher
+        // Daily / Monthly Mode
         document.getElementById('btnModeDaily').addEventListener('click', () => {
           state.settings.mode = 'daily';
           saveLocal();
@@ -1918,24 +1822,21 @@ function doPost(e) {
           e.stopPropagation();
           periodMenu.classList.toggle('hidden');
         });
+        document.addEventListener('click', () => periodMenu.classList.add('hidden'));
         document.querySelectorAll('.period-option').forEach(btn => {
           btn.addEventListener('click', () => {
             state.settings.period = btn.dataset.period;
-            state.visibleRowLimit = INITIAL_VISIBLE_ROWS;
             periodMenu.classList.add('hidden');
             saveLocal();
             renderAll();
           });
-        });
-        document.addEventListener('click', () => {
-          periodMenu.classList.add('hidden');
         });
 
         // Delegated Click on Table Rows (Daily & Monthly) and Cashflow Rows
         document.getElementById('performanceTableBody').addEventListener('click', (e) => {
           const dailyRow = e.target.closest('.daily-row');
           if (dailyRow && dailyRow.dataset.date) {
-            openEntryModal(dailyRow.dataset.date);
+            requirePinThen(() => openEntryModal(dailyRow.dataset.date));
             return;
           }
           const monthRow = e.target.closest('.month-row');
@@ -1951,7 +1852,7 @@ function doPost(e) {
         document.getElementById('cashflowListContainer').addEventListener('click', (e) => {
           const row = e.target.closest('.daily-row');
           if (row && row.dataset.date) {
-            openEntryModal(row.dataset.date, true);
+            requirePinThen(() => openEntryModal(row.dataset.date, true));
           }
         });
 
@@ -1961,11 +1862,53 @@ function doPost(e) {
           renderAll();
         });
 
-        // Open Entry Modal Triggers
-        document.getElementById('btnQuickAddHeader').addEventListener('click', () => openEntryModal(null));
-        document.getElementById('btnFloatingUpdate').addEventListener('click', () => openEntryModal(null));
-        document.getElementById('btnEmptyAddFirst').addEventListener('click', () => openEntryModal(null));
-        document.getElementById('btnAddCashflowShortcut').addEventListener('click', () => openEntryModal(null, true));
+        // Open Entry Modal Triggers (Protected by 1-Time Device PIN)
+        document.getElementById('btnQuickAddHeader').addEventListener('click', () => requirePinThen(() => openEntryModal(null)));
+        document.getElementById('btnFloatingUpdate').addEventListener('click', () => requirePinThen(() => openEntryModal(null)));
+        document.getElementById('btnEmptyAddFirst').addEventListener('click', () => requirePinThen(() => openEntryModal(null)));
+        document.getElementById('btnAddCashflowShortcut').addEventListener('click', () => requirePinThen(() => openEntryModal(null, true)));
+
+        // Header Lock / Unlock Quick Toggle
+        document.getElementById('btnPinLockHeader').addEventListener('click', () => {
+          if (state.security.isTrustedDevice) {
+            state.security.isTrustedDevice = false;
+            localStorage.removeItem(STORAGE_KEY_PIN_TRUSTED);
+            updatePinStatusUI();
+            showToast('Perangkat dikunci (memerlukan PIN untuk edit)');
+          } else {
+            requirePinThen(() => showToast('Perangkat berhasil dibuka & diingat'));
+          }
+        });
+
+        // PIN Verification Modal Events
+        document.getElementById('btnCancelPinModal').addEventListener('click', () => {
+          document.getElementById('pinModalBackdrop').classList.add('hidden');
+          state.security.pendingAction = null;
+        });
+        document.getElementById('pinModalBackdrop').addEventListener('click', (e) => {
+          if (e.target.id === 'pinModalBackdrop') {
+            document.getElementById('pinModalBackdrop').classList.add('hidden');
+            state.security.pendingAction = null;
+          }
+        });
+        document.getElementById('pinVerifyForm').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const entered = document.getElementById('inputVerifyPin').value.trim();
+          const remember = document.getElementById('chkRememberDevicePin').checked;
+          if (entered === state.security.pinCode) {
+            state.security.isTrustedDevice = true;
+            if (remember) {
+              localStorage.setItem(STORAGE_KEY_PIN_TRUSTED, 'true');
+            }
+            document.getElementById('pinModalBackdrop').classList.add('hidden');
+            updatePinStatusUI();
+            const fn = state.security.pendingAction;
+            state.security.pendingAction = null;
+            if (typeof fn === 'function') fn();
+          } else {
+            document.getElementById('pinErrorText').classList.remove('hidden');
+          }
+        });
 
         // Refresh Button for iOS Add-to-Home-Screen Mode
         async function triggerManualRefresh() {
@@ -2034,7 +1977,6 @@ function doPost(e) {
           syncCashflowSignButtons();
           updateLivePnlPreview();
         });
-
         document.getElementById('inputEquity').addEventListener('input', updateLivePnlPreview);
         document.getElementById('inputCashflowAmount').addEventListener('input', updateLivePnlPreview);
         document.getElementById('chkAutoAdjustEquity').addEventListener('change', updateLivePnlPreview);
@@ -2057,7 +1999,7 @@ function doPost(e) {
           saveLocal();
           renderAll();
           closeEntryModal();
-          showToast('Data berhasil disimpan');
+          showToast('Data VOO berhasil disimpan');
           pushEntriesToCloud(true);
         });
 
@@ -2084,17 +2026,42 @@ function doPost(e) {
           document.getElementById('inlineResetConfirm').classList.add('hidden');
           settingsModal.classList.remove('hidden');
         }
-        document.getElementById('btnOpenSettingsLeft').addEventListener('click', openSettingsModal);
-        document.getElementById('btnOpenSettingsRight').addEventListener('click', openSettingsModal);
-        document.getElementById('btnSyncStatusHeader').addEventListener('click', openSettingsModal);
+        document.getElementById('btnOpenSettingsLeft').addEventListener('click', () => requirePinThen(openSettingsModal));
+        document.getElementById('btnOpenSettingsRight').addEventListener('click', () => requirePinThen(openSettingsModal));
+        document.getElementById('btnSyncStatusHeader').addEventListener('click', () => requirePinThen(openSettingsModal));
+
+        // Change PIN & Manual Device Lock inside Settings
+        document.getElementById('btnSaveNewPin').addEventListener('click', () => {
+          const newPin = document.getElementById('inputNewPin').value.trim();
+          if (!/^\d{4,8}$/.test(newPin)) {
+            showToast('PIN harus berupa 4–8 digit angka', true);
+            return;
+          }
+          state.security.pinCode = newPin;
+          state.security.isTrustedDevice = true;
+          localStorage.setItem(STORAGE_KEY_PIN_CODE, newPin);
+          localStorage.setItem(STORAGE_KEY_PIN_TRUSTED, 'true');
+          document.getElementById('inputNewPin').value = '';
+          updatePinStatusUI();
+          showToast('PIN keamanan berhasil diperbarui');
+        });
+
+        document.getElementById('btnLockDeviceNow').addEventListener('click', () => {
+          state.security.isTrustedDevice = false;
+          localStorage.removeItem(STORAGE_KEY_PIN_TRUSTED);
+          updatePinStatusUI();
+          settingsModal.classList.add('hidden');
+          showToast('Perangkat dikunci');
+        });
+
         document.getElementById('btnCloseSettingsModal').addEventListener('click', () => {
           settingsModal.classList.add('hidden');
         });
         settingsModal.addEventListener('click', (e) => {
-          if (e.target === settingsModal) settingsModal.classList.add('hidden');
+          if (e.target.id === 'settingsModalBackdrop') settingsModal.classList.add('hidden');
         });
 
-        // Script Guide & Copy
+        // Apps Script Guide & Copy
         document.getElementById('btnToggleScriptGuide').addEventListener('click', () => {
           document.getElementById('appsScriptSetupGuide').classList.toggle('hidden');
         });
@@ -2106,79 +2073,76 @@ function doPost(e) {
           ta.select();
           document.execCommand('copy');
           document.body.removeChild(ta);
-          showToast('Kode Apps Script disalin');
+          showToast('Kode Apps Script berhasil disalin');
         });
 
-        // Cloud Connect / Disconnect / Manual Sync
-        document.getElementById('btnSaveAppsScriptUrl').addEventListener('click', () => {
-          const url = document.getElementById('inputAppsScriptUrl').value.trim();
-          state.cloud.url = url;
-          localStorage.setItem(STORAGE_KEY_CLOUD, url);
-          updateCloudStatusUI();
-          if (url) pullEntriesFromCloud(false);
+        // Connect / Disconnect Cloud
+        document.getElementById('btnSaveAppsScriptUrl').addEventListener('click', async () => {
+          const urlVal = document.getElementById('inputAppsScriptUrl').value.trim();
+          if (!urlVal) return;
+          state.cloud.url = urlVal;
+          localStorage.setItem(STORAGE_KEY_CLOUD, urlVal);
+          await pullEntriesFromCloud(false);
         });
         document.getElementById('btnDisconnectCloud').addEventListener('click', () => {
           state.cloud.url = '';
           state.cloud.status = 'local';
           localStorage.setItem(STORAGE_KEY_CLOUD, '');
-          document.getElementById('inputAppsScriptUrl').value = '';
           updateCloudStatusUI();
           showToast('Koneksi Cloud diputuskan');
         });
         document.getElementById('btnPushToCloud').addEventListener('click', () => pushEntriesToCloud(false));
         document.getElementById('btnPullFromCloud').addEventListener('click', () => pullEntriesFromCloud(false));
 
-        // Currency Switcher
+        // Currency Buttons
         document.getElementById('btnCurrencyIDR').addEventListener('click', () => {
           state.settings.currency = 'IDR';
           saveLocal();
           renderAll();
-          pushEntriesToCloud(true);
+          showToast('Format angka bulat / IDR aktif');
         });
         document.getElementById('btnCurrencyUSD').addEventListener('click', () => {
           state.settings.currency = 'USD';
           saveLocal();
           renderAll();
-          pushEntriesToCloud(true);
+          showToast('Format US Dollar ($) aktif');
         });
 
-        // Export CSV / JSON & Import JSON
+        // Export CSV & JSON
         document.getElementById('btnExportCsv').addEventListener('click', () => {
-          const computed = computeAllDailyMetrics(state.entries);
-          const rows = ['Date,Equity,NetTopUp,DailyPnL,DailyPnLPct,Note'];
-          computed.forEach(r => {
-            const safeNote = `"${String(r.note || '').replace(/"/g, '""')}"`;
-            rows.push(`${r.date},${r.equity},${r.netFlow || 0},${r.pnl.toFixed(2)},${r.pnlPct.toFixed(4)},${safeNote}`);
+          const computed = computeAllEntries();
+          const lines = ['Date,Equity,NetTopUp,DailyPnL,DailyPnLPct,Note'];
+          computed.forEach(e => {
+            const safeNote = `"${String(e.note || '').replace(/"/g, '""')}"`;
+            lines.push(`${e.date},${e.equity},${e.netFlow || 0},${e.pnl.toFixed(2)},${e.pnlPct.toFixed(2)}%,${safeNote}`);
           });
-          downloadFile(`etf-pnl-${toIsoDateLocal(new Date())}.csv`, rows.join('\n'), 'text/csv');
-          showToast('File CSV diunduh');
+          downloadTextFile(lines.join('\n'), `etf-pnl-${toIsoDateLocal(new Date())}.csv`, 'text/csv');
         });
 
         document.getElementById('btnExportJson').addEventListener('click', () => {
-          const payload = JSON.stringify({ currency: state.settings.currency, entries: state.entries }, null, 2);
-          downloadFile(`etf-pnl-backup-${toIsoDateLocal(new Date())}.json`, payload, 'application/json');
-          showToast('Backup JSON diunduh');
+          downloadTextFile(JSON.stringify({ currency: state.settings.currency, entries: state.entries }, null, 2), `etf-pnl-backup-${toIsoDateLocal(new Date())}.json`, 'application/json');
         });
 
         document.getElementById('inputImportJson').addEventListener('change', (e) => {
           const file = e.target.files && e.target.files[0];
           if (!file) return;
           const reader = new FileReader();
-          reader.onload = (ev) => {
+          reader.onload = () => {
             try {
-              const parsed = JSON.parse(ev.target.result);
+              const parsed = JSON.parse(String(reader.result));
               const list = Array.isArray(parsed) ? parsed : parsed.entries;
-              if (!Array.isArray(list)) throw new Error('Format tidak valid');
-              state.entries = list.map(item => ({
-                date: String(item.date).slice(0, 10),
-                equity: Number(item.equity) || 0,
-                netFlow: Number(item.netFlow) || 0,
-                note: item.note ? String(item.note).trim() : ''
-              })).sort((a, b) => a.date.localeCompare(b.date));
-              saveLocal();
-              renderAll();
-              pushEntriesToCloud(true);
-              showToast(`Berhasil import ${state.entries.length} data`);
+              if (Array.isArray(list)) {
+                state.entries = list.map(item => ({
+                  date: normalizeToIsoDate(item.date),
+                  equity: Number(item.equity) || 0,
+                  netFlow: Number(item.netFlow) || 0,
+                  note: item.note ? String(item.note) : ''
+                }));
+                saveLocal();
+                renderAll();
+                pushEntriesToCloud(true);
+                showToast('Backup JSON berhasil dimuat');
+              }
             } catch (err) {
               showToast('File JSON tidak valid', true);
             }
@@ -2186,7 +2150,7 @@ function doPost(e) {
           reader.readAsText(file);
         });
 
-        // Clear Data & Sample Generators
+        // Reset & Sample Data Generators
         document.getElementById('btnClearAllDataPrompt').addEventListener('click', () => {
           document.getElementById('inlineResetConfirm').classList.remove('hidden');
         });
@@ -2197,40 +2161,65 @@ function doPost(e) {
           state.entries = [];
           saveLocal();
           renderAll();
-          document.getElementById('inlineResetConfirm').classList.add('hidden');
           settingsModal.classList.add('hidden');
+          pushEntriesToCloud(true);
           showToast('Semua data dikosongkan');
-        });
-
-        document.getElementById('btnGenerate1YearSample').addEventListener('click', () => {
-          state.entries = generate1YearSampleEntries();
-          state.settings.period = '1Y';
-          saveLocal();
-          renderAll();
-          settingsModal.classList.add('hidden');
-          showToast('Simulasi 1 tahun (252 hari) dimuat');
         });
 
         document.getElementById('btnRestoreSampleData').addEventListener('click', () => {
           state.entries = [...SAMPLE_ENTRIES];
-          state.settings.period = '1M';
           saveLocal();
           renderAll();
           settingsModal.classList.add('hidden');
-          showToast('Data contoh referensi dimuat');
+          showToast('Data contoh dimuat');
+        });
+
+        document.getElementById('btnGenerate1YearSample').addEventListener('click', () => {
+          const generated = [];
+          let eq = 1440000;
+          const cursor = new Date(2025, 10, 24);
+          let seed = 42;
+          for (let i = 0; i < 252; i++) {
+            while (cursor.getDay() === 0 || cursor.getDay() === 6) {
+              cursor.setDate(cursor.getDate() + 1);
+            }
+            seed = (seed * 1664525 + 1013904223) % 4294967296;
+            const rand = (seed / 4294967296) - 0.46;
+            eq = Math.round(eq * (1 + rand * 0.014));
+            generated.push({ date: toIsoDateLocal(cursor), equity: eq, netFlow: 0, note: '' });
+            cursor.setDate(cursor.getDate() + 1);
+          }
+          state.entries = generated;
+          saveLocal();
+          renderAll();
+          settingsModal.classList.add('hidden');
+          showToast('Simulasi 1 tahun (252 hari bursa) dimuat');
         });
       }
 
+      function downloadTextFile(content, filename, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      // ==================== INITIALIZATION ====================
       function init() {
         try {
           const savedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
           const savedSettings = localStorage.getItem(STORAGE_KEY_SETTINGS);
           const savedCloud = localStorage.getItem(STORAGE_KEY_CLOUD);
 
-          if (savedEntries !== null) {
-            const rawList = JSON.parse(savedEntries);
-            state.entries = Array.isArray(rawList)
-              ? rawList.map(item => ({
+          if (savedEntries) {
+            const parsed = JSON.parse(savedEntries);
+            state.entries = Array.isArray(parsed)
+              ? parsed.map(item => ({
                   ...item,
                   date: normalizeToIsoDate(item.date)
                 }))
@@ -2244,6 +2233,9 @@ function doPost(e) {
           }
 
           state.cloud.url = savedCloud !== null ? savedCloud : DEFAULT_APPS_SCRIPT_URL;
+          const savedPin = localStorage.getItem(STORAGE_KEY_PIN_CODE);
+          state.security.pinCode = savedPin || DEFAULT_SECURITY_PIN;
+          state.security.isTrustedDevice = localStorage.getItem(STORAGE_KEY_PIN_TRUSTED) === 'true';
         } catch (err) {
           console.error('Init parse error:', err);
           state.entries = [...SAMPLE_ENTRIES];
