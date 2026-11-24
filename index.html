@@ -519,16 +519,108 @@
 
     <!-- Floating Bottom CTA Bar -->
     <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] px-4 pb-5 pt-3 bg-gradient-to-t from-[#111312] via-[#111312]/95 to-transparent z-20 pointer-events-none">
-      <button
-        id="btnFloatingUpdate"
-        type="button"
-        class="pointer-events-auto w-full py-3.5 px-5 rounded-full bg-[#22C55E] hover:bg-[#1EB054] active:scale-[0.99] text-[#090D0B] font-semibold text-sm shadow-lg shadow-[#22C55E]/20 flex items-center justify-center gap-2 transition"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-        </svg>
-        <span>Update Equity Hari Ini</span>
-      </button>
+      <div class="pointer-events-auto grid grid-cols-12 gap-2">
+        <button
+          id="btnFloatingTopup"
+          type="button"
+          class="col-span-5 py-3.5 px-3 rounded-full bg-[#181B19] hover:bg-[#1F2421] active:scale-[0.99] border border-[#2F3532] hover:border-[#22C55E] text-[#F3F4F6] font-semibold text-xs shadow-lg flex items-center justify-center gap-1.5 transition"
+        >
+          <svg class="w-3.5 h-3.5 text-[#22C55E]" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
+          </svg>
+          <span>Top-Up Saldo</span>
+        </button>
+        <button
+          id="btnFloatingUpdate"
+          type="button"
+          class="col-span-7 py-3.5 px-4 rounded-full bg-[#22C55E] hover:bg-[#1EB054] active:scale-[0.99] text-[#090D0B] font-semibold text-xs sm:text-sm shadow-lg shadow-[#22C55E]/20 flex items-center justify-center gap-1.5 transition"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 17l6-6 4 4 8-8" />
+          </svg>
+          <span>Update Equity</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== MODAL KHUSUS: TOP-UP / TARIK SALDO (TANPA GANGGU P&L) ==================== -->
+    <div id="topupOnlyModalBackdrop" class="hidden fixed inset-0 z-40 bg-black/75 backdrop-blur-xs flex items-end justify-center">
+      <div class="w-full max-w-[480px] bg-[#181B19] border-t border-[#2A302D] rounded-t-3xl p-5 pb-8 shadow-2xl space-y-4">
+        <div class="w-10 h-1 bg-[#343B37] rounded-full mx-auto"></div>
+
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-semibold text-[#F3F4F6]">Top-Up / Tarik Saldo</h3>
+            <p class="text-[11px] text-[#8E9591]">Hanya mengubah saldo &amp; modal bersih (P&amp;L tidak berubah)</p>
+          </div>
+          <button
+            id="btnCloseTopupOnlyModal"
+            type="button"
+            class="w-8 h-8 rounded-full bg-[#222724] text-[#8E9591] hover:text-white flex items-center justify-center"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form id="topupOnlyForm" class="space-y-4">
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              id="btnQuickTopupSign"
+              class="py-2 rounded-xl text-xs font-semibold bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition"
+            >
+              + Tambah Saldo (Top-Up)
+            </button>
+            <button
+              type="button"
+              id="btnQuickWithdrawSign"
+              class="py-2 rounded-xl text-xs font-semibold bg-[#111312] text-[#8E9591] border border-[#2F3532] transition"
+            >
+              - Tarik Saldo (Withdraw)
+            </button>
+          </div>
+
+          <div>
+            <label for="inputQuickTopupDate" class="text-xs font-medium text-[#D1D5DB] block mb-1.5">Tanggal Transaksi</label>
+            <input
+              type="date"
+              id="inputQuickTopupDate"
+              required
+              class="w-full px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-sm text-[#F3F4F6] focus:outline-none focus:border-[#22C55E]"
+            />
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="inputQuickTopupAmount" class="text-xs font-medium text-[#D1D5DB]">Nominal Top-Up / Tarik</label>
+              <span id="quickTopupBaseHint" class="text-[11px] text-[#8E9591] [font-variant-numeric:tabular-nums]">Saldo saat ini: 0</span>
+            </div>
+            <input
+              type="number"
+              id="inputQuickTopupAmount"
+              step="any"
+              min="1"
+              required
+              placeholder="Contoh: 500000"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-base font-semibold text-[#F3F4F6] [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E]"
+            />
+          </div>
+
+          <div class="px-3.5 py-3 rounded-xl bg-[#111312] border border-[#262B28] flex items-center justify-between">
+            <span class="text-xs text-[#8E9591]">Saldo Baru Setelah Top-Up</span>
+            <span id="quickTopupResultPreview" class="text-sm font-semibold text-[#22C55E] [font-variant-numeric:tabular-nums]">0</span>
+          </div>
+
+          <button
+            type="submit"
+            class="w-full py-3 px-4 rounded-xl bg-[#22C55E] hover:bg-[#1EB054] text-[#090D0B] text-sm font-semibold shadow-md transition"
+          >
+            Simpan Top-Up (P&amp;L Tetap 0)
+          </button>
+        </form>
+      </div>
     </div>
 
     <!-- ==================== BOTTOM SHEET MODAL: ADD / EDIT ENTRY ==================== -->
@@ -688,7 +780,36 @@
               </svg>
             </button>
 
-            <div id="cashflowInputContainer" class="hidden px-3.5 pb-3.5 pt-1 border-t border-[#1E2220] space-y-2.5">
+            <div id="cashflowInputContainer" class="hidden px-3.5 pb-3.5 pt-2.5 border-t border-[#1E2220] space-y-3">
+              <!-- Mode Selector: Mode 1 (Top-Up Saja) vs Mode 2 (Saldo Penutupan Bursa) -->
+              <div class="space-y-1.5">
+                <span class="text-[11px] font-medium text-[#D1D5DB] block">Pilih Kondisi Waktu Input:</span>
+                <div class="grid grid-cols-1 gap-1.5">
+                  <button
+                    type="button"
+                    id="btnModeTopupOnly"
+                    class="w-full p-2.5 rounded-xl text-left border border-[#22C55E] bg-[#22C55E]/10 transition"
+                  >
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-semibold text-[#22C55E]">Mode 1 — Catat Top-Up / Tarik Saja</span>
+                      <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#22C55E]/20 text-[#22C55E] font-medium">P&amp;L = 0</span>
+                    </div>
+                    <p class="text-[10px] text-[#9CA3AF] mt-0.5">Pasar belum tutup &rarr; otomatis hitung Equity = Kemarin + Top-Up.</p>
+                  </button>
+                  <button
+                    type="button"
+                    id="btnModeMarketClose"
+                    class="w-full p-2.5 rounded-xl text-left border border-[#2F3532] bg-[#181B19] hover:border-[#3E4642] transition"
+                  >
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-semibold text-[#D1D5DB]">Mode 2 — Input Saldo Penutupan Bursa</span>
+                      <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#222724] text-[#8E9591]">Hitung P&amp;L Asli</span>
+                    </div>
+                    <p class="text-[10px] text-[#8E9591] mt-0.5">Pasar sudah tutup &rarr; ketik Saldo Akhir broker + nominal Top-Up hari ini.</p>
+                  </button>
+                </div>
+              </div>
+
               <div class="grid grid-cols-2 gap-2">
                 <button
                   type="button"
@@ -710,20 +831,11 @@
                 id="inputCashflowAmount"
                 step="any"
                 min="0"
-                placeholder="Contoh: 500000"
+                placeholder="Nominal Top-Up / Tarik (Contoh: 500000)"
                 class="w-full px-3 py-2 rounded-lg bg-[#181B19] border border-[#2F3532] text-xs text-[#F3F4F6] [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E]"
               />
-              <label class="flex items-center gap-2 text-[11px] text-[#D1D5DB] cursor-pointer select-none pt-0.5">
-                <input
-                  type="checkbox"
-                  id="chkAutoAdjustEquity"
-                  checked
-                  class="w-3.5 h-3.5 rounded accent-[#22C55E] bg-[#181B19] border-[#2F3532]"
-                />
-                <span>Otomatis tambahkan ke Total Equity (P&amp;L tetap 0)</span>
-              </label>
-              <p class="text-[10px] text-[#8E9591] leading-normal">
-                Jika dicentang, mengetik <strong class="text-[#D1D5DB]">500,000</strong> otomatis mengubah Equity menjadi <strong class="text-[#D1D5DB]">Equity Sebelumnya + 500,000</strong> sehingga hanya menambah nilai portofolio tanpa menambah P&amp;L.
+              <p id="cashflowModeHint" class="text-[10px] text-[#8E9591] leading-normal">
+                <strong class="text-[#22C55E]">Mode 1 Aktif:</strong> Kolom Total Equity otomatis menjadi <strong class="text-[#D1D5DB]">Equity Sebelumnya + Top-Up</strong> (P&amp;L = 0). Nanti setelah bursa AS tutup, edit tanggal ini lalu pilih <strong class="text-[#D1D5DB]">Mode 2</strong> untuk mengisi saldo penutupan broker.
               </p>
             </div>
           </div>
@@ -1091,6 +1203,7 @@ function doPost(e) {
         },
         visibleRowLimit: INITIAL_VISIBLE_ROWS,
         cashflowSign: 1,
+        cashflowInputMode: 'topup_only',
         calViewYear: new Date().getFullYear(),
         calViewMonth: new Date().getMonth(),
         heatmapYear: null,
@@ -2126,6 +2239,41 @@ function doPost(e) {
         }
       }
 
+      function setCashflowInputMode(mode) {
+        state.cashflowInputMode = mode;
+        const btnM1 = document.getElementById('btnModeTopupOnly');
+        const btnM2 = document.getElementById('btnModeMarketClose');
+        const eqInput = document.getElementById('inputEquity');
+        const hintEl = document.getElementById('cashflowModeHint');
+
+        if (mode === 'topup_only') {
+          btnM1.className = 'w-full p-2.5 rounded-xl text-left border border-[#22C55E] bg-[#22C55E]/10 transition';
+          btnM1.querySelector('span').className = 'text-xs font-semibold text-[#22C55E]';
+          btnM2.className = 'w-full p-2.5 rounded-xl text-left border border-[#2F3532] bg-[#181B19] hover:border-[#3E4642] transition';
+          btnM2.querySelector('span').className = 'text-xs font-semibold text-[#D1D5DB]';
+          eqInput.readOnly = true;
+          eqInput.classList.add('opacity-75', 'cursor-not-allowed');
+          hintEl.innerHTML = '<strong class="text-[#22C55E]">Mode 1 Aktif:</strong> Kolom Total Equity otomatis menjadi <strong class="text-[#D1D5DB]">Equity Sebelumnya + Top-Up</strong> (P&amp;L = 0). Nanti setelah bursa AS tutup, edit tanggal ini lalu pilih <strong class="text-[#D1D5DB]">Mode 2</strong> untuk mengisi saldo penutupan broker.';
+
+          const iso = document.getElementById('inputDate').value;
+          const orig = document.getElementById('editingOriginalDate').value;
+          const prevEq = getPreviousEquityForDate(iso, orig);
+          if (prevEq !== null) {
+            const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
+            eqInput.value = prevEq + cfRaw * state.cashflowSign;
+          }
+        } else {
+          btnM2.className = 'w-full p-2.5 rounded-xl text-left border border-[#22C55E] bg-[#22C55E]/10 transition';
+          btnM2.querySelector('span').className = 'text-xs font-semibold text-[#22C55E]';
+          btnM1.className = 'w-full p-2.5 rounded-xl text-left border border-[#2F3532] bg-[#181B19] hover:border-[#3E4642] transition';
+          btnM1.querySelector('span').className = 'text-xs font-semibold text-[#D1D5DB]';
+          eqInput.readOnly = false;
+          eqInput.classList.remove('opacity-75', 'cursor-not-allowed');
+          hintEl.innerHTML = '<strong class="text-[#22C55E]">Mode 2 Aktif:</strong> Masukkan <strong class="text-[#D1D5DB]">Total Equity Penutupan</strong> sesuai saldo akhir di broker Anda dan biarkan nominal Top-Up tetap terisi &rarr; P&amp;L asli hari ini langsung terhitung otomatis.';
+        }
+        updateLivePnlPreview();
+      }
+
       function openEntryModal(editDateIso = null, expandCashflow = false) {
         const modal = document.getElementById('entryModalBackdrop');
         const titleEl = document.getElementById('entryModalTitle');
@@ -2155,10 +2303,12 @@ function doPost(e) {
             setCashflowSign(found.netFlow >= 0 ? 1 : -1);
             cfInput.value = Math.abs(found.netFlow);
             cfContainer.classList.remove('hidden');
+            setCashflowInputMode('market_close');
           } else {
             setCashflowSign(1);
             cfInput.value = '';
             cfContainer.classList.toggle('hidden', !expandCashflow);
+            setCashflowInputMode('market_close');
           }
         } else {
           titleEl.textContent = 'Update Equity Harian';
@@ -2172,6 +2322,7 @@ function doPost(e) {
           cfInput.value = '';
           btnDelete.classList.add('hidden');
           cfContainer.classList.toggle('hidden', !expandCashflow);
+          setCashflowInputMode(expandCashflow ? 'topup_only' : 'market_close');
         }
 
         const dObj = parseIsoLocal(dateInput.value);
@@ -2371,8 +2522,86 @@ function doPost(e) {
         document.getElementById('btnQuickAddHeader').addEventListener('click', () => openEntryModal(null));
         document.getElementById('btnFloatingUpdate').addEventListener('click', () => openEntryModal(null));
         document.getElementById('btnEmptyAddFirst').addEventListener('click', () => openEntryModal(null));
-        document.getElementById('btnAddCashflowShortcut').addEventListener('click', () => openEntryModal(null, true));
         document.getElementById('btnCloseEntryModal').addEventListener('click', closeEntryModal);
+
+        // Quick Top-Up Only Modal (Zero P&L Impact)
+        let quickTopupSign = 1;
+        const updateQuickTopupPreview = () => {
+          const dateIso = normalizeToIsoDate(document.getElementById('inputQuickTopupDate').value);
+          const existingSameDay = state.entries.find(e => e.date === dateIso);
+          const baseEq = existingSameDay
+            ? Number(existingSameDay.equity) || 0
+            : (getPreviousEquityForDate(dateIso) ?? 0);
+          const amt = parseFloat(document.getElementById('inputQuickTopupAmount').value) || 0;
+          const nextEq = Math.max(0, baseEq + amt * quickTopupSign);
+          document.getElementById('quickTopupBaseHint').textContent = `Saldo sebelum: ${formatBalanceDisplay(baseEq)}`;
+          document.getElementById('quickTopupResultPreview').textContent = formatBalanceDisplay(nextEq);
+        };
+
+        const openQuickTopupModal = () => {
+          quickTopupSign = 1;
+          document.getElementById('btnQuickTopupSign').className = 'py-2 rounded-xl text-xs font-semibold bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition';
+          document.getElementById('btnQuickWithdrawSign').className = 'py-2 rounded-xl text-xs font-semibold bg-[#111312] text-[#8E9591] border border-[#2F3532] transition';
+          const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
+          const defaultIso = sorted.length ? sorted[sorted.length - 1].date : toIsoDateLocal(new Date());
+          document.getElementById('inputQuickTopupDate').value = defaultIso;
+          document.getElementById('inputQuickTopupAmount').value = '';
+          updateQuickTopupPreview();
+          document.getElementById('topupOnlyModalBackdrop').classList.remove('hidden');
+        };
+
+        document.getElementById('btnFloatingTopup').addEventListener('click', openQuickTopupModal);
+        document.getElementById('btnAddCashflowShortcut').addEventListener('click', openQuickTopupModal);
+        document.getElementById('btnCloseTopupOnlyModal').addEventListener('click', () => {
+          document.getElementById('topupOnlyModalBackdrop').classList.add('hidden');
+        });
+
+        document.getElementById('btnQuickTopupSign').addEventListener('click', () => {
+          quickTopupSign = 1;
+          document.getElementById('btnQuickTopupSign').className = 'py-2 rounded-xl text-xs font-semibold bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition';
+          document.getElementById('btnQuickWithdrawSign').className = 'py-2 rounded-xl text-xs font-semibold bg-[#111312] text-[#8E9591] border border-[#2F3532] transition';
+          updateQuickTopupPreview();
+        });
+
+        document.getElementById('btnQuickWithdrawSign').addEventListener('click', () => {
+          quickTopupSign = -1;
+          document.getElementById('btnQuickTopupSign').className = 'py-2 rounded-xl text-xs font-semibold bg-[#111312] text-[#8E9591] border border-[#2F3532] transition';
+          document.getElementById('btnQuickWithdrawSign').className = 'py-2 rounded-xl text-xs font-semibold bg-[#E05252]/15 text-[#E05252] border border-[#E05252]/40 transition';
+          updateQuickTopupPreview();
+        });
+
+        document.getElementById('inputQuickTopupDate').addEventListener('change', updateQuickTopupPreview);
+        document.getElementById('inputQuickTopupAmount').addEventListener('input', updateQuickTopupPreview);
+
+        document.getElementById('topupOnlyForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const dateIso = normalizeToIsoDate(document.getElementById('inputQuickTopupDate').value);
+          const amt = parseFloat(document.getElementById('inputQuickTopupAmount').value);
+          if (isNaN(amt) || amt <= 0) {
+            showToast('Masukkan nominal Top-Up / Tarik yang valid', 'error');
+            return;
+          }
+          const delta = amt * quickTopupSign;
+          const existingIdx = state.entries.findIndex(item => item.date === dateIso);
+          if (existingIdx >= 0) {
+            state.entries[existingIdx].equity = Math.max(0, (Number(state.entries[existingIdx].equity) || 0) + delta);
+            state.entries[existingIdx].netFlow = (Number(state.entries[existingIdx].netFlow) || 0) + delta;
+          } else {
+            const prevEq = getPreviousEquityForDate(dateIso) ?? 0;
+            state.entries.push({
+              date: dateIso,
+              equity: Math.max(0, prevEq + delta),
+              netFlow: delta,
+              note: delta > 0 ? 'Top-Up Saldo' : 'Tarik Saldo'
+            });
+          }
+          state.entries.sort((a, b) => a.date.localeCompare(b.date));
+          saveLocal();
+          document.getElementById('topupOnlyModalBackdrop').classList.add('hidden');
+          renderAll();
+          showToast(delta > 0 ? 'Top-Up saldo dicatat (P&L tidak berubah)' : 'Penarikan saldo dicatat');
+          await pushToCloud(true);
+        });
 
         // Custom Calendar Controls
         document.getElementById('btnOpenCustomCalendar').addEventListener('click', () => {
@@ -2428,12 +2657,24 @@ function doPost(e) {
           updateModalDateBadge();
         });
 
-        // Cashflow Section & Auto-Adjust Equity
+        // Cashflow Section & 2-Mode Input
         document.getElementById('btnToggleCashflowSection').addEventListener('click', () => {
           const box = document.getElementById('cashflowInputContainer');
           const chev = document.getElementById('cashflowChevron');
+          const willOpen = box.classList.contains('hidden');
           box.classList.toggle('hidden');
-          chev.classList.toggle('rotate-180');
+          chev.classList.toggle('rotate-180', willOpen);
+          if (!willOpen) {
+            setCashflowInputMode('market_close');
+          }
+        });
+
+        document.getElementById('btnModeTopupOnly').addEventListener('click', () => {
+          setCashflowInputMode('topup_only');
+        });
+
+        document.getElementById('btnModeMarketClose').addEventListener('click', () => {
+          setCashflowInputMode('market_close');
         });
 
         document.getElementById('btnFlowDeposit').addEventListener('click', () => {
@@ -2449,7 +2690,7 @@ function doPost(e) {
         });
 
         function applyAutoAdjustEquity() {
-          if (!document.getElementById('chkAutoAdjustEquity').checked) return;
+          if (state.cashflowInputMode !== 'topup_only') return;
           const iso = document.getElementById('inputDate').value;
           const orig = document.getElementById('editingOriginalDate').value;
           const prevEq = getPreviousEquityForDate(iso, orig);
