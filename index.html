@@ -486,7 +486,7 @@
               id="btnToggleCashflowSection"
               class="w-full px-3.5 py-2.5 flex items-center justify-between text-xs text-[#8E9591] hover:text-[#D1D5DB] transition"
             >
-              <span>+ Tambah / Tarik Dana Hari Ini (Opsional)</span>
+              <span>+ Tambah Pembelian / Top-Up Modal (Opsional)</span>
               <svg id="cashflowChevron" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
@@ -499,7 +499,7 @@
                   id="btnFlowDeposit"
                   class="py-1.5 rounded-lg text-xs font-medium bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition"
                 >
-                  + Top-Up (Deposit)
+                  + Beli / Top-Up Modal
                 </button>
                 <button
                   type="button"
@@ -514,11 +514,20 @@
                 id="inputCashflowAmount"
                 step="any"
                 min="0"
-                placeholder="Nominal Top-Up / Penarikan (0 jika tidak ada)"
+                placeholder="Contoh: 500000"
                 class="w-full px-3 py-2 rounded-lg bg-[#181B19] border border-[#2F3532] text-xs text-[#F3F4F6] [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E]"
               />
+              <label class="flex items-center gap-2 text-[11px] text-[#D1D5DB] cursor-pointer select-none pt-0.5">
+                <input
+                  type="checkbox"
+                  id="chkAutoAdjustEquity"
+                  checked
+                  class="w-3.5 h-3.5 rounded accent-[#22C55E] bg-[#181B19] border-[#2F3532]"
+                />
+                <span>Otomatis tambahkan ke Total Equity (P&amp;L tetap 0)</span>
+              </label>
               <p class="text-[10px] text-[#8E9591] leading-normal">
-                Menjaga agar P&amp;L harian murni menghitung imbal hasil ETF, bukan kenaikan karena transfer modal baru.
+                Jika dicentang, mengetik <strong class="text-[#D1D5DB]">500,000</strong> otomatis mengubah Equity menjadi <strong class="text-[#D1D5DB]">Equity Sebelumnya + 500,000</strong> sehingga hanya menambah nilai portofolio tanpa menambah P&amp;L.
               </p>
             </div>
           </div>
@@ -1517,13 +1526,20 @@ function doPost(e) {
       function updateLivePnlPreview() {
         const dateVal = document.getElementById('inputDate').value;
         const origDate = document.getElementById('editingOriginalDate').value;
-        const eqVal = parseFloat(document.getElementById('inputEquity').value);
+        const eqInput = document.getElementById('inputEquity');
         const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
         const netFlow = cfRaw * state.cashflowSign;
+        const autoAdjust = document.getElementById('chkAutoAdjustEquity')?.checked;
 
         const prevEq = getPreviousEquityForDate(dateVal, origDate);
         const hintEl = document.getElementById('prevEquityHint');
         const previewEl = document.getElementById('livePnlPreview');
+
+        if (prevEq !== null && autoAdjust && document.activeElement === document.getElementById('inputCashflowAmount')) {
+          eqInput.value = Math.max(0, prevEq + netFlow);
+        }
+
+        const eqVal = parseFloat(eqInput.value);
 
         if (prevEq === null) {
           hintEl.textContent = 'Modal Awal (Hari ke-1)';
@@ -1767,11 +1783,14 @@ function doPost(e) {
         });
         document.getElementById('inputEquity').addEventListener('input', updateLivePnlPreview);
         document.getElementById('inputCashflowAmount').addEventListener('input', updateLivePnlPreview);
-
-        document.getElementById('btnSuggestNextTradingDay').addEventListener('click', () => {
-          const nextIso = getNextTradingDayIso();
-          document.getElementById('inputDate').value = nextIso;
-          updateModalDateBadge(nextIso);
+        document.getElementById('chkAutoAdjustEquity').addEventListener('change', () => {
+          const dateVal = document.getElementById('inputDate').value;
+          const origDate = document.getElementById('editingOriginalDate').value;
+          const prevEq = getPreviousEquityForDate(dateVal, origDate);
+          const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
+          if (prevEq !== null && document.getElementById('chkAutoAdjustEquity').checked) {
+            document.getElementById('inputEquity').value = Math.max(0, prevEq + cfRaw * state.cashflowSign);
+          }
           updateLivePnlPreview();
         });
         document.getElementById('btnSuggestToday').addEventListener('click', () => {
@@ -1788,6 +1807,25 @@ function doPost(e) {
         document.getElementById('btnFlowDeposit').addEventListener('click', () => {
           state.cashflowSign = 1;
           syncCashflowSignButtons();
+          const dateVal = document.getElementById('inputDate').value;
+          const origDate = document.getElementById('editingOriginalDate').value;
+          const prevEq = getPreviousEquityForDate(dateVal, origDate);
+          const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
+          if (prevEq !== null && document.getElementById('chkAutoAdjustEquity').checked && cfRaw > 0) {
+            document.getElementById('inputEquity').value = Math.max(0, prevEq + cfRaw);
+          }
+          updateLivePnlPreview();
+        });
+        document.getElementById('btnFlowWithdraw').addEventListener('click', () => {
+          state.cashflowSign = -1;
+          syncCashflowSignButtons();
+          const dateVal = document.getElementById('inputDate').value;
+          const origDate = document.getElementById('editingOriginalDate').value;
+          const prevEq = getPreviousEquityForDate(dateVal, origDate);
+          const cfRaw = parseFloat(document.getElementById('inputCashflowAmount').value) || 0;
+          if (prevEq !== null && document.getElementById('chkAutoAdjustEquity').checked && cfRaw > 0) {
+            document.getElementById('inputEquity').value = Math.max(0, prevEq - cfRaw);
+          }
           updateLivePnlPreview();
         });
         document.getElementById('btnFlowWithdraw').addEventListener('click', () => {
