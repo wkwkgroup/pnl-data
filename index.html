@@ -1384,7 +1384,7 @@ function doPost(e) {
       const THEME_MODE_KEY = 'etf_portfolio_theme_mode_v1';
       const USD_IDR_RATE_KEY = 'etf_portfolio_usd_idr_rate_v1';
       const DISPLAY_CURR_KEY = 'etf_portfolio_display_curr_v1';
-      const DEFAULT_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzDa1zDUwAIkAn1EMLEPlevp84hkLgMsZ77Wnkp232rk20xlkY6a8QPx4cWaz-o_b5Z/exec';
+      const DEFAULT_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxTKWdE0QaysCZkFFzO6gjLz50Zxllud8_P80ltoUiqAWz7_MYqZaIkc9uIbvkwjxMn/exec';
       const DEFAULT_USD_IDR_RATE = 16500;
 
       // Initial realistic ETF portfolio dataset in USD ($) (Senin - Jumat US Market days)
@@ -1823,7 +1823,13 @@ function doPost(e) {
       function getAppsScriptUrl() {
         try {
           const saved = (localStorage.getItem(APPS_SCRIPT_URL_KEY) || '').trim();
-          return saved || DEFAULT_APPS_SCRIPT_URL;
+          if (DEFAULT_APPS_SCRIPT_URL) {
+            if (saved && saved !== DEFAULT_APPS_SCRIPT_URL) {
+              localStorage.setItem(APPS_SCRIPT_URL_KEY, DEFAULT_APPS_SCRIPT_URL);
+            }
+            return DEFAULT_APPS_SCRIPT_URL;
+          }
+          return saved;
         } catch (e) {
           return DEFAULT_APPS_SCRIPT_URL;
         }
@@ -1910,7 +1916,11 @@ function doPost(e) {
 
         updateCloudStatusUI('syncing', 'Memuat dari Sheets...');
         try {
-          const resp = await fetch(url, { method: 'GET' });
+          const cacheBusterUrl = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+          const resp = await fetch(cacheBusterUrl, {
+            method: 'GET',
+            cache: 'no-store'
+          });
           if (!resp.ok) throw new Error('HTTP ' + resp.status);
           const data = await resp.json();
 
@@ -3701,6 +3711,13 @@ function doPost(e) {
       } else {
         updateCloudStatusUI('idle');
       }
+
+      // Auto-refresh from Google Sheets when switching back to app on mobile
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && getAppsScriptUrl()) {
+          loadFromGoogleSheets(true);
+        }
+      });
     })();
   </script>
 </body>
