@@ -374,26 +374,33 @@
         </div>
       </div>
 
-      <!-- Filter Controls Row: [Daily] [Monthly]  |  Period Dropdown -->
-      <div class="flex items-center justify-between gap-2 mb-5">
-        <div class="flex items-center gap-2">
+      <!-- Filter Controls Row: [Daily] [Monthly] [Yearly]  |  Period Dropdown -->
+      <div class="flex items-center justify-between gap-1.5 mb-5">
+        <div class="flex items-center gap-1.5">
           <button
             id="btnModeDaily"
             type="button"
-            class="px-4 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition"
+            class="px-3.5 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition"
           >
             Daily
           </button>
           <button
             id="btnModeMonthly"
             type="button"
-            class="px-4 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition"
+            class="px-3.5 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition"
           >
             Monthly
           </button>
+          <button
+            id="btnModeYearly"
+            type="button"
+            class="px-3.5 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition"
+          >
+            Yearly
+          </button>
         </div>
 
-        <div class="relative">
+        <div class="relative shrink-0">
           <button
             id="btnPeriodDropdown"
             type="button"
@@ -441,7 +448,7 @@
 
       <!-- Table Header Row -->
       <div class="grid grid-cols-12 items-center pb-2.5 text-xs font-normal text-[#8E9591] select-none">
-        <div class="col-span-4 text-left">Date</div>
+        <div id="tableColDateHeader" class="col-span-4 text-left">Date</div>
         <div class="col-span-3 text-center">Equity</div>
         <div class="col-span-5 text-right">P&amp;L</div>
       </div>
@@ -1537,6 +1544,8 @@ function doPost(e) {
         heroTotalPnlPct: document.getElementById('heroTotalPnlPct'),
         btnModeDaily: document.getElementById('btnModeDaily'),
         btnModeMonthly: document.getElementById('btnModeMonthly'),
+        btnModeYearly: document.getElementById('btnModeYearly'),
+        tableColDateHeader: document.getElementById('tableColDateHeader'),
         btnPeriodDropdown: document.getElementById('btnPeriodDropdown'),
         selectedPeriodLabel: document.getElementById('selectedPeriodLabel'),
         periodDropdownMenu: document.getElementById('periodDropdownMenu'),
@@ -2168,6 +2177,39 @@ function doPost(e) {
         });
       }
 
+      function computeYearlyAggregates(enrichedList) {
+        const map = new Map();
+
+        enrichedList.forEach((item) => {
+          const yr = item.date.slice(0, 4);
+          if (!map.has(yr)) {
+            map.set(yr, {
+              yr,
+              label: yr,
+              endingEquity: item.equity,
+              totalPnlNominal: 0,
+              totalNetFlow: 0,
+              startingBase: item.equity - item.pnlNominal - item.netFlow,
+              daysCount: 0
+            });
+          }
+          const group = map.get(yr);
+          group.endingEquity = item.equity;
+          group.totalPnlNominal += item.pnlNominal;
+          group.totalNetFlow += item.netFlow;
+          group.daysCount += 1;
+        });
+
+        return Array.from(map.values()).map((g) => {
+          const base = g.startingBase > 0 ? g.startingBase + g.totalNetFlow : g.endingEquity;
+          const pnlPercent = base > 0 ? (g.totalPnlNominal / base) * 100 : 0;
+          return {
+            ...g,
+            pnlPercent
+          };
+        });
+      }
+
       // ==================== RENDERING: PORTFOLIO TABLE ====================
       function renderPerformanceTable() {
         const allEnriched = computeAllEnrichedEntries();
@@ -2208,8 +2250,40 @@ function doPost(e) {
 
         el.emptyStateContainer.classList.add('hidden');
 
+        if (state.viewMode === 'YEARLY') {
+          el.loadMoreContainer.classList.add('hidden');
+          if (el.tableColDateHeader) el.tableColDateHeader.textContent = 'Year';
+          const yearlySource = state.periodFilter === '1M' || state.periodFilter === '1W' ? allEnriched : filtered;
+          const yearlyRows = computeYearlyAggregates(yearlySource).reverse();
+          el.performanceTableBody.innerHTML = yearlyRows.map((row) => {
+            const colorClass = row.totalPnlNominal > 0.0001
+              ? 'text-[#22C55E]'
+              : row.totalPnlNominal < -0.0001
+              ? 'text-[#E05252]'
+              : 'text-[#D1D5DB]';
+            const pnlText = `${formatNumber(row.totalPnlNominal, true)} ${formatSignedPercent(row.pnlPercent)}`;
+
+            return `
+              <div class="grid grid-cols-12 items-center py-3.5 text-[13px] transition-colors hover:bg-[#161918]">
+                <div class="col-span-4 text-left">
+                  <span class="font-semibold text-[#E5E7EB] block">${row.label}</span>
+                  <span class="text-[10px] text-[#8E9591]">${row.daysCount} hari bursa</span>
+                </div>
+                <div class="col-span-3 text-center font-normal text-[#E5E7EB] [font-variant-numeric:tabular-nums]">
+                  ${maskIfPrivate(formatNumber(row.endingEquity))}
+                </div>
+                <div class="col-span-5 text-right font-medium ${colorClass} [font-variant-numeric:tabular-nums]">
+                  ${pnlText}
+                </div>
+              </div>
+            `;
+          }).join('');
+          return;
+        }
+
         if (state.viewMode === 'MONTHLY') {
           el.loadMoreContainer.classList.add('hidden');
+          if (el.tableColDateHeader) el.tableColDateHeader.textContent = 'Month';
           const monthlyRows = computeMonthlyAggregates(filtered).reverse();
           el.performanceTableBody.innerHTML = monthlyRows.map((row) => {
             const colorClass = row.totalPnlNominal > 0.0001
@@ -2238,6 +2312,7 @@ function doPost(e) {
         }
 
         // Daily rows (Newest date on top)
+        if (el.tableColDateHeader) el.tableColDateHeader.textContent = 'Date';
         const reversedDaily = [...filtered].reverse();
         const displayedRows = reversedDaily.slice(0, state.visibleRowLimit);
         const remainingCount = reversedDaily.length - displayedRows.length;
@@ -2707,13 +2782,11 @@ function doPost(e) {
           el.customEndTrade.value = state.customEndDate;
         }
 
-        if (state.viewMode === 'DAILY') {
-          el.btnModeDaily.className = 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition';
-          el.btnModeMonthly.className = 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
-        } else {
-          el.btnModeMonthly.className = 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition';
-          el.btnModeDaily.className = 'px-4 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
-        }
+        const activePillClass = 'px-3.5 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition';
+        const inactivePillClass = 'px-3.5 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
+        el.btnModeDaily.className = state.viewMode === 'DAILY' ? activePillClass : inactivePillClass;
+        el.btnModeMonthly.className = state.viewMode === 'MONTHLY' ? activePillClass : inactivePillClass;
+        el.btnModeYearly.className = state.viewMode === 'YEARLY' ? activePillClass : inactivePillClass;
 
         if (state.currency === 'IDR') {
           el.btnCurrIDR.className = 'py-2.5 px-3 rounded-xl border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left';
@@ -3046,14 +3119,11 @@ function doPost(e) {
           (prevEq === null && Math.abs(targetItem.equity - removedFlow) < 0.05);
 
         if (isPureTopupRow) {
-          // Hapus baris tanggal tersebut sepenuhnya beserta tambahan saldonya
           sorted.splice(idx, 1);
-          // Jika ada baris setelahnya yang ikut membawa saldo Top-Up ini, kurangi juga selisihnya
           for (let j = idx; j < sorted.length; j++) {
             sorted[j].equity = Math.max(0, sorted[j].equity - removedFlow);
           }
         } else {
-          // Tanggal tersebut juga memiliki pergerakan P&L bursa: nolkan netFlow dan kurangi saldo dari tanggal tersebut ke depan
           sorted[idx].netFlow = 0;
           for (let j = idx; j < sorted.length; j++) {
             sorted[j].equity = Math.max(0, sorted[j].equity - removedFlow);
@@ -3193,7 +3263,7 @@ function doPost(e) {
         el.infoTooltipCard.classList.add('hidden');
       });
 
-      // Daily / Monthly Pill Buttons
+      // Daily / Monthly / Yearly Pill Buttons
       el.btnModeDaily.addEventListener('click', () => {
         state.viewMode = 'DAILY';
         state.visibleRowLimit = 35;
@@ -3201,6 +3271,10 @@ function doPost(e) {
       });
       el.btnModeMonthly.addEventListener('click', () => {
         state.viewMode = 'MONTHLY';
+        renderAll();
+      });
+      el.btnModeYearly.addEventListener('click', () => {
+        state.viewMode = 'YEARLY';
         renderAll();
       });
 
@@ -3369,80 +3443,85 @@ function doPost(e) {
       el.topupOnlyModalBackdrop.addEventListener('click', (e) => {
         if (e.target === el.topupOnlyModalBackdrop) closeTopupOnlyModal();
       });
+
+      el.btnQuickTopupSign.addEventListener('click', () => setQuickTopupDirectionUI('DEPOSIT'));
+      el.btnQuickWithdrawSign.addEventListener('click', () => setQuickTopupDirectionUI('WITHDRAW'));
+      el.inputQuickTopupDate.addEventListener('change', updateQuickTopupPreview);
+      el.inputQuickTopupAmount.addEventListener('input', updateQuickTopupPreview);
+
       el.btnUndoLatestTopup.addEventListener('click', () => {
         const targetDate = el.btnUndoLatestTopup.dataset.targetDate;
         if (!targetDate) return;
 
         if (el.btnUndoLatestTopup.dataset.armed !== 'true') {
           el.btnUndoLatestTopup.dataset.armed = 'true';
-          el.btnUndoLatestTopup.textContent = 'Ketuk Lagi (Yakin?)';
-          el.btnUndoLatestTopup.className = 'shrink-0 px-3 py-1.5 rounded-xl bg-[#E05252] text-[11px] font-semibold text-white transition';
+          el.btnUndoLatestTopup.textContent = 'Ketuk Lagi untuk Hapus';
+          el.btnUndoLatestTopup.className = 'shrink-0 px-3 py-1.5 rounded-xl bg-[#E05252] text-[11px] font-semibold text-white active:scale-95 transition';
           setTimeout(() => {
-            if (el.btnUndoLatestTopup.dataset.armed === 'true') {
+            if (el.btnUndoLatestTopup.isConnected && el.btnUndoLatestTopup.dataset.armed === 'true') {
               refreshLatestTopupUndoBanner();
             }
-          }, 3000);
+          }, 3500);
           return;
         }
 
         if (removeTopupByDate(targetDate)) {
           refreshLatestTopupUndoBanner();
           updateQuickTopupPreview();
-          closeTopupOnlyModal();
-          showToast(`Riwayat Top-Up ${formatDisplayDate(targetDate)} & saldonya dihapus`);
+          showToast(`Top-Up ${formatDisplayDate(targetDate)} dihapus & saldo dikurangi`);
         }
       });
-      el.btnQuickTopupSign.addEventListener('click', () => setQuickTopupDirectionUI('DEPOSIT'));
-      el.btnQuickWithdrawSign.addEventListener('click', () => setQuickTopupDirectionUI('WITHDRAW'));
-      el.inputQuickTopupDate.addEventListener('change', updateQuickTopupPreview);
-      el.inputQuickTopupAmount.addEventListener('input', updateQuickTopupPreview);
 
       el.topupOnlyForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const dateVal = el.inputQuickTopupDate.value;
+        const targetDate = el.inputQuickTopupDate.value;
         const rawAmtInput = parseFloat(el.inputQuickTopupAmount.value);
-        if (!dateVal || isNaN(rawAmtInput) || rawAmtInput <= 0) {
-          showToast('Masukkan nominal Top-Up yang valid');
+        if (!targetDate || isNaN(rawAmtInput) || rawAmtInput <= 0) {
+          showToast('Masukkan nominal Top-Up / Tarik yang valid');
           return;
         }
 
         const rawAmtUSD = fromInputAmountToUSD(rawAmtInput);
         const signedAmtUSD = state.quickTopupDirection === 'DEPOSIT' ? rawAmtUSD : -rawAmtUSD;
-        const existingIdx = state.entries.findIndex((item) => item.date === dateVal);
+
+        state.entries.sort((a, b) => a.date.localeCompare(b.date));
+        const existingIdx = state.entries.findIndex((item) => item.date === targetDate);
 
         if (existingIdx !== -1) {
-          state.entries[existingIdx].equity = Math.max(0, state.entries[existingIdx].equity + signedAmtUSD);
           state.entries[existingIdx].netFlow = (Number(state.entries[existingIdx].netFlow) || 0) + signedAmtUSD;
+          for (let j = existingIdx; j < state.entries.length; j++) {
+            state.entries[j].equity = Math.max(0, state.entries[j].equity + signedAmtUSD);
+          }
         } else {
-          const baseEntry = getTopupBaseEntry(dateVal);
-          const baseEq = baseEntry ? baseEntry.equity : 0;
+          const baseEntry = getTopupBaseEntry(targetDate);
+          const baseEqUSD = baseEntry ? baseEntry.equity : 0;
+          const newEqUSD = Math.max(0, baseEqUSD + signedAmtUSD);
           state.entries.push({
-            date: dateVal,
-            equity: Math.max(0, baseEq + signedAmtUSD),
+            date: targetDate,
+            equity: newEqUSD,
             netFlow: signedAmtUSD,
-            note: ''
+            note: signedAmtUSD > 0 ? 'Top-Up Saldo' : 'Tarik Saldo'
           });
+          state.entries.sort((a, b) => a.date.localeCompare(b.date));
+          const insertedIdx = state.entries.findIndex((item) => item.date === targetDate);
+          for (let j = insertedIdx + 1; j < state.entries.length; j++) {
+            state.entries[j].equity = Math.max(0, state.entries[j].equity + signedAmtUSD);
+          }
         }
 
         saveState();
         renderAll();
         closeTopupOnlyModal();
-        showToast(
-          state.quickTopupDirection === 'DEPOSIT'
-            ? `Top-Up ${formatNumber(rawAmtUSD)} ditambahkan (P&L tetap 0)`
-            : `Penarikan ${formatNumber(rawAmtUSD)} dicatat (P&L tetap 0)`
-        );
+        showToast(signedAmtUSD > 0 ? 'Top-Up saldo berhasil ditambahkan' : 'Penarikan saldo berhasil dicatat');
       });
 
-      // Entry Modal Controls
+      // Entry Modal Listeners
       el.btnCloseEntryModal.addEventListener('click', closeEntryModal);
       el.entryModalBackdrop.addEventListener('click', (e) => {
         if (e.target === el.entryModalBackdrop) closeEntryModal();
       });
 
-      // Custom Calendar Controls
       el.btnOpenCustomCalendar.addEventListener('click', () => toggleCustomCalendar());
-
       el.btnCalPrevMonth.addEventListener('click', () => {
         if (state.calMonth === 0) {
           state.calMonth = 11;
@@ -3452,7 +3531,6 @@ function doPost(e) {
         }
         renderCustomCalendar();
       });
-
       el.btnCalNextMonth.addEventListener('click', () => {
         if (state.calMonth === 11) {
           state.calMonth = 0;
@@ -3464,17 +3542,21 @@ function doPost(e) {
       });
 
       el.customCalendarDays.addEventListener('click', (e) => {
-        const dayBtn = e.target.closest('.cal-day-btn');
-        if (!dayBtn || !dayBtn.dataset.calDate) return;
-        setSelectedCalendarDate(dayBtn.dataset.calDate, false);
-        toggleCustomCalendar(false);
-        syncEquityWithCashflow();
-        updateLivePnlPreview();
+        const btn = e.target.closest('.cal-day-btn');
+        if (!btn) return;
+        const picked = btn.dataset.calDate;
+        if (picked) {
+          setSelectedCalendarDate(picked, false);
+          toggleCustomCalendar(false);
+          syncEquityWithCashflow();
+          updateLivePnlPreview();
+        }
       });
 
       el.btnSuggestNextTradingDay.addEventListener('click', () => {
-        const current = el.inputDate.value || formatISODate(new Date());
-        setSelectedCalendarDate(getNextUSTradingDay(current), true);
+        const currentVal = el.inputDate.value || formatISODate(new Date());
+        const nextTrading = getNextUSTradingDay(currentVal);
+        setSelectedCalendarDate(nextTrading, true);
         syncEquityWithCashflow();
         updateLivePnlPreview();
       });
@@ -3485,10 +3567,10 @@ function doPost(e) {
         updateLivePnlPreview();
       });
 
-      el.inputEquity.addEventListener('input', updateLivePnlPreview);
-      el.inputCashflowAmount.addEventListener('input', () => {
-        syncEquityWithCashflow();
-        updateLivePnlPreview();
+      el.btnToggleCashflowSection.addEventListener('click', () => {
+        const willOpen = el.cashflowInputContainer.classList.contains('hidden');
+        el.cashflowInputContainer.classList.toggle('hidden', !willOpen);
+        el.cashflowChevron.classList.toggle('rotate-180', willOpen);
       });
 
       el.btnModeTopupOnly.addEventListener('click', () => {
@@ -3504,51 +3586,59 @@ function doPost(e) {
         updateLivePnlPreview();
       });
 
-      el.btnToggleCashflowSection.addEventListener('click', () => {
-        const isHidden = el.cashflowInputContainer.classList.contains('hidden');
-        el.cashflowInputContainer.classList.toggle('hidden', !isHidden);
-        el.cashflowChevron.classList.toggle('rotate-180', isHidden);
-      });
-
       el.btnFlowDeposit.addEventListener('click', () => setCashflowDirectionUI('DEPOSIT'));
       el.btnFlowWithdraw.addEventListener('click', () => setCashflowDirectionUI('WITHDRAW'));
+      el.inputCashflowAmount.addEventListener('input', () => {
+        syncEquityWithCashflow();
+        updateLivePnlPreview();
+      });
+      el.inputEquity.addEventListener('input', updateLivePnlPreview);
 
-      // Save Form Submission (Stores Base USD internally)
       el.entryForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const dateVal = el.inputDate.value;
-        const equityValInput = parseFloat(el.inputEquity.value);
+        const targetDate = el.inputDate.value;
         const originalDate = el.editingOriginalDate.value;
-
-        if (!dateVal || isNaN(equityValInput) || equityValInput < 0) {
-          showToast('Mohon masukkan tanggal dan nominal equity yang valid');
+        const rawEqInput = parseFloat(el.inputEquity.value);
+        if (!targetDate || isNaN(rawEqInput) || rawEqInput < 0) {
+          showToast('Masukkan nominal Total Equity yang valid');
           return;
         }
 
+        const eqUSD = fromInputAmountToUSD(rawEqInput);
         const rawFlowInput = parseFloat(el.inputCashflowAmount.value) || 0;
-        const equityValUSD = fromInputAmountToUSD(equityValInput);
         const rawFlowUSD = fromInputAmountToUSD(rawFlowInput);
-        const netFlowUSD = rawFlowUSD > 0 ? (state.cashflowDirection === 'DEPOSIT' ? rawFlowUSD : -rawFlowUSD) : 0;
-        const noteVal = (el.inputNote.value || '').trim().slice(0, 60);
+        const signedFlowUSD = rawFlowUSD > 0
+          ? (state.cashflowDirection === 'DEPOSIT' ? rawFlowUSD : -rawFlowUSD)
+          : 0;
+        const noteText = (el.inputNote.value || '').trim().slice(0, 60);
 
-        if (originalDate && originalDate !== dateVal) {
+        if (originalDate && originalDate !== targetDate) {
           state.entries = state.entries.filter((item) => item.date !== originalDate);
         }
 
-        const existingIndex = state.entries.findIndex((item) => item.date === dateVal);
-        if (existingIndex !== -1) {
-          state.entries[existingIndex] = { date: dateVal, equity: equityValUSD, netFlow: netFlowUSD, note: noteVal };
+        const existingIdx = state.entries.findIndex((item) => item.date === targetDate);
+        if (existingIdx !== -1) {
+          state.entries[existingIdx] = {
+            date: targetDate,
+            equity: eqUSD,
+            netFlow: signedFlowUSD,
+            note: noteText
+          };
         } else {
-          state.entries.push({ date: dateVal, equity: equityValUSD, netFlow: netFlowUSD, note: noteVal });
+          state.entries.push({
+            date: targetDate,
+            equity: eqUSD,
+            netFlow: signedFlowUSD,
+            note: noteText
+          });
         }
 
         saveState();
         renderAll();
         closeEntryModal();
-        showToast(`Data ${formatDisplayDate(dateVal)} tersimpan`);
+        showToast(originalDate ? 'Data equity diperbarui' : 'Data equity disimpan');
       });
 
-      // Delete Entry Flow
       el.btnDeleteEntry.addEventListener('click', () => {
         el.inlineDeleteConfirm.classList.remove('hidden');
       });
@@ -3556,184 +3646,142 @@ function doPost(e) {
         el.inlineDeleteConfirm.classList.add('hidden');
       });
       el.btnConfirmDelete.addEventListener('click', () => {
-        const target = el.editingOriginalDate.value || el.inputDate.value;
-        state.entries = state.entries.filter((item) => item.date !== target);
+        const targetDate = el.editingOriginalDate.value || el.inputDate.value;
+        state.entries = state.entries.filter((item) => item.date !== targetDate);
         saveState();
         renderAll();
         closeEntryModal();
-        showToast(`Data ${formatDisplayDate(target)} dihapus`);
+        showToast('Data tanggal dihapus');
       });
 
-      // Settings Modal Controls
+      // Settings Modal Listeners
       el.btnOpenSettingsRight.addEventListener('click', openSettingsModal);
       el.btnCloseSettingsModal.addEventListener('click', closeSettingsModal);
       el.settingsModalBackdrop.addEventListener('click', (e) => {
         if (e.target === el.settingsModalBackdrop) closeSettingsModal();
       });
 
-      // Google Sheets Sync Controls
       el.btnSaveSyncUrl.addEventListener('click', async () => {
-        const url = el.inputAppsScriptUrl.value.trim();
-        setAppsScriptUrl(url);
-        if (!url) {
-          updateCloudStatusUI('idle');
-          showToast('URL Google Sheets dihapus (Mode Lokal)');
-          return;
-        }
+        setAppsScriptUrl(el.inputAppsScriptUrl.value);
         await loadFromGoogleSheets(false);
       });
 
       el.btnPushToCloud.addEventListener('click', async () => {
-        const url = el.inputAppsScriptUrl.value.trim() || getAppsScriptUrl();
-        if (!url) {
-          showToast('Masukkan Web App URL Google Apps Script terlebih dahulu');
-          return;
+        if (el.inputAppsScriptUrl.value.trim()) {
+          setAppsScriptUrl(el.inputAppsScriptUrl.value);
         }
-        setAppsScriptUrl(url);
         await syncToGoogleSheets(false);
       });
 
       el.btnToggleScriptGuide.addEventListener('click', () => {
-        const isHidden = el.scriptGuideContainer.classList.contains('hidden');
-        el.scriptGuideContainer.classList.toggle('hidden', !isHidden);
-        el.scriptGuideChevron.classList.toggle('rotate-180', isHidden);
+        const willOpen = el.scriptGuideContainer.classList.contains('hidden');
+        el.scriptGuideContainer.classList.toggle('hidden', !willOpen);
+        el.scriptGuideChevron.classList.toggle('rotate-180', willOpen);
       });
 
       el.btnCopyAppsScript.addEventListener('click', () => {
-        const codeText = el.appsScriptCodeBlock.textContent || '';
-        const tempArea = document.createElement('textarea');
-        tempArea.value = codeText;
-        tempArea.style.position = 'fixed';
-        tempArea.style.opacity = '0';
-        document.body.appendChild(tempArea);
-        tempArea.select();
+        const text = el.appsScriptCodeBlock.textContent || '';
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
         try {
           document.execCommand('copy');
           showToast('Kode Google Apps Script disalin');
         } catch (err) {
           showToast('Gagal menyalin kode');
         }
-        document.body.removeChild(tempArea);
+        document.body.removeChild(ta);
       });
 
       el.btnThemeDark.addEventListener('click', () => setThemeMode('DARK'));
       el.btnThemeLight.addEventListener('click', () => setThemeMode('LIGHT'));
 
-      el.btnCurrIDR.addEventListener('click', () => {
-        setDisplayCurrency('IDR');
-        showToast('Mata uang diubah ke IDR (Rp)');
-      });
-
       el.btnCurrUSD.addEventListener('click', () => {
         setDisplayCurrency('USD');
-        showToast('Mata uang diubah ke USD ($)');
+        showToast('Format mata uang: USD ($)');
+      });
+      el.btnCurrIDR.addEventListener('click', () => {
+        setDisplayCurrency('IDR');
+        showToast('Format mata uang: IDR (Rp)');
       });
 
       el.inputSettingsUsdIdrRate.addEventListener('change', (e) => {
         if (setUsdIdrRate(e.target.value, true)) {
           renderAll();
           showToast(`Rate $1 USD = Rp ${Math.round(state.usdIdrRate).toLocaleString('en-US')}`);
-        } else {
-          e.target.value = state.usdIdrRate;
-          showToast('Masukkan angka rate yang valid');
         }
       });
 
-      // Export CSV
       el.btnExportCsv.addEventListener('click', () => {
         const enriched = computeAllEnrichedEntries();
-        if (enriched.length === 0) {
-          showToast('Tidak ada data untuk diekspor');
-          return;
-        }
-        const headers = ['Date', 'Equity_USD', 'Equity_IDR', 'Net_Flow_USD', 'PnL_Nominal_USD', 'PnL_Percent', 'Note'];
-        const lines = [headers.join(',')];
+        const lines = ['Date,Equity_USD,Net_Flow_USD,PnL_USD,PnL_Percent,Note'];
         enriched.forEach((r) => {
           const safeNote = `"${(r.note || '').replace(/"/g, '""')}"`;
-          lines.push([
-            r.date,
-            r.equity.toFixed(2),
-            Math.round(r.equity * state.usdIdrRate),
-            r.netFlow.toFixed(2),
-            r.pnlNominal.toFixed(2),
-            r.pnlPercent.toFixed(4),
-            safeNote
-          ].join(','));
+          lines.push(`${r.date},${r.equity.toFixed(2)},${r.netFlow.toFixed(2)},${r.pnlNominal.toFixed(2)},${r.pnlPercent.toFixed(2)},${safeNote}`);
         });
         const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `etf-performance-usd-${formatISODate(new Date())}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `etf-portfolio-${formatISODate(new Date())}.csv`;
+        link.click();
         showToast('File CSV berhasil diunduh');
       });
 
-      // Export JSON
       el.btnExportJson.addEventListener('click', () => {
         const payload = JSON.stringify({
           exportedAt: new Date().toISOString(),
-          currency: state.currency,
+          currency: 'USD',
           usdIdrRate: state.usdIdrRate,
           entries: state.entries
         }, null, 2);
         const blob = new Blob([payload], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `etf-backup-usd-${formatISODate(new Date())}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `etf-portfolio-backup-${formatISODate(new Date())}.json`;
+        link.click();
         showToast('Backup JSON berhasil diunduh');
       });
 
-      // Import JSON
       el.inputImportJson.addEventListener('change', (e) => {
         const file = e.target.files && e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = (evt) => {
+        reader.onload = (ev) => {
           try {
-            const parsed = JSON.parse(evt.target.result);
-            if (!parsed || !Array.isArray(parsed.entries)) {
-              throw new Error('Format JSON tidak valid');
+            const parsed = JSON.parse(ev.target.result);
+            if (parsed && Array.isArray(parsed.entries)) {
+              state.entries = parsed.entries
+                .map((item) => ({
+                  date: normalizeDateToISO(item.date),
+                  equity: Number(item.equity) || 0,
+                  netFlow: Number(item.netFlow) || 0,
+                  note: item.note ? String(item.note).slice(0, 60) : ''
+                }))
+                .filter((item) => item.date);
+              saveState();
+              renderAll();
+              closeSettingsModal();
+              showToast(`Berhasil import ${state.entries.length} data`);
+            } else {
+              showToast('Format file JSON tidak valid');
             }
-            const validEntries = parsed.entries
-              .filter((item) => item && typeof item.date === 'string' && !isNaN(Number(item.equity)))
-              .map((item) => ({
-                date: normalizeDateToISO(item.date),
-                equity: Number(item.equity),
-                netFlow: Number(item.netFlow) || 0,
-                note: item.note ? String(item.note).slice(0, 60) : ''
-              }))
-              .filter((item) => item.date);
-            state.entries = validEntries;
-            if (parsed.usdIdrRate && Number(parsed.usdIdrRate) > 0) {
-              setUsdIdrRate(Number(parsed.usdIdrRate), true);
-            }
-            if (parsed.currency === 'USD' || parsed.currency === 'IDR') {
-              state.currency = parsed.currency;
-            }
-            saveState();
-            renderAll();
-            closeSettingsModal();
-            showToast(`Berhasil mengimpor ${validEntries.length} baris data`);
           } catch (err) {
-            showToast('Gagal membaca file JSON backup');
+            showToast('Gagal membaca file JSON');
           }
-          el.inputImportJson.value = '';
+          e.target.value = '';
         };
         reader.readAsText(file);
       });
 
-      // Load Sample Data & Clear All Data
       el.btnLoadSampleData.addEventListener('click', () => {
         state.entries = [...DEFAULT_SAMPLE_DATA];
         saveState();
         renderAll();
         closeSettingsModal();
-        showToast('Data contoh ETF (USD) dimuat');
+        showToast('Data contoh berhasil dimuat');
       });
 
       el.btnClearAllData.addEventListener('click', () => {
@@ -3750,6 +3798,13 @@ function doPost(e) {
         showToast('Semua data dikosongkan');
       });
 
+      // Auto-sync when returning to browser tab on mobile/desktop
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && getAppsScriptUrl()) {
+          loadFromGoogleSheets(true);
+        }
+      });
+
       // ==================== INITIALIZATION ====================
       loadState();
       if (state.entries.length > 0) {
@@ -3758,20 +3813,9 @@ function doPost(e) {
         state.heatmapMonth = latestDt.getMonth();
       }
       renderAll();
-
-      // Auto-sync from Google Sheets on launch if Web App URL is configured
       if (getAppsScriptUrl()) {
         loadFromGoogleSheets(true);
-      } else {
-        updateCloudStatusUI('idle');
       }
-
-      // Auto-refresh from Google Sheets when switching back to app on mobile
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && getAppsScriptUrl()) {
-          loadFromGoogleSheets(true);
-        }
-      });
     })();
   </script>
 </body>
