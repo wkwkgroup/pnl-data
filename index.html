@@ -109,8 +109,26 @@
     <header class="sticky top-0 z-30 bg-[#111312]/95 backdrop-blur-md">
       <!-- Top Bar -->
       <div class="flex items-center justify-between px-4 h-14">
-        <!-- Left Title -->
-        <h1 class="text-[16px] font-semibold tracking-tight text-[#F3F4F6]">Performance</h1>
+        <!-- Left Title & Currency Pill Switcher -->
+        <div class="flex items-center gap-2">
+          <h1 class="text-[16px] font-semibold tracking-tight text-[#F3F4F6]">Performance</h1>
+          <div class="inline-flex items-center rounded-full bg-[#181B19] border border-[#262B28] p-0.5 text-[10px] font-semibold">
+            <button
+              id="btnQuickCurrUSD"
+              type="button"
+              class="px-2 py-0.5 rounded-full bg-[#22C55E] text-[#090D0B] transition"
+            >
+              $ USD
+            </button>
+            <button
+              id="btnQuickCurrIDR"
+              type="button"
+              class="px-2 py-0.5 rounded-full text-[#8E9591] hover:text-[#F3F4F6] transition"
+            >
+              Rp IDR
+            </button>
+          </div>
+        </div>
 
         <!-- Right Quick Action, Cloud Sync Status & Settings -->
         <div class="flex items-center gap-1 -mr-1">
@@ -190,7 +208,7 @@
           type="button"
           role="tab"
           aria-selected="false"
-          class="py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] border-b-2 border-transparent hover:text-[#D1D5DB] transition-colors"
+          class="py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] hover:text-[#D1D5DB] border-b-2 border-transparent transition-colors"
         >
           TRADE
         </button>
@@ -199,15 +217,15 @@
 
     <!-- ==================== VIEW 1: PORTFOLIO TAB ==================== -->
     <main id="viewPortfolio" class="flex-1 flex flex-col px-4 pt-5 pb-28">
-      <!-- Sub-header Row: Total Equity Return (i) -->
-      <div class="flex items-center justify-between mb-3.5">
+      <!-- Section Title + Info Icon + Editable USD/IDR Rate Pill -->
+      <div class="flex items-center justify-between mb-3.5 gap-2">
         <div class="flex items-center gap-1.5">
           <h2 class="text-[15px] font-semibold text-[#F3F4F6]">Total Equity Return</h2>
           <button
             id="btnToggleInfo"
             type="button"
             aria-label="Informasi Perhitungan P&L"
-            class="w-5 h-5 flex items-center justify-center rounded-full text-[#8E9591] hover:text-[#F3F4F6] active:scale-95 transition"
+            class="text-[#8E9591] hover:text-[#D1D5DB] transition p-0.5"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="9" />
@@ -215,11 +233,43 @@
             </svg>
           </button>
         </div>
+        <!-- Editable USD/IDR Rate Pill -->
+        <button
+          id="btnQuickEditRate"
+          type="button"
+          title="Ketuk untuk ubah kurs USD/IDR"
+          class="text-[11px] font-medium text-[#8E9591] hover:text-[#F3F4F6] bg-[#181B19] border border-[#262B28] hover:border-[#22C55E]/50 px-2.5 py-0.5 rounded-full flex items-center gap-1 active:scale-95 transition [font-variant-numeric:tabular-nums]"
+        >
+          <span>$1 = Rp <strong id="headerRateDisplay" class="text-[#22C55E] font-semibold">16,500</strong></span>
+          <svg class="w-2.5 h-2.5 opacity-80" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+        </button>
+      </div>
 
-        <!-- Subtle US Market Status Pill -->
-        <span id="currencyBadge" class="text-[11px] font-medium text-[#8E9591] bg-[#181B19] border border-[#262B28] px-2 py-0.5 rounded-full">
-          US Market (Sen–Jum)
-        </span>
+      <!-- Inline Quick USD/IDR Exchange Rate Editor Bar -->
+      <div id="quickRateEditorBar" class="hidden mb-4 p-3 rounded-2xl bg-[#181B19] border border-[#22C55E]/40 flex items-center justify-between gap-2">
+        <div class="flex-1">
+          <label for="inputQuickUsdIdrRate" class="text-[10px] font-medium text-[#22C55E] block mb-1">Kurs Konversi ($1 USD ke Rupiah)</label>
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs text-[#8E9591]">Rp</span>
+            <input
+              type="number"
+              id="inputQuickUsdIdrRate"
+              step="1"
+              min="1"
+              placeholder="16500"
+              class="w-full px-2.5 py-1.5 rounded-xl bg-[#111312] border border-[#2F3532] text-xs font-semibold text-[#F3F4F6] [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E]"
+            />
+          </div>
+        </div>
+        <button
+          id="btnSaveQuickRate"
+          type="button"
+          class="mt-4 px-3.5 py-2 rounded-xl bg-[#22C55E] hover:bg-[#1EB054] text-[#090D0B] text-xs font-semibold transition"
+        >
+          Terapkan
+        </button>
       </div>
 
       <!-- Total Portfolio Summary Card -->
@@ -227,7 +277,7 @@
         <div>
           <span class="text-[11px] text-[#8E9591] block mb-0.5">Total Portfolio</span>
           <div class="flex items-center gap-1.5">
-            <span id="heroTotalPortfolio" class="text-xl font-bold text-[#F3F4F6] [font-variant-numeric:tabular-nums]">1,596,000</span>
+            <span id="heroTotalPortfolio" class="text-xl font-bold text-[#F3F4F6] [font-variant-numeric:tabular-nums]">$99.75</span>
             <button
               type="button"
               data-privacy-trigger="true"
@@ -245,12 +295,12 @@
             </button>
           </div>
           <span class="text-[11px] text-[#8E9591] mt-1 block [font-variant-numeric:tabular-nums]">
-            Modal Bersih: <strong id="heroTotalInvested" class="font-medium text-[#D1D5DB]">1,440,000</strong>
+            Modal Bersih: <strong id="heroTotalInvested" class="font-medium text-[#D1D5DB]">$90.00</strong>
           </span>
         </div>
         <div class="text-right">
           <span class="text-[11px] text-[#8E9591] block mb-0.5">Total Return</span>
-          <span id="heroTotalPnl" class="text-sm font-semibold text-[#22C55E] block [font-variant-numeric:tabular-nums]">+156,000</span>
+          <span id="heroTotalPnl" class="text-sm font-semibold text-[#22C55E] block [font-variant-numeric:tabular-nums]">+$9.75</span>
           <span id="heroTotalPnlPct" class="text-xs font-medium text-[#22C55E] block [font-variant-numeric:tabular-nums]">+10.83%</span>
         </div>
       </div>
@@ -442,7 +492,7 @@
               <span id="chartActiveDate" class="text-[11px] text-[#8E9591] bg-[#111312] px-2 py-0.5 rounded-full">24 Nov 26</span>
             </div>
             <div class="flex items-center gap-2">
-              <span id="chartActiveEquity" class="text-2xl font-bold tracking-tight text-[#F3F4F6] [font-variant-numeric:tabular-nums]">1,596,000</span>
+              <span id="chartActiveEquity" class="text-2xl font-bold tracking-tight text-[#F3F4F6] [font-variant-numeric:tabular-nums]">$99.75</span>
               <button
                 type="button"
                 data-privacy-trigger="true"
@@ -461,7 +511,7 @@
             </div>
             <div class="flex items-center gap-1.5 mt-1 flex-wrap">
               <span id="chartTrendArrow" class="text-xs font-bold text-[#22C55E]">↗</span>
-              <span id="chartActivePnl" class="text-xs font-semibold text-[#22C55E] [font-variant-numeric:tabular-nums]">+156,000 (+10.83%)</span>
+              <span id="chartActivePnl" class="text-xs font-semibold text-[#22C55E] [font-variant-numeric:tabular-nums]">+$9.75 (+10.83%)</span>
               <span id="chartPeriodSubLabel" class="text-xs text-[#8E9591]">1 bulan terakhir</span>
             </div>
           </div>
@@ -510,7 +560,7 @@
         <!-- Total Return -->
         <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-3.5">
           <span class="text-[11px] text-[#8E9591] block mb-1">Total Net P&amp;L</span>
-          <span id="statTotalPnl" class="text-sm font-semibold text-[#22C55E] block [font-variant-numeric:tabular-nums]">+156,000</span>
+          <span id="statTotalPnl" class="text-sm font-semibold text-[#22C55E] block [font-variant-numeric:tabular-nums]">+$9.75</span>
           <span id="statTotalPnlPct" class="text-xs text-[#22C55E] [font-variant-numeric:tabular-nums]">+10.83%</span>
         </div>
 
@@ -524,15 +574,15 @@
         <!-- Max Profit (Nominal) -->
         <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-3.5">
           <span class="text-[11px] text-[#8E9591] block mb-1">Max Profit</span>
-          <span id="statMaxProfit" class="text-sm font-semibold text-[#22C55E] block [font-variant-numeric:tabular-nums]">+48,000</span>
+          <span id="statMaxProfit" class="text-sm font-semibold text-[#22C55E] block [font-variant-numeric:tabular-nums]">+$3.00</span>
           <span id="statMaxProfitDate" class="text-[11px] text-[#8E9591]">12 Nov 26</span>
         </div>
 
         <!-- Max Loss (Nominal) -->
         <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-3.5">
           <span class="text-[11px] text-[#8E9591] block mb-1">Max Loss</span>
-          <span id="statMaxLoss" class="text-sm font-semibold text-[#E05252] block [font-variant-numeric:tabular-nums]">-8,000</span>
-          <span id="statMaxLossDate" class="text-[11px] text-[#8E9591]">20 Nov 26</span>
+          <span id="statMaxLoss" class="text-sm font-semibold text-[#E05252] block [font-variant-numeric:tabular-nums]">-$0.75</span>
+          <span id="statMaxLossDate" class="text-[11px] text-[#8E9591]">13 Nov 26</span>
         </div>
 
         <!-- Max Profit (%) -->
@@ -545,22 +595,22 @@
         <!-- Max Loss (%) -->
         <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-3.5">
           <span class="text-[11px] text-[#8E9591] block mb-1">Max Loss (%)</span>
-          <span id="statMaxLossPct" class="text-sm font-semibold text-[#E05252] block [font-variant-numeric:tabular-nums]">-0.51%</span>
-          <span id="statMaxLossPctDate" class="text-[11px] text-[#8E9591]">20 Nov 26</span>
+          <span id="statMaxLossPct" class="text-sm font-semibold text-[#E05252] block [font-variant-numeric:tabular-nums]">-0.77%</span>
+          <span id="statMaxLossPctDate" class="text-[11px] text-[#8E9591]">13 Nov 26</span>
         </div>
 
         <!-- Avg Daily P&L -->
         <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-3.5">
           <span class="text-[11px] text-[#8E9591] block mb-1">Rata-Rata P&amp;L / Hari</span>
-          <span id="statAvgDaily" class="text-sm font-semibold text-[#F3F4F6] block [font-variant-numeric:tabular-nums]">+11,143</span>
-          <span id="statTradingDays" class="text-[11px] text-[#8E9591]">14 hari bursa</span>
+          <span id="statAvgDaily" class="text-sm font-semibold text-[#F3F4F6] block [font-variant-numeric:tabular-nums]">+$0.75</span>
+          <span id="statTradingDays" class="text-[11px] text-[#8E9591]">13 hari bursa</span>
         </div>
 
         <!-- Net Top-Up / Cashflow -->
         <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-3.5">
           <span class="text-[11px] text-[#8E9591] block mb-1">Net Top-Up / Tarik</span>
-          <span id="statNetCashflow" class="text-sm font-semibold text-[#F3F4F6] block [font-variant-numeric:tabular-nums]">0</span>
-          <span class="text-[11px] text-[#8E9591]">Modal awal: <span id="statInitialEquity">1,440,000</span></span>
+          <span id="statNetCashflow" class="text-sm font-semibold text-[#F3F4F6] block [font-variant-numeric:tabular-nums]">$0.00</span>
+          <span class="text-[11px] text-[#8E9591]">Modal awal: <span id="statInitialEquity">$90.00</span></span>
         </div>
 
         <!-- Max Drawdown (%) -->
@@ -571,7 +621,7 @@
           </div>
           <div class="text-right">
             <span id="statMaxDrawdownRange" class="text-[11px] text-[#8E9591] block">Dari puncak tertinggi</span>
-            <span id="statMaxDrawdownNominal" class="text-[11px] text-[#8E9591] block [font-variant-numeric:tabular-nums]">Drop nominal: 0</span>
+            <span id="statMaxDrawdownNominal" class="text-[11px] text-[#8E9591] block [font-variant-numeric:tabular-nums]">Drop nominal: $0.00</span>
           </div>
         </div>
       </div>
@@ -728,23 +778,23 @@
 
           <div>
             <div class="flex items-center justify-between mb-1.5">
-              <label for="inputQuickTopupAmount" class="text-xs font-medium text-[#D1D5DB]">Nominal Top-Up / Tarik</label>
-              <span id="quickTopupBaseHint" class="text-[11px] text-[#8E9591] [font-variant-numeric:tabular-nums]">Saldo saat ini: 0</span>
+              <label for="inputQuickTopupAmount" class="text-xs font-medium text-[#D1D5DB]">Nominal Top-Up / Tarik (<span id="quickTopupCurrLabel">USD</span>)</label>
+              <span id="quickTopupBaseHint" class="text-[11px] text-[#8E9591] [font-variant-numeric:tabular-nums]">Saldo saat ini: $0.00</span>
             </div>
             <input
               type="number"
               id="inputQuickTopupAmount"
               step="any"
-              min="1"
+              min="0.01"
               required
-              placeholder="Contoh: 500000"
+              placeholder="Contoh: 50"
               class="w-full px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-base font-semibold text-[#F3F4F6] [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E]"
             />
           </div>
 
           <div class="px-3.5 py-3 rounded-xl bg-[#111312] border border-[#262B28] flex items-center justify-between">
             <span class="text-xs text-[#8E9591]">Saldo Baru Setelah Top-Up</span>
-            <span id="quickTopupResultPreview" class="text-sm font-semibold text-[#22C55E] [font-variant-numeric:tabular-nums]">0</span>
+            <span id="quickTopupResultPreview" class="text-sm font-semibold text-[#22C55E] [font-variant-numeric:tabular-nums]">$0.00</span>
           </div>
 
           <button
@@ -882,21 +932,21 @@
           <!-- Equity Input -->
           <div>
             <div class="flex items-center justify-between mb-1.5">
-              <label for="inputEquity" class="text-xs font-medium text-[#D1D5DB]">Total Equity Penutupan</label>
+              <label for="inputEquity" class="text-xs font-medium text-[#D1D5DB]">Total Equity Penutupan (<span id="entryEquityCurrLabel">USD</span>)</label>
               <span id="prevEquityHint" class="text-[11px] text-[#8E9591] [font-variant-numeric:tabular-nums]">
-                Sebelumnya: 1,596,000
+                Sebelumnya: $99.75
               </span>
             </div>
             <div class="relative">
-              <span id="equityInputPrefix" class="hidden absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-[#8E9591]">$</span>
+              <span id="equityInputPrefix" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-[#8E9591]">$</span>
               <input
                 type="number"
                 id="inputEquity"
                 step="any"
                 min="0"
                 required
-                placeholder="Contoh: 1612000"
-                class="w-full px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-base font-semibold text-[#F3F4F6] [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E] transition"
+                placeholder="Contoh: 105.50"
+                class="w-full pl-7 px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-base font-semibold text-[#F3F4F6] [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E] transition"
               />
             </div>
           </div>
@@ -965,7 +1015,7 @@
                 id="inputCashflowAmount"
                 step="any"
                 min="0"
-                placeholder="Nominal Top-Up / Tarik (Contoh: 500000)"
+                placeholder="Nominal Top-Up / Tarik (Contoh: 50)"
                 class="w-full px-3 py-2 rounded-lg bg-[#181B19] border border-[#2F3532] text-xs text-[#F3F4F6] [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E]"
               />
               <p id="cashflowModeHint" class="text-[10px] text-[#8E9591] leading-normal">
@@ -978,7 +1028,7 @@
           <div class="px-3.5 py-3 rounded-xl bg-[#111312] border border-[#262B28] flex items-center justify-between">
             <span class="text-xs text-[#8E9591]">Estimasi P&amp;L Hari Ini</span>
             <span id="livePnlPreview" class="text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]">
-              0 (0.00%)
+              $0.00 (0.00%)
             </span>
           </div>
 
@@ -992,7 +1042,7 @@
               type="text"
               id="inputNote"
               maxlength="60"
-              placeholder="Contoh: DCA ETF, Dividen masuk, CPI AS turun"
+              placeholder="Contoh: DCA VOO, Dividen masuk, CPI AS turun"
               class="w-full px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-xs text-[#F3F4F6] placeholder-[#5B635F] focus:outline-none focus:border-[#22C55E] transition"
             />
           </div>
@@ -1111,7 +1161,7 @@
   var sheet = ss.getSheetByName('ETF_PnL') || ss.insertSheet('ETF_PnL');
   var rows = sheet.getDataRange().getValues();
   var entries = [];
-  var currency = 'IDR';
+  var currency = 'USD';
   for (var i = 1; i &lt; rows.length; i++) {
     if (rows[i][0]) {
       var d = rows[i][0] instanceof Date
@@ -1136,91 +1186,111 @@
 function doPost(e) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('ETF_PnL') || ss.insertSheet('ETF_PnL');
-  var payload = JSON.parse(e.postData.contents);
-  var entries = payload.entries || [];
-  var currency = payload.currency || 'IDR';
-  sheet.clear();
-  sheet.appendRow(['Date', 'Equity', 'Net_TopUp', 'Updated_At', 'Currency', 'Note', 'VOO', 'SCHD']);
+  var body = JSON.parse(e.postData.contents);
+  var entries = body.entries || [];
+  var currency = body.currency || 'USD';
+  sheet.clearContents();
+  sheet.appendRow(['Date', 'Equity_USD', 'Net_Flow_USD', 'Updated_At', 'Currency', 'Note']);
   var now = new Date().toISOString();
-  var prevEq = 0;
   for (var i = 0; i &lt; entries.length; i++) {
-    var item = entries[i];
-    var eq = Number(item.equity) || 0;
-    var nf = Number(item.netFlow) || 0;
-    var pnlNominal = i === 0 ? 0 : (eq - prevEq - nf);
-    var pnlPct = (i === 0 || (prevEq + nf) === 0) ? 0 : (pnlNominal / (prevEq + nf));
-    sheet.appendRow([item.date, eq, nf, now, currency, item.note || '', pnlNominal, pnlPct]);
-    prevEq = eq;
+    sheet.appendRow([
+      entries[i].date,
+      Number(entries[i].equity) || 0,
+      Number(entries[i].netFlow) || 0,
+      now,
+      currency,
+      entries[i].note || ''
+    ]);
   }
-  if (entries.length &gt; 0) {
-    sheet.getRange(2, 7, entries.length, 1).setNumberFormat('#,##0');
-    sheet.getRange(2, 8, entries.length, 1).setNumberFormat('+0.00%;-0.00%;0.00%');
-  }
-  return ContentService.createTextOutput(JSON.stringify({ status: 'saved', count: entries.length }))
-    .setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify({
+    status: 'ok',
+    saved: entries.length
+  })).setMimeType(ContentService.MimeType.JSON);
 }</pre>
                 <button
                   id="btnCopyAppsScript"
                   type="button"
-                  class="mt-1.5 w-full py-1.5 rounded-lg bg-[#222724] hover:bg-[#2B312E] text-[11px] font-medium text-[#22C55E] transition"
+                  class="mt-1.5 w-full py-1.5 px-3 rounded-lg bg-[#222724] hover:bg-[#2B312E] text-[11px] font-medium text-[#22C55E] transition"
                 >
-                  Salin Kode Apps Script
+                  Salin Kode Google Apps Script
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Currency Display Mode -->
-        <div>
-          <label class="text-xs font-medium text-[#D1D5DB] block mb-2">Tema Tampilan (Siang / Malam)</label>
-          <div class="grid grid-cols-2 gap-2 mb-4">
-            <button
-              type="button"
-              id="btnThemeDark"
-              class="py-2.5 px-3 rounded-xl border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left flex items-center gap-2"
-            >
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
-              <div>
-                <span class="block font-semibold">Mode Malam</span>
-                <span class="text-[10px] opacity-80">Gelap &amp; nyaman</span>
-              </div>
-            </button>
-            <button
-              type="button"
-              id="btnThemeLight"
-              class="py-2.5 px-3 rounded-xl border border-[#2F3532] bg-[#111312] text-xs font-medium text-[#8E9591] text-left flex items-center gap-2"
-            >
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-              <div>
-                <span class="block font-semibold">Mode Siang</span>
-                <span class="text-[10px] opacity-80">Terang &amp; bersih</span>
-              </div>
-            </button>
+        <!-- Theme & Currency Display Mode -->
+        <div class="space-y-4">
+          <div>
+            <label class="text-xs font-medium text-[#D1D5DB] block mb-2">Tema Tampilan (Siang / Malam)</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                id="btnThemeDark"
+                class="py-2.5 px-3 rounded-xl border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left flex items-center gap-2"
+              >
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                <div>
+                  <span class="block font-semibold">Mode Malam</span>
+                  <span class="text-[10px] opacity-80">Gelap &amp; nyaman</span>
+                </div>
+              </button>
+              <button
+                type="button"
+                id="btnThemeLight"
+                class="py-2.5 px-3 rounded-xl border border-[#2F3532] bg-[#111312] text-xs font-medium text-[#8E9591] text-left flex items-center gap-2"
+              >
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <div>
+                  <span class="block font-semibold">Mode Siang</span>
+                  <span class="text-[10px] opacity-80">Terang &amp; bersih</span>
+                </div>
+              </button>
+            </div>
           </div>
 
-          <label class="text-xs font-medium text-[#D1D5DB] block mb-2">Format Mata Uang &amp; Angka</label>
-          <div class="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              id="btnCurrIDR"
-              class="py-2.5 px-3 rounded-xl border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left"
-            >
-              <span class="block font-semibold">IDR / Tanpa Simbol</span>
-              <span class="text-[10px] opacity-80">Contoh: 1,596,000</span>
-            </button>
-            <button
-              type="button"
-              id="btnCurrUSD"
-              class="py-2.5 px-3 rounded-xl border border-[#2F3532] bg-[#111312] text-xs font-medium text-[#8E9591] text-left"
-            >
-              <span class="block font-semibold">USD ($)</span>
-              <span class="text-[10px] opacity-80">Contoh: $1,596.00</span>
-            </button>
+          <div>
+            <label class="text-xs font-medium text-[#D1D5DB] block mb-2">Format Mata Uang &amp; Kurs Dollar</label>
+            <div class="grid grid-cols-2 gap-2 mb-2.5">
+              <button
+                type="button"
+                id="btnCurrUSD"
+                class="py-2.5 px-3 rounded-xl border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left"
+              >
+                <span class="block font-semibold">USD ($) — Utama</span>
+                <span class="text-[10px] opacity-80">Contoh: $108.50</span>
+              </button>
+              <button
+                type="button"
+                id="btnCurrIDR"
+                class="py-2.5 px-3 rounded-xl border border-[#2F3532] bg-[#111312] text-xs font-medium text-[#8E9591] text-left"
+              >
+                <span class="block font-semibold">IDR (Rp) — Konversi</span>
+                <span class="text-[10px] opacity-80">Contoh: Rp 1,790,250</span>
+              </button>
+            </div>
+
+            <div class="p-3 rounded-xl bg-[#111312] border border-[#262B28] flex items-center justify-between gap-2">
+              <div>
+                <label for="inputSettingsUsdIdrRate" class="text-xs font-medium text-[#D1D5DB] block">Rate $1 USD ke Rupiah</label>
+                <span class="text-[10px] text-[#8E9591]">Bisa diubah sesuai kurs broker</span>
+              </div>
+              <div class="flex items-center gap-1.5 w-36">
+                <span class="text-xs text-[#8E9591]">Rp</span>
+                <input
+                  type="number"
+                  id="inputSettingsUsdIdrRate"
+                  step="1"
+                  min="1"
+                  placeholder="16500"
+                  class="w-full px-2.5 py-1.5 rounded-lg bg-[#181B19] border border-[#2F3532] text-xs font-semibold text-[#F3F4F6] text-right [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E]"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1297,83 +1367,101 @@ function doPost(e) {
       const APPS_SCRIPT_URL_KEY = 'etf_portfolio_apps_script_url_v1';
       const PRIVACY_MODE_KEY = 'etf_portfolio_privacy_mode_v1';
       const THEME_MODE_KEY = 'etf_portfolio_theme_mode_v1';
+      const USD_IDR_RATE_KEY = 'etf_portfolio_usd_idr_rate_v1';
+      const DISPLAY_CURR_KEY = 'etf_portfolio_display_curr_v1';
       const DEFAULT_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzDa1zDUwAIkAn1EMLEPlevp84hkLgMsZ77Wnkp232rk20xlkY6a8QPx4cWaz-o_b5Z/exec';
+      const DEFAULT_USD_IDR_RATE = 16500;
 
-      // Initial realistic ETF portfolio dataset (Senin - Jumat US Market days)
+      // Initial realistic ETF portfolio dataset in USD ($) (Senin - Jumat US Market days)
       const DEFAULT_SAMPLE_DATA = [
-        { date: '2026-11-05', equity: 1440000, netFlow: 0, note: 'Modal awal ETF' },
-        { date: '2026-11-06', equity: 1456000, netFlow: 0, note: '' },
-        { date: '2026-11-09', equity: 1472000, netFlow: 0, note: '' },
-        { date: '2026-11-10', equity: 1468000, netFlow: 0, note: '' },
-        { date: '2026-11-11', equity: 1508000, netFlow: 0, note: '' },
-        { date: '2026-11-12', equity: 1556000, netFlow: 0, note: 'CPI AS melandai' },
-        { date: '2026-11-13', equity: 1544000, netFlow: 0, note: '' },
-        { date: '2026-11-16', equity: 1552000, netFlow: 0, note: '' },
-        { date: '2026-11-17', equity: 1564000, netFlow: 0, note: '' },
-        { date: '2026-11-18', equity: 1556000, netFlow: 0, note: '' },
-        { date: '2026-11-19', equity: 1560000, netFlow: 0, note: '' },
-        { date: '2026-11-20', equity: 1552000, netFlow: 0, note: '' },
-        { date: '2026-11-23', equity: 1552000, netFlow: 0, note: '' },
-        { date: '2026-11-24', equity: 1596000, netFlow: 0, note: 'Rally teknologi & S&P 500' }
+        { date: '2026-11-05', equity: 90.00, netFlow: 0, note: 'Modal awal ETF' },
+        { date: '2026-11-06', equity: 91.00, netFlow: 0, note: '' },
+        { date: '2026-11-09', equity: 92.00, netFlow: 0, note: '' },
+        { date: '2026-11-10', equity: 91.75, netFlow: 0, note: '' },
+        { date: '2026-11-11', equity: 94.25, netFlow: 0, note: '' },
+        { date: '2026-11-12', equity: 97.25, netFlow: 0, note: 'CPI AS melandai' },
+        { date: '2026-11-13', equity: 96.50, netFlow: 0, note: '' },
+        { date: '2026-11-16', equity: 97.00, netFlow: 0, note: '' },
+        { date: '2026-11-17', equity: 97.75, netFlow: 0, note: '' },
+        { date: '2026-11-18', equity: 97.25, netFlow: 0, note: '' },
+        { date: '2026-11-19', equity: 97.50, netFlow: 0, note: '' },
+        { date: '2026-11-20', equity: 97.00, netFlow: 0, note: '' },
+        { date: '2026-11-23', equity: 97.00, netFlow: 0, note: '' },
+        { date: '2026-11-24', equity: 99.75, netFlow: 0, note: 'Rally teknologi & S&P 500' }
       ];
 
-      // App State
+      // App State (Base values stored in USD; IDR converts dynamically via usdIdrRate)
       let state = {
         activeTab: 'PORTFOLIO',
         viewMode: 'DAILY',
         periodFilter: '1M',
         customStartDate: '',
         customEndDate: '',
-        currency: 'IDR',
+        currency: 'USD',
+        usdIdrRate: DEFAULT_USD_IDR_RATE,
         theme: 'DARK',
         privacyHidden: false,
         entries: [],
         cashflowDirection: 'DEPOSIT',
         topupInputMode: 'TOPUP_ONLY',
         quickTopupDirection: 'DEPOSIT',
-        visibleRowLimit: 60,
-        heatmapYear: 2026,
+        calMonth: 10,
+        calYear: 2026,
         heatmapMonth: 10,
-        calendarViewYear: 2026,
-        calendarViewMonth: 10
+        heatmapYear: 2026,
+        visibleRowLimit: 35
       };
 
+      const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      const MONTHS_FULL = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      const DAYS_ID = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
       const PERIOD_LABELS = {
-        '1D': '1 Hari',
+        '1D': '1 Hari (Hari Ini)',
         '1W': 'Mingguan',
         '1M': 'Bulanan',
         '3M': '3 Bulanan',
         'YTD': 'YTD',
         '1Y': '1 Tahun',
         'ALL': 'All',
-        'CUSTOM': 'Kostum'
+        'CUSTOM': 'Kostum Tanggal'
       };
-
       const CHART_PERIOD_SUBLABELS = {
         '1D': 'hari bursa terakhir',
         '1W': '1 minggu terakhir',
         '1M': '1 bulan terakhir',
         '3M': '3 bulan terakhir',
-        'YTD': 'tahun berjalan (YTD)',
+        'YTD': 'sejak awal tahun (YTD)',
         '1Y': '1 tahun terakhir',
-        'ALL': 'sejak awal investasi',
-        'CUSTOM': 'periode pilihan'
+        'ALL': 'keseluruhan waktu',
+        'CUSTOM': 'rentang kostum'
       };
 
-      const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      const MONTHS_FULL_ID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-      const DAYS_ID = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-
-      // DOM Elements Cache
+      // DOM Element References
       const el = {
         tabPortfolio: document.getElementById('tabPortfolio'),
         tabTrade: document.getElementById('tabTrade'),
         viewPortfolio: document.getElementById('viewPortfolio'),
         viewTrade: document.getElementById('viewTrade'),
+        btnSyncStatusHeader: document.getElementById('btnSyncStatusHeader'),
+        headerCloudDot: document.getElementById('headerCloudDot'),
+        headerCloudLabel: document.getElementById('headerCloudLabel'),
+        btnToggleThemeHeader: document.getElementById('btnToggleThemeHeader'),
+        themeIconSun: document.getElementById('themeIconSun'),
+        themeIconMoon: document.getElementById('themeIconMoon'),
+        btnRefreshApp: document.getElementById('btnRefreshApp'),
+        refreshIconSvg: document.getElementById('refreshIconSvg'),
+        btnQuickAddHeader: document.getElementById('btnQuickAddHeader'),
+        btnOpenSettingsRight: document.getElementById('btnOpenSettingsRight'),
         btnToggleInfo: document.getElementById('btnToggleInfo'),
         infoTooltipCard: document.getElementById('infoTooltipCard'),
         btnCloseInfo: document.getElementById('btnCloseInfo'),
-        currencyBadge: document.getElementById('currencyBadge'),
+        btnQuickCurrUSD: document.getElementById('btnQuickCurrUSD'),
+        btnQuickCurrIDR: document.getElementById('btnQuickCurrIDR'),
+        btnQuickEditRate: document.getElementById('btnQuickEditRate'),
+        headerRateDisplay: document.getElementById('headerRateDisplay'),
+        quickRateEditorBar: document.getElementById('quickRateEditorBar'),
+        inputQuickUsdIdrRate: document.getElementById('inputQuickUsdIdrRate'),
+        btnSaveQuickRate: document.getElementById('btnSaveQuickRate'),
         heroTotalPortfolio: document.getElementById('heroTotalPortfolio'),
         heroTotalInvested: document.getElementById('heroTotalInvested'),
         heroTotalPnl: document.getElementById('heroTotalPnl'),
@@ -1383,27 +1471,40 @@ function doPost(e) {
         btnPeriodDropdown: document.getElementById('btnPeriodDropdown'),
         selectedPeriodLabel: document.getElementById('selectedPeriodLabel'),
         periodDropdownMenu: document.getElementById('periodDropdownMenu'),
-        btnTradePeriodDropdown: document.getElementById('btnTradePeriodDropdown'),
-        tradePeriodDropdownMenu: document.getElementById('tradePeriodDropdownMenu'),
         customRangeBarPortfolio: document.getElementById('customRangeBarPortfolio'),
         customStartPort: document.getElementById('customStartPort'),
         customEndPort: document.getElementById('customEndPort'),
-        customRangeBarTrade: document.getElementById('customRangeBarTrade'),
-        customStartTrade: document.getElementById('customStartTrade'),
-        customEndTrade: document.getElementById('customEndTrade'),
         performanceTableBody: document.getElementById('performanceTableBody'),
         loadMoreContainer: document.getElementById('loadMoreContainer'),
         btnLoadMoreRows: document.getElementById('btnLoadMoreRows'),
         remainingRowsCount: document.getElementById('remainingRowsCount'),
         emptyStateContainer: document.getElementById('emptyStateContainer'),
         btnEmptyAddFirst: document.getElementById('btnEmptyAddFirst'),
+        btnFloatingTopup: document.getElementById('btnFloatingTopup'),
+        btnFloatingUpdate: document.getElementById('btnFloatingUpdate'),
+        // Top-up only modal
+        topupOnlyModalBackdrop: document.getElementById('topupOnlyModalBackdrop'),
+        btnCloseTopupOnlyModal: document.getElementById('btnCloseTopupOnlyModal'),
+        topupOnlyForm: document.getElementById('topupOnlyForm'),
+        btnQuickTopupSign: document.getElementById('btnQuickTopupSign'),
+        btnQuickWithdrawSign: document.getElementById('btnQuickWithdrawSign'),
+        quickTopupCurrLabel: document.getElementById('quickTopupCurrLabel'),
+        inputQuickTopupDate: document.getElementById('inputQuickTopupDate'),
+        inputQuickTopupAmount: document.getElementById('inputQuickTopupAmount'),
+        quickTopupBaseHint: document.getElementById('quickTopupBaseHint'),
+        quickTopupResultPreview: document.getElementById('quickTopupResultPreview'),
+        // Trade tab
+        btnTradePeriodDropdown: document.getElementById('btnTradePeriodDropdown'),
+        tradePeriodDropdownMenu: document.getElementById('tradePeriodDropdownMenu'),
         tradePeriodTag: document.getElementById('tradePeriodTag'),
+        customRangeBarTrade: document.getElementById('customRangeBarTrade'),
+        customStartTrade: document.getElementById('customStartTrade'),
+        customEndTrade: document.getElementById('customEndTrade'),
         chartActiveDate: document.getElementById('chartActiveDate'),
         chartActiveEquity: document.getElementById('chartActiveEquity'),
         chartTrendArrow: document.getElementById('chartTrendArrow'),
         chartActivePnl: document.getElementById('chartActivePnl'),
         chartPeriodSubLabel: document.getElementById('chartPeriodSubLabel'),
-        quickChartPeriodTabs: document.getElementById('quickChartPeriodTabs'),
         sparklineWrapper: document.getElementById('sparklineWrapper'),
         equitySparklineSvg: document.getElementById('equitySparklineSvg'),
         statTotalPnl: document.getElementById('statTotalPnl'),
@@ -1425,42 +1526,21 @@ function doPost(e) {
         statMaxDrawdownPct: document.getElementById('statMaxDrawdownPct'),
         statMaxDrawdownRange: document.getElementById('statMaxDrawdownRange'),
         statMaxDrawdownNominal: document.getElementById('statMaxDrawdownNominal'),
-        heatmapMonthLabel: document.getElementById('heatmapMonthLabel'),
-        heatmapMonthSummary: document.getElementById('heatmapMonthSummary'),
         btnHeatmapPrevMonth: document.getElementById('btnHeatmapPrevMonth'),
         btnHeatmapNextMonth: document.getElementById('btnHeatmapNextMonth'),
+        heatmapMonthLabel: document.getElementById('heatmapMonthLabel'),
+        heatmapMonthSummary: document.getElementById('heatmapMonthSummary'),
         pnlHeatmapGrid: document.getElementById('pnlHeatmapGrid'),
         heatmapSelectedInfo: document.getElementById('heatmapSelectedInfo'),
         cashflowListContainer: document.getElementById('cashflowListContainer'),
         btnAddCashflowShortcut: document.getElementById('btnAddCashflowShortcut'),
-        btnFloatingTopup: document.getElementById('btnFloatingTopup'),
-        btnFloatingUpdate: document.getElementById('btnFloatingUpdate'),
-        btnQuickAddHeader: document.getElementById('btnQuickAddHeader'),
-        btnToggleThemeHeader: document.getElementById('btnToggleThemeHeader'),
-        themeIconSun: document.getElementById('themeIconSun'),
-        themeIconMoon: document.getElementById('themeIconMoon'),
-        btnThemeDark: document.getElementById('btnThemeDark'),
-        btnThemeLight: document.getElementById('btnThemeLight'),
-        btnRefreshApp: document.getElementById('btnRefreshApp'),
-        refreshIconSvg: document.getElementById('refreshIconSvg'),
-        btnOpenSettingsRight: document.getElementById('btnOpenSettingsRight'),
-        btnSyncStatusHeader: document.getElementById('btnSyncStatusHeader'),
-        headerCloudDot: document.getElementById('headerCloudDot'),
-        headerCloudLabel: document.getElementById('headerCloudLabel'),
-        topupOnlyModalBackdrop: document.getElementById('topupOnlyModalBackdrop'),
-        btnCloseTopupOnlyModal: document.getElementById('btnCloseTopupOnlyModal'),
-        topupOnlyForm: document.getElementById('topupOnlyForm'),
-        btnQuickTopupSign: document.getElementById('btnQuickTopupSign'),
-        btnQuickWithdrawSign: document.getElementById('btnQuickWithdrawSign'),
-        inputQuickTopupDate: document.getElementById('inputQuickTopupDate'),
-        inputQuickTopupAmount: document.getElementById('inputQuickTopupAmount'),
-        quickTopupBaseHint: document.getElementById('quickTopupBaseHint'),
-        quickTopupResultPreview: document.getElementById('quickTopupResultPreview'),
+        // Entry modal
         entryModalBackdrop: document.getElementById('entryModalBackdrop'),
         entryModalTitle: document.getElementById('entryModalTitle'),
         btnCloseEntryModal: document.getElementById('btnCloseEntryModal'),
         entryForm: document.getElementById('entryForm'),
         editingOriginalDate: document.getElementById('editingOriginalDate'),
+        dayNameBadge: document.getElementById('dayNameBadge'),
         inputDate: document.getElementById('inputDate'),
         btnOpenCustomCalendar: document.getElementById('btnOpenCustomCalendar'),
         calendarSelectedText: document.getElementById('calendarSelectedText'),
@@ -1470,13 +1550,14 @@ function doPost(e) {
         btnCalNextMonth: document.getElementById('btnCalNextMonth'),
         calMonthYearTitle: document.getElementById('calMonthYearTitle'),
         customCalendarDays: document.getElementById('customCalendarDays'),
-        dayNameBadge: document.getElementById('dayNameBadge'),
         btnSuggestNextTradingDay: document.getElementById('btnSuggestNextTradingDay'),
         btnSuggestToday: document.getElementById('btnSuggestToday'),
         weekendWarning: document.getElementById('weekendWarning'),
+        entryEquityCurrLabel: document.getElementById('entryEquityCurrLabel'),
         prevEquityHint: document.getElementById('prevEquityHint'),
         equityInputPrefix: document.getElementById('equityInputPrefix'),
         inputEquity: document.getElementById('inputEquity'),
+        inputNote: document.getElementById('inputNote'),
         btnToggleCashflowSection: document.getElementById('btnToggleCashflowSection'),
         cashflowChevron: document.getElementById('cashflowChevron'),
         cashflowInputContainer: document.getElementById('cashflowInputContainer'),
@@ -1487,11 +1568,11 @@ function doPost(e) {
         btnFlowWithdraw: document.getElementById('btnFlowWithdraw'),
         inputCashflowAmount: document.getElementById('inputCashflowAmount'),
         livePnlPreview: document.getElementById('livePnlPreview'),
-        inputNote: document.getElementById('inputNote'),
         btnDeleteEntry: document.getElementById('btnDeleteEntry'),
         inlineDeleteConfirm: document.getElementById('inlineDeleteConfirm'),
         btnCancelDelete: document.getElementById('btnCancelDelete'),
         btnConfirmDelete: document.getElementById('btnConfirmDelete'),
+        // Settings modal
         settingsModalBackdrop: document.getElementById('settingsModalBackdrop'),
         btnCloseSettingsModal: document.getElementById('btnCloseSettingsModal'),
         modalCloudDot: document.getElementById('modalCloudDot'),
@@ -1504,8 +1585,11 @@ function doPost(e) {
         scriptGuideContainer: document.getElementById('scriptGuideContainer'),
         appsScriptCodeBlock: document.getElementById('appsScriptCodeBlock'),
         btnCopyAppsScript: document.getElementById('btnCopyAppsScript'),
+        btnThemeDark: document.getElementById('btnThemeDark'),
+        btnThemeLight: document.getElementById('btnThemeLight'),
         btnCurrIDR: document.getElementById('btnCurrIDR'),
         btnCurrUSD: document.getElementById('btnCurrUSD'),
+        inputSettingsUsdIdrRate: document.getElementById('inputSettingsUsdIdrRate'),
         btnExportCsv: document.getElementById('btnExportCsv'),
         btnExportJson: document.getElementById('btnExportJson'),
         inputImportJson: document.getElementById('inputImportJson'),
@@ -1518,24 +1602,13 @@ function doPost(e) {
       };
 
       // ==================== UTILITIES ====================
-      function showToast(message) {
-        el.toastBanner.textContent = message;
-        el.toastBanner.classList.remove('hidden');
-        clearTimeout(showToast._timer);
-        showToast._timer = setTimeout(() => {
-          el.toastBanner.classList.add('hidden');
-        }, 2300);
-      }
-
       function parseISODate(isoStr) {
-        if (!isoStr) return new Date();
-        const clean = String(isoStr).trim();
-        if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
-          const [y, m, d] = clean.split('-').map(Number);
-          return new Date(y, m - 1, d);
+        const clean = normalizeDateToISO(isoStr);
+        const parts = clean.split('-').map(Number);
+        if (parts.length !== 3 || parts.some(isNaN)) {
+          return new Date();
         }
-        const parsed = new Date(clean);
-        return isNaN(parsed.getTime()) ? new Date() : parsed;
+        return new Date(parts[0], parts[1] - 1, parts[2]);
       }
 
       function normalizeDateToISO(rawVal) {
@@ -1544,12 +1617,9 @@ function doPost(e) {
           return formatISODate(rawVal);
         }
         const str = String(rawVal).trim();
-        // Match YYYY-MM-DD or YYYY/MM/DD at start
-        const ymdMatch = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
-        if (ymdMatch) {
-          return `${ymdMatch[1]}-${ymdMatch[2].padStart(2, '0')}-${ymdMatch[3].padStart(2, '0')}`;
+        if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+          return str.slice(0, 10);
         }
-        // Fallback for full JS Date strings like "Wed Nov 25 2026 00:00:00 GMT+0800"
         const parsed = new Date(str);
         if (!isNaN(parsed.getTime())) {
           return formatISODate(parsed);
@@ -1565,7 +1635,9 @@ function doPost(e) {
       }
 
       function formatDisplayDate(isoStr) {
-        const dt = parseISODate(isoStr);
+        const clean = normalizeDateToISO(isoStr);
+        if (!clean) return '-';
+        const dt = parseISODate(clean);
         const day = String(dt.getDate()).padStart(2, '0');
         const mon = MONTHS_SHORT[dt.getMonth()];
         const yr = String(dt.getFullYear()).slice(-2);
@@ -1586,30 +1658,74 @@ function doPost(e) {
         return formatISODate(dt);
       }
 
-      function formatNumber(val, includeSign = false) {
-        const absVal = Math.abs(val);
+      function toDisplayAmount(usdVal) {
+        return state.currency === 'IDR' ? usdVal * state.usdIdrRate : usdVal;
+      }
+
+      function fromInputAmountToUSD(inputVal) {
+        if (isNaN(inputVal)) return NaN;
+        return state.currency === 'IDR' ? inputVal / state.usdIdrRate : inputVal;
+      }
+
+      function fromUSDToInputAmount(usdVal) {
+        if (isNaN(usdVal)) return '';
+        if (state.currency === 'IDR') {
+          return Math.round(usdVal * state.usdIdrRate);
+        }
+        return Number(usdVal.toFixed(2));
+      }
+
+      function formatNumber(usdVal, includeSign = false) {
+        const converted = toDisplayAmount(usdVal);
+        const absVal = Math.abs(converted);
         let formatted;
         if (state.currency === 'USD') {
           formatted = '$' + absVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         } else {
-          formatted = Math.round(absVal).toLocaleString('en-US');
+          formatted = 'Rp ' + Math.round(absVal).toLocaleString('en-US');
         }
         if (includeSign) {
-          if (val > 0.0001) return '+' + formatted;
-          if (val < -0.0001) return '-' + formatted;
-          return state.currency === 'USD' ? '$0.00' : '0';
+          if (converted > 0.0001) return '+' + formatted;
+          if (converted < -0.0001) return '-' + formatted;
+          return state.currency === 'USD' ? '$0.00' : 'Rp 0';
         }
-        return val < -0.0001 ? '-' + formatted : formatted;
+        return converted < -0.0001 ? '-' + formatted : formatted;
+      }
+
+      function setUsdIdrRate(newRate, persist = true) {
+        const parsed = Number(newRate);
+        if (isNaN(parsed) || parsed <= 0) return false;
+        state.usdIdrRate = parsed;
+        if (persist) {
+          try {
+            localStorage.setItem(USD_IDR_RATE_KEY, String(state.usdIdrRate));
+          } catch (e) {}
+        }
+        if (el.headerRateDisplay) {
+          el.headerRateDisplay.textContent = Math.round(state.usdIdrRate).toLocaleString('en-US');
+        }
+        if (el.inputQuickUsdIdrRate) {
+          el.inputQuickUsdIdrRate.value = state.usdIdrRate;
+        }
+        if (el.inputSettingsUsdIdrRate) {
+          el.inputSettingsUsdIdrRate.value = state.usdIdrRate;
+        }
+        return true;
+      }
+
+      function setDisplayCurrency(curr) {
+        state.currency = curr === 'IDR' ? 'IDR' : 'USD';
+        try {
+          localStorage.setItem(DISPLAY_CURR_KEY, state.currency);
+        } catch (e) {}
+        renderAll();
       }
 
       function formatSignedPercent(pct) {
-        if (pct > 0.0001) return `(+${pct.toFixed(2)}%)`;
-        if (pct < -0.0001) return `(${pct.toFixed(2)}%)`;
+        const clean = Math.abs(pct) < 0.0001 ? 0 : pct;
+        if (clean > 0) return `(+${clean.toFixed(2)}%)`;
+        if (clean < 0) return `(${clean.toFixed(2)}%)`;
         return `(0.00%)`;
-      }
-
-      function maskIfPrivate(text) {
-        return state.privacyHidden ? '••••••••' : text;
       }
 
       function escapeHtml(str) {
@@ -1621,6 +1737,10 @@ function doPost(e) {
           .replace(/'/g, '&#39;');
       }
 
+      function maskIfPrivate(text) {
+        return state.privacyHidden ? '••••••••' : text;
+      }
+
       function updatePrivacyUI() {
         document.querySelectorAll('.privacy-eye-open').forEach((icon) => {
           icon.classList.toggle('hidden', state.privacyHidden);
@@ -1628,6 +1748,16 @@ function doPost(e) {
         document.querySelectorAll('.privacy-eye-closed').forEach((icon) => {
           icon.classList.toggle('hidden', !state.privacyHidden);
         });
+      }
+
+      function togglePrivacyMode() {
+        state.privacyHidden = !state.privacyHidden;
+        try {
+          localStorage.setItem(PRIVACY_MODE_KEY, String(state.privacyHidden));
+        } catch (e) {}
+        updatePrivacyUI();
+        renderAll();
+        showToast(state.privacyHidden ? 'Mode Privasi: Saldo disembunyikan' : 'Mode Privasi: Saldo ditampilkan');
       }
 
       function applyThemeUI() {
@@ -1645,7 +1775,7 @@ function doPost(e) {
             el.btnThemeDark.className = 'py-2.5 px-3 rounded-xl border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left flex items-center gap-2';
             el.btnThemeLight.className = 'py-2.5 px-3 rounded-xl border border-[#2F3532] bg-[#111312] text-xs font-medium text-[#8E9591] text-left flex items-center gap-2';
           } else {
-            el.btnThemeLight.className = 'py-2.5 px-3 rounded-xl border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#16A34A] text-left flex items-center gap-2';
+            el.btnThemeLight.className = 'py-2.5 px-3 rounded-xl border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left flex items-center gap-2';
             el.btnThemeDark.className = 'py-2.5 px-3 rounded-xl border border-[#2F3532] bg-[#111312] text-xs font-medium text-[#8E9591] text-left flex items-center gap-2';
           }
         }
@@ -1658,14 +1788,24 @@ function doPost(e) {
         } catch (e) {}
         applyThemeUI();
         renderAll();
+        showToast(state.theme === 'LIGHT' ? 'Mode Siang (Light) aktif' : 'Mode Malam (Dark) aktif');
       }
 
-      // ==================== STORAGE & GOOGLE SHEETS CLOUD SYNC ====================
+      let toastTimer = null;
+      function showToast(message) {
+        el.toastBanner.textContent = message;
+        el.toastBanner.classList.remove('hidden');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          el.toastBanner.classList.add('hidden');
+        }, 2500);
+      }
+
+      // ==================== GOOGLE SHEETS CLOUD SYNC & LOCAL STORAGE ====================
       function getAppsScriptUrl() {
         try {
-          const saved = localStorage.getItem(APPS_SCRIPT_URL_KEY);
-          if (saved && saved.trim()) return saved.trim();
-          return DEFAULT_APPS_SCRIPT_URL;
+          const saved = (localStorage.getItem(APPS_SCRIPT_URL_KEY) || '').trim();
+          return saved || DEFAULT_APPS_SCRIPT_URL;
         } catch (e) {
           return DEFAULT_APPS_SCRIPT_URL;
         }
@@ -1673,75 +1813,89 @@ function doPost(e) {
 
       function setAppsScriptUrl(url) {
         try {
-          localStorage.setItem(APPS_SCRIPT_URL_KEY, (url || '').trim());
-        } catch (e) {
-          console.warn('Storage unavailable:', e);
-        }
-        updateCloudStatusUI(getAppsScriptUrl() ? 'ready' : 'local');
+          const clean = url.trim();
+          if (clean) {
+            localStorage.setItem(APPS_SCRIPT_URL_KEY, clean);
+          } else {
+            localStorage.removeItem(APPS_SCRIPT_URL_KEY);
+          }
+        } catch (e) {}
       }
 
-      function updateCloudStatusUI(status, detailText) {
+      function updateCloudStatusUI(status, customLabel) {
         const url = getAppsScriptUrl();
         if (!url) {
           el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#8E9591]';
           el.headerCloudLabel.textContent = 'Local';
           el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-[#8E9591]';
           el.modalCloudStatusText.textContent = 'Belum terhubung';
+          el.modalCloudStatusText.className = 'text-[10px] text-[#8E9591]';
           return;
         }
+
         if (status === 'syncing') {
           el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse';
-          el.headerCloudLabel.textContent = 'Syncing...';
+          el.headerCloudLabel.textContent = 'Syncing';
           el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
-          el.modalCloudStatusText.textContent = detailText || 'Menyinkronkan...';
+          el.modalCloudStatusText.textContent = customLabel || 'Menyinkronkan...';
+          el.modalCloudStatusText.className = 'text-[10px] text-amber-400';
+        } else if (status === 'synced') {
+          el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#22C55E]';
+          el.headerCloudLabel.textContent = 'Synced';
+          el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-[#22C55E]';
+          el.modalCloudStatusText.textContent = customLabel || 'Tersinkron ke Google Sheets';
+          el.modalCloudStatusText.className = 'text-[10px] text-[#22C55E]';
         } else if (status === 'error') {
           el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#E05252]';
           el.headerCloudLabel.textContent = 'Offline';
           el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-[#E05252]';
-          el.modalCloudStatusText.textContent = detailText || 'Gagal terhubung (tersimpan lokal)';
+          el.modalCloudStatusText.textContent = customLabel || 'Gagal terhubung';
+          el.modalCloudStatusText.className = 'text-[10px] text-[#E05252]';
         } else {
           el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#22C55E]';
-          el.headerCloudLabel.textContent = 'Synced';
+          el.headerCloudLabel.textContent = 'Cloud';
           el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-[#22C55E]';
-          el.modalCloudStatusText.textContent = detailText || 'Terhubung ke Google Sheets';
+          el.modalCloudStatusText.textContent = 'URL tersimpan';
+          el.modalCloudStatusText.className = 'text-[10px] text-[#22C55E]';
         }
       }
 
       async function syncToGoogleSheets(silent = true) {
         const url = getAppsScriptUrl();
         if (!url) return;
-        updateCloudStatusUI('syncing', 'Mengirim data ke Google Sheets...');
+
+        updateCloudStatusUI('syncing', 'Mengirim ke Sheets...');
         try {
-          const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
           await fetch(url, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
-              currency: state.currency,
-              entries: sorted
+              currency: 'USD',
+              entries: state.entries
             })
           });
-          updateCloudStatusUI('synced', 'Tersinkron ke Google Sheets');
-          if (!silent) showToast('Tersimpan ke Google Sheets');
+          updateCloudStatusUI('synced', `Tersimpan (${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })})`);
+          if (!silent) showToast('Semua data berhasil dikirim ke Google Sheets');
         } catch (err) {
-          console.error('Google Sheets POST error:', err);
-          updateCloudStatusUI('error', 'Gagal kirim ke Sheet');
-          if (!silent) showToast('Gagal sync ke Google Sheets (cek URL)');
+          updateCloudStatusUI('error', 'Gagal mengirim (cek koneksi)');
+          if (!silent) showToast('Gagal mengirim ke Google Sheets');
         }
       }
 
       async function loadFromGoogleSheets(silent = false) {
         const url = getAppsScriptUrl();
         if (!url) {
-          if (!silent) showToast('Masukkan Web App URL Google Sheets dulu');
+          updateCloudStatusUI('idle');
           return;
         }
-        updateCloudStatusUI('syncing', 'Mengambil data dari Sheet...');
+
+        updateCloudStatusUI('syncing', 'Memuat dari Sheets...');
         try {
-          const resp = await fetch(url, { method: 'GET', redirect: 'follow' });
+          const resp = await fetch(url, { method: 'GET' });
           if (!resp.ok) throw new Error('HTTP ' + resp.status);
           const data = await resp.json();
+
           if (data && Array.isArray(data.entries)) {
             if (data.entries.length > 0) {
               state.entries = data.entries
@@ -1752,9 +1906,6 @@ function doPost(e) {
                   note: item && item.note ? String(item.note).slice(0, 60) : ''
                 }))
                 .filter((item) => item.date && !isNaN(item.equity));
-              if (data.currency === 'USD' || data.currency === 'IDR') {
-                state.currency = data.currency;
-              }
               state.entries.sort((a, b) => a.date.localeCompare(b.date));
               try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -1800,9 +1951,18 @@ function doPost(e) {
           if (savedTheme === 'LIGHT' || savedTheme === 'DARK') {
             state.theme = savedTheme;
           }
+          const savedRate = Number(localStorage.getItem(USD_IDR_RATE_KEY));
+          if (!isNaN(savedRate) && savedRate > 0) {
+            state.usdIdrRate = savedRate;
+          }
+          const savedCurr = localStorage.getItem(DISPLAY_CURR_KEY);
+          if (savedCurr === 'USD' || savedCurr === 'IDR') {
+            state.currency = savedCurr;
+          }
         } catch (e) {
           state.privacyHidden = false;
         }
+        setUsdIdrRate(state.usdIdrRate, false);
         applyThemeUI();
         try {
           const raw = localStorage.getItem(STORAGE_KEY);
@@ -1812,7 +1972,6 @@ function doPost(e) {
             return;
           }
           const parsed = JSON.parse(raw);
-          state.currency = parsed.currency || 'IDR';
           state.entries = Array.isArray(parsed.entries)
             ? parsed.entries
                 .map((item) => ({
@@ -2204,7 +2363,6 @@ function doPost(e) {
         }
 
         const firstItem = filtered[0];
-        const lastItem = filtered[filtered.length - 1];
         const isFirstOverall = firstItem.date === allEnriched[0].date;
 
         const periodPnl = filtered.reduce((acc, d, idx) => {
@@ -2478,35 +2636,55 @@ function doPost(e) {
         if (state.currency === 'IDR') {
           el.btnCurrIDR.className = 'py-2.5 px-3 rounded-xl border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left';
           el.btnCurrUSD.className = 'py-2.5 px-3 rounded-xl border border-[#2F3532] bg-[#111312] text-xs font-medium text-[#8E9591] text-left';
-          el.equityInputPrefix.classList.add('hidden');
+          el.btnQuickCurrIDR.className = 'px-2 py-0.5 rounded-full bg-[#22C55E] text-[#090D0B] transition';
+          el.btnQuickCurrUSD.className = 'px-2 py-0.5 rounded-full text-[#8E9591] hover:text-[#F3F4F6] transition';
+          el.equityInputPrefix.textContent = 'Rp';
+          el.equityInputPrefix.classList.remove('hidden');
+          el.inputEquity.classList.add('pl-9');
           el.inputEquity.classList.remove('pl-7');
+          el.inputEquity.placeholder = 'Contoh: 1750000';
+          el.inputQuickTopupAmount.placeholder = 'Contoh: 500000';
+          el.quickTopupCurrLabel.textContent = 'IDR';
+          el.entryEquityCurrLabel.textContent = 'IDR';
         } else {
           el.btnCurrUSD.className = 'py-2.5 px-3 rounded-xl border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left';
           el.btnCurrIDR.className = 'py-2.5 px-3 rounded-xl border border-[#2F3532] bg-[#111312] text-xs font-medium text-[#8E9591] text-left';
+          el.btnQuickCurrUSD.className = 'px-2 py-0.5 rounded-full bg-[#22C55E] text-[#090D0B] transition';
+          el.btnQuickCurrIDR.className = 'px-2 py-0.5 rounded-full text-[#8E9591] hover:text-[#F3F4F6] transition';
+          el.equityInputPrefix.textContent = '$';
           el.equityInputPrefix.classList.remove('hidden');
           el.inputEquity.classList.add('pl-7');
+          el.inputEquity.classList.remove('pl-9');
+          el.inputEquity.placeholder = 'Contoh: 105.50';
+          el.inputQuickTopupAmount.placeholder = 'Contoh: 50';
+          el.quickTopupCurrLabel.textContent = 'USD';
+          el.entryEquityCurrLabel.textContent = 'USD';
         }
+
+        el.headerRateDisplay.textContent = Math.round(state.usdIdrRate).toLocaleString('en-US');
 
         renderPerformanceTable();
         renderTradeAnalytics();
       }
 
       // ==================== MODAL & FORM LOGIC ====================
-      function getPreviousEntryBeforeDate(targetDate, ignoreDate = '') {
-        const candidates = state.entries
-          .filter((e) => e.date < targetDate && e.date !== ignoreDate)
+      function getPreviousEntryBeforeDate(targetDate, ignoreOriginalDate = '') {
+        const sorted = [...state.entries]
+          .filter((e) => e.date !== targetDate && e.date !== ignoreOriginalDate)
           .sort((a, b) => a.date.localeCompare(b.date));
-        return candidates.length > 0 ? candidates[candidates.length - 1] : null;
+        const prior = sorted.filter((e) => e.date < targetDate);
+        return prior.length > 0 ? prior[prior.length - 1] : null;
       }
 
-      function updateDateHelperUI(dateStr) {
-        if (!dateStr) return;
-        const dt = parseISODate(dateStr);
-        const dayIdx = dt.getDay();
-        const isWeekend = dayIdx === 0 || dayIdx === 6;
+      function updateDateBadgeAndWarning() {
+        const val = el.inputDate.value;
+        if (!val) return;
+        const dt = parseISODate(val);
+        const dow = dt.getDay();
+        const isWeekend = dow === 0 || dow === 6;
 
-        el.calendarSelectedText.textContent = `${DAYS_ID[dayIdx]}, ${formatDisplayDate(dateStr)}`;
-        el.dayNameBadge.textContent = DAYS_ID[dayIdx];
+        el.calendarSelectedText.textContent = formatDisplayDate(val);
+        el.dayNameBadge.textContent = DAYS_ID[dow];
         if (isWeekend) {
           el.dayNameBadge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400';
           el.weekendWarning.classList.remove('hidden');
@@ -2516,18 +2694,30 @@ function doPost(e) {
         }
       }
 
+      function setSelectedCalendarDate(isoStr, syncCalendarView = true) {
+        el.inputDate.value = isoStr;
+        if (syncCalendarView && isoStr) {
+          const dt = parseISODate(isoStr);
+          state.calYear = dt.getFullYear();
+          state.calMonth = dt.getMonth();
+        }
+        updateDateBadgeAndWarning();
+        renderCustomCalendar();
+      }
+
       function renderCustomCalendar() {
-        const year = state.calendarViewYear;
-        const month = state.calendarViewMonth;
-        el.calMonthYearTitle.textContent = `${MONTHS_FULL_ID[month]} ${year}`;
+        const year = state.calYear;
+        const month = state.calMonth;
+        el.calMonthYearTitle.textContent = `${MONTHS_FULL[month]} ${year}`;
 
         const firstDayOfMonth = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const selectedISO = el.inputDate.value;
-        const todayISO = formatISODate(new Date());
+        const selectedIso = el.inputDate.value;
+        const todayIso = formatISODate(new Date());
         const existingDates = new Set(state.entries.map((e) => e.date));
 
         let html = '';
+
         for (let i = 0; i < firstDayOfMonth; i++) {
           html += `<div class="h-9"></div>`;
         }
@@ -2537,17 +2727,17 @@ function doPost(e) {
           const iso = formatISODate(dt);
           const dow = dt.getDay();
           const isWeekend = dow === 0 || dow === 6;
-          const isSelected = iso === selectedISO;
-          const isToday = iso === todayISO;
+          const isSelected = iso === selectedIso;
+          const isToday = iso === todayIso;
           const hasEntry = existingDates.has(iso);
 
-          let btnClass = 'h-9 rounded-xl text-xs font-medium flex flex-col items-center justify-center relative transition ';
+          let btnClass = 'h-9 rounded-xl text-xs flex flex-col items-center justify-center relative transition ';
           if (isSelected) {
-            btnClass += 'bg-[#22C55E] text-[#090D0B] font-semibold shadow-sm';
+            btnClass += 'bg-[#22C55E] text-[#090D0B] font-bold shadow-md shadow-[#22C55E]/20';
           } else if (isWeekend) {
-            btnClass += 'text-[#5A625E] hover:bg-[#1A1E1C]';
+            btnClass += 'text-[#58605C] hover:bg-[#181B19]';
           } else {
-            btnClass += 'text-[#E5E7EB] hover:bg-[#1E2320]';
+            btnClass += 'text-[#E5E7EB] hover:bg-[#1E2320] font-medium';
           }
 
           if (isToday && !isSelected) {
@@ -2569,23 +2759,19 @@ function doPost(e) {
         el.customCalendarDays.innerHTML = html;
       }
 
-      function setSelectedCalendarDate(isoStr, syncMonthView = true) {
-        el.inputDate.value = isoStr;
-        if (syncMonthView) {
-          const dt = parseISODate(isoStr);
-          state.calendarViewYear = dt.getFullYear();
-          state.calendarViewMonth = dt.getMonth();
-        }
-        updateDateHelperUI(isoStr);
-        if (!el.customCalendarBox.classList.contains('hidden')) {
+      function toggleCustomCalendar(forceState) {
+        const willShow = typeof forceState === 'boolean'
+          ? forceState
+          : el.customCalendarBox.classList.contains('hidden');
+        el.customCalendarBox.classList.toggle('hidden', !willShow);
+        el.calendarChevron.classList.toggle('rotate-180', willShow);
+        if (willShow) {
           renderCustomCalendar();
         }
-        updateLivePnlPreview();
       }
 
       function applyTopupModeUI() {
-        const isMode1 = state.topupInputMode === 'TOPUP_ONLY';
-        if (isMode1) {
+        if (state.topupInputMode === 'TOPUP_ONLY') {
           el.btnModeTopupOnly.className = 'w-full p-2.5 rounded-xl text-left border border-[#22C55E] bg-[#22C55E]/10 transition';
           el.btnModeTopupOnly.querySelector('span').className = 'text-xs font-semibold text-[#22C55E]';
           el.btnModeMarketClose.className = 'w-full p-2.5 rounded-xl text-left border border-[#2F3532] bg-[#181B19] hover:border-[#3E4642] transition';
@@ -2596,23 +2782,24 @@ function doPost(e) {
           el.btnModeMarketClose.querySelector('span').className = 'text-xs font-semibold text-[#22C55E]';
           el.btnModeTopupOnly.className = 'w-full p-2.5 rounded-xl text-left border border-[#2F3532] bg-[#181B19] hover:border-[#3E4642] transition';
           el.btnModeTopupOnly.querySelector('span').className = 'text-xs font-semibold text-[#D1D5DB]';
-          el.cashflowModeHint.innerHTML = '<strong class="text-[#22C55E]">Mode 2 Aktif:</strong> Ketik <strong class="text-[#D1D5DB]">Saldo Penutupan Aktual</strong> dari broker di atas, lalu isi nominal Top-Up/Tarik di bawah—angka Equity tidak akan tertimpa otomatis.';
+          el.cashflowModeHint.innerHTML = '<strong class="text-[#22C55E]">Mode 2 Aktif:</strong> Ketik saldo penutupan akhir dari broker Anda pada kolom Total Equity di atas; sistem otomatis menghitung P&amp;L murni tanpa tercampur nominal Top-Up.';
         }
       }
 
       function syncEquityWithCashflow() {
-        const rawFlow = parseFloat(el.inputCashflowAmount.value);
-        if (state.topupInputMode !== 'TOPUP_ONLY' || isNaN(rawFlow) || rawFlow <= 0) return;
+        const rawFlowInput = parseFloat(el.inputCashflowAmount.value);
+        if (state.topupInputMode !== 'TOPUP_ONLY' || isNaN(rawFlowInput) || rawFlowInput <= 0) return;
 
         const targetDate = el.inputDate.value;
         const originalDate = el.editingOriginalDate.value;
         const prevEntry = getPreviousEntryBeforeDate(targetDate, originalDate);
-        const signedFlow = state.cashflowDirection === 'DEPOSIT' ? rawFlow : -rawFlow;
+        const rawFlowUSD = fromInputAmountToUSD(rawFlowInput);
+        const signedFlowUSD = state.cashflowDirection === 'DEPOSIT' ? rawFlowUSD : -rawFlowUSD;
 
         if (prevEntry) {
-          el.inputEquity.value = Math.max(0, prevEntry.equity + signedFlow);
+          el.inputEquity.value = fromUSDToInputAmount(Math.max(0, prevEntry.equity + signedFlowUSD));
         } else {
-          el.inputEquity.value = Math.max(0, signedFlow);
+          el.inputEquity.value = fromUSDToInputAmount(Math.max(0, signedFlowUSD));
         }
       }
 
@@ -2627,12 +2814,14 @@ function doPost(e) {
           el.prevEquityHint.textContent = 'Modal Awal Pertama';
         }
 
-        const eqVal = parseFloat(el.inputEquity.value);
-        const rawFlow = parseFloat(el.inputCashflowAmount.value) || 0;
-        const signedFlow = state.cashflowDirection === 'DEPOSIT' ? rawFlow : -rawFlow;
+        const eqValInput = parseFloat(el.inputEquity.value);
+        const rawFlowInput = parseFloat(el.inputCashflowAmount.value) || 0;
+        const eqValUSD = fromInputAmountToUSD(eqValInput);
+        const rawFlowUSD = fromInputAmountToUSD(rawFlowInput);
+        const signedFlowUSD = state.cashflowDirection === 'DEPOSIT' ? rawFlowUSD : -rawFlowUSD;
 
-        if (isNaN(eqVal)) {
-          el.livePnlPreview.textContent = '0 (0.00%)';
+        if (isNaN(eqValUSD)) {
+          el.livePnlPreview.textContent = `${formatNumber(0, true)} (0.00%)`;
           el.livePnlPreview.className = 'text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]';
           return;
         }
@@ -2643,12 +2832,12 @@ function doPost(e) {
           return;
         }
 
-        const pnlNominal = eqVal - prevEntry.equity - signedFlow;
-        const base = prevEntry.equity + signedFlow;
-        const pnlPct = base > 0 ? (pnlNominal / base) * 100 : 0;
-        const color = pnlNominal > 0.0001 ? 'text-[#22C55E]' : pnlNominal < -0.0001 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
+        const pnlNominalUSD = eqValUSD - prevEntry.equity - signedFlowUSD;
+        const baseUSD = prevEntry.equity + signedFlowUSD;
+        const pnlPct = baseUSD > 0 ? (pnlNominalUSD / baseUSD) * 100 : 0;
+        const color = pnlNominalUSD > 0.0001 ? 'text-[#22C55E]' : pnlNominalUSD < -0.0001 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
 
-        el.livePnlPreview.textContent = `${formatNumber(pnlNominal, true)} ${formatSignedPercent(pnlPct)}`;
+        el.livePnlPreview.textContent = `${formatNumber(pnlNominalUSD, true)} ${formatSignedPercent(pnlPct)}`;
         el.livePnlPreview.className = `text-sm font-semibold ${color} [font-variant-numeric:tabular-nums]`;
       }
 
@@ -2665,19 +2854,17 @@ function doPost(e) {
         updateLivePnlPreview();
       }
 
-      function openEntryModal(editDate = null, expandCashflow = false) {
+      function openEntryModal(editDate = '', autoExpandCashflow = false) {
         el.inlineDeleteConfirm.classList.add('hidden');
-        el.customCalendarBox.classList.add('hidden');
-        el.calendarChevron.classList.remove('rotate-180');
+        toggleCustomCalendar(false);
 
         if (editDate) {
           const existing = state.entries.find((e) => e.date === editDate);
           if (!existing) return;
-
-          el.entryModalTitle.textContent = 'Edit Data Harian';
+          el.entryModalTitle.textContent = 'Edit Data Equity';
           el.editingOriginalDate.value = existing.date;
           setSelectedCalendarDate(existing.date, true);
-          el.inputEquity.value = existing.equity;
+          el.inputEquity.value = fromUSDToInputAmount(existing.equity);
           el.inputNote.value = existing.note || '';
           el.btnDeleteEntry.classList.remove('hidden');
 
@@ -2687,7 +2874,7 @@ function doPost(e) {
             state.topupInputMode = 'MARKET_CLOSE';
             applyTopupModeUI();
             setCashflowDirectionUI(existing.netFlow > 0 ? 'DEPOSIT' : 'WITHDRAW');
-            el.inputCashflowAmount.value = Math.abs(existing.netFlow);
+            el.inputCashflowAmount.value = fromUSDToInputAmount(Math.abs(existing.netFlow));
           } else {
             el.cashflowInputContainer.classList.add('hidden');
             el.cashflowChevron.classList.remove('rotate-180');
@@ -2699,36 +2886,44 @@ function doPost(e) {
         } else {
           el.entryModalTitle.textContent = 'Update Equity Harian';
           el.editingOriginalDate.value = '';
+          const latest = state.entries.length > 0 ? state.entries[state.entries.length - 1] : null;
+          const nextDate = latest ? getNextUSTradingDay(latest.date) : formatISODate(new Date());
+          setSelectedCalendarDate(nextDate, true);
+          el.inputEquity.value = latest ? fromUSDToInputAmount(latest.equity) : '';
+          el.inputNote.value = '';
           el.btnDeleteEntry.classList.add('hidden');
 
-          const latest = state.entries.length > 0 ? state.entries[state.entries.length - 1] : null;
-          const suggestedDate = latest ? getNextUSTradingDay(latest.date) : formatISODate(new Date());
-          setSelectedCalendarDate(suggestedDate, true);
-          el.inputEquity.value = latest ? latest.equity : '';
-          el.inputNote.value = '';
-          el.inputCashflowAmount.value = '';
-          state.topupInputMode = 'TOPUP_ONLY';
-          applyTopupModeUI();
-          setCashflowDirectionUI('DEPOSIT');
-
-          if (expandCashflow) {
+          if (autoExpandCashflow) {
             el.cashflowInputContainer.classList.remove('hidden');
             el.cashflowChevron.classList.add('rotate-180');
           } else {
             el.cashflowInputContainer.classList.add('hidden');
             el.cashflowChevron.classList.remove('rotate-180');
           }
+          state.topupInputMode = 'TOPUP_ONLY';
+          applyTopupModeUI();
+          setCashflowDirectionUI('DEPOSIT');
+          el.inputCashflowAmount.value = '';
         }
 
+        updateDateBadgeAndWarning();
         updateLivePnlPreview();
         el.entryModalBackdrop.classList.remove('hidden');
       }
 
       function closeEntryModal() {
+        toggleCustomCalendar(false);
         el.entryModalBackdrop.classList.add('hidden');
       }
 
-      // ==================== QUICK TOP-UP / WITHDRAW MODAL (SEPARATE FROM P&L) ====================
+      // ==================== TOP-UP ONLY MODAL LOGIC ====================
+      function getTopupBaseEntry(targetDate) {
+        if (state.entries.length === 0) return null;
+        const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
+        const sameOrBefore = sorted.filter((e) => e.date <= targetDate);
+        return sameOrBefore.length > 0 ? sameOrBefore[sameOrBefore.length - 1] : sorted[sorted.length - 1];
+      }
+
       function setQuickTopupDirectionUI(dir) {
         state.quickTopupDirection = dir;
         if (dir === 'DEPOSIT') {
@@ -2742,22 +2937,16 @@ function doPost(e) {
       }
 
       function updateQuickTopupPreview() {
-        const targetDate = el.inputQuickTopupDate.value;
-        const existingSameDay = state.entries.find((e) => e.date === targetDate);
-        const prevEntry = getPreviousEntryBeforeDate(targetDate);
-        const currentSaldo = existingSameDay
-          ? existingSameDay.equity
-          : prevEntry
-          ? prevEntry.equity
-          : 0;
+        const targetDate = el.inputQuickTopupDate.value || formatISODate(new Date());
+        const baseEntry = getTopupBaseEntry(targetDate);
+        const baseEqUSD = baseEntry ? baseEntry.equity : 0;
+        el.quickTopupBaseHint.textContent = `Saldo saat ini: ${formatNumber(baseEqUSD)}`;
 
-        el.quickTopupBaseHint.textContent = `Saldo acuan: ${formatNumber(currentSaldo)}`;
-
-        const amt = parseFloat(el.inputQuickTopupAmount.value) || 0;
-        const signed = state.quickTopupDirection === 'DEPOSIT' ? amt : -amt;
-        const newSaldo = Math.max(0, currentSaldo + signed);
-        el.quickTopupResultPreview.textContent = formatNumber(newSaldo);
-        el.quickTopupResultPreview.className = `text-sm font-semibold ${signed >= 0 ? 'text-[#22C55E]' : 'text-[#E05252]'} [font-variant-numeric:tabular-nums]`;
+        const rawAmtInput = parseFloat(el.inputQuickTopupAmount.value) || 0;
+        const rawAmtUSD = fromInputAmountToUSD(rawAmtInput);
+        const signedAmtUSD = state.quickTopupDirection === 'DEPOSIT' ? rawAmtUSD : -rawAmtUSD;
+        const nextEqUSD = Math.max(0, baseEqUSD + signedAmtUSD);
+        el.quickTopupResultPreview.textContent = formatNumber(nextEqUSD);
       }
 
       function openTopupOnlyModal() {
@@ -2767,610 +2956,672 @@ function doPost(e) {
         setQuickTopupDirectionUI('DEPOSIT');
         updateQuickTopupPreview();
         el.topupOnlyModalBackdrop.classList.remove('hidden');
+        setTimeout(() => el.inputQuickTopupAmount.focus(), 80);
       }
 
       function closeTopupOnlyModal() {
         el.topupOnlyModalBackdrop.classList.add('hidden');
       }
 
+      function openSettingsModal() {
+        el.inlineClearAllConfirm.classList.add('hidden');
+        el.inputAppsScriptUrl.value = getAppsScriptUrl();
+        el.inputSettingsUsdIdrRate.value = state.usdIdrRate;
+        updateCloudStatusUI('idle');
+        el.settingsModalBackdrop.classList.remove('hidden');
+      }
+
+      function closeSettingsModal() {
+        el.settingsModalBackdrop.classList.add('hidden');
+      }
+
       // ==================== EVENT LISTENERS ====================
-      function switchTab(tabName) {
-        state.activeTab = tabName;
-        if (tabName === 'PORTFOLIO') {
-          el.tabPortfolio.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors';
-          el.tabPortfolio.setAttribute('aria-selected', 'true');
-          el.tabTrade.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] border-b-2 border-transparent hover:text-[#D1D5DB] transition-colors';
-          el.tabTrade.setAttribute('aria-selected', 'false');
-          el.viewPortfolio.classList.remove('hidden');
-          el.viewTrade.classList.add('hidden');
+      // Primary Tab Switching
+      el.tabPortfolio.addEventListener('click', () => {
+        state.activeTab = 'PORTFOLIO';
+        el.tabPortfolio.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors';
+        el.tabTrade.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] hover:text-[#D1D5DB] border-b-2 border-transparent transition-colors';
+        el.viewPortfolio.classList.remove('hidden');
+        el.viewTrade.classList.add('hidden');
+      });
+
+      el.tabTrade.addEventListener('click', () => {
+        state.activeTab = 'TRADE';
+        el.tabTrade.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors';
+        el.tabPortfolio.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] hover:text-[#D1D5DB] border-b-2 border-transparent transition-colors';
+        el.viewTrade.classList.remove('hidden');
+        el.viewPortfolio.classList.add('hidden');
+        renderTradeAnalytics();
+      });
+
+      // Quick USD / IDR Currency Switcher in Header
+      el.btnQuickCurrUSD.addEventListener('click', () => {
+        if (state.currency !== 'USD') {
+          setDisplayCurrency('USD');
+          showToast('Mata uang tampilan: USD ($)');
+        }
+      });
+
+      el.btnQuickCurrIDR.addEventListener('click', () => {
+        if (state.currency !== 'IDR') {
+          setDisplayCurrency('IDR');
+          showToast(`Mata uang tampilan: IDR (Kurs Rp ${Math.round(state.usdIdrRate).toLocaleString('en-US')})`);
+        }
+      });
+
+      // Quick Inline USD/IDR Exchange Rate Editor
+      el.btnQuickEditRate.addEventListener('click', () => {
+        const isHidden = el.quickRateEditorBar.classList.contains('hidden');
+        el.quickRateEditorBar.classList.toggle('hidden', !isHidden);
+        if (isHidden) {
+          el.inputQuickUsdIdrRate.value = state.usdIdrRate;
+          setTimeout(() => el.inputQuickUsdIdrRate.focus(), 60);
+        }
+      });
+
+      el.btnSaveQuickRate.addEventListener('click', () => {
+        if (setUsdIdrRate(el.inputQuickUsdIdrRate.value, true)) {
+          el.quickRateEditorBar.classList.add('hidden');
+          renderAll();
+          showToast(`Kurs diperbarui: $1 = Rp ${Math.round(state.usdIdrRate).toLocaleString('en-US')}`);
         } else {
-          el.tabTrade.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors';
-          el.tabTrade.setAttribute('aria-selected', 'true');
-          el.tabPortfolio.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] border-b-2 border-transparent hover:text-[#D1D5DB] transition-colors';
-          el.tabPortfolio.setAttribute('aria-selected', 'false');
-          el.viewTrade.classList.remove('hidden');
-          el.viewPortfolio.classList.add('hidden');
-          renderTradeAnalytics();
+          showToast('Masukkan angka kurs yang valid');
         }
+      });
+
+      el.inputQuickUsdIdrRate.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          el.btnSaveQuickRate.click();
+        }
+      });
+
+      // Delegated Privacy Eye Button Clicks (beside nominal balances)
+      document.addEventListener('click', (e) => {
+        const trigger = e.target.closest('[data-privacy-trigger="true"]');
+        if (trigger) {
+          e.stopPropagation();
+          togglePrivacyMode();
+        }
+      });
+
+      // Quick Theme Toggle in Header
+      el.btnToggleThemeHeader.addEventListener('click', () => {
+        setThemeMode(state.theme === 'DARK' ? 'LIGHT' : 'DARK');
+      });
+
+      // Info Tooltip Toggle
+      el.btnToggleInfo.addEventListener('click', () => {
+        el.infoTooltipCard.classList.toggle('hidden');
+      });
+      el.btnCloseInfo.addEventListener('click', () => {
+        el.infoTooltipCard.classList.add('hidden');
+      });
+
+      // Daily / Monthly Pill Buttons
+      el.btnModeDaily.addEventListener('click', () => {
+        state.viewMode = 'DAILY';
+        state.visibleRowLimit = 35;
+        renderAll();
+      });
+      el.btnModeMonthly.addEventListener('click', () => {
+        state.viewMode = 'MONTHLY';
+        renderAll();
+      });
+
+      // Load More Pagination Button
+      el.btnLoadMoreRows.addEventListener('click', () => {
+        state.visibleRowLimit += 50;
+        renderPerformanceTable();
+      });
+
+      // Period Dropdown (Portfolio Tab)
+      el.btnPeriodDropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+        el.tradePeriodDropdownMenu.classList.add('hidden');
+        el.periodDropdownMenu.classList.toggle('hidden');
+      });
+
+      document.querySelectorAll('.period-option').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.periodFilter = btn.dataset.period;
+          state.visibleRowLimit = 35;
+          el.periodDropdownMenu.classList.add('hidden');
+          renderAll();
+        });
+      });
+
+      // Period Dropdown (Trade Tab)
+      el.btnTradePeriodDropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+        el.periodDropdownMenu.classList.add('hidden');
+        el.tradePeriodDropdownMenu.classList.toggle('hidden');
+      });
+
+      document.querySelectorAll('.trade-period-option').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.periodFilter = btn.dataset.period;
+          state.visibleRowLimit = 35;
+          el.tradePeriodDropdownMenu.classList.add('hidden');
+          renderAll();
+        });
+      });
+
+      // Quick Bibit-Style Period Tabs (1D | 1W | 1M | 3M | YTD | 1Y | All)
+      document.querySelectorAll('.chart-tab-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.periodFilter = btn.dataset.chartPeriod;
+          state.visibleRowLimit = 35;
+          renderAll();
+        });
+      });
+
+      // Custom Date Range Inputs Sync
+      function handleCustomRangeChange(startVal, endVal) {
+        if (startVal) state.customStartDate = startVal;
+        if (endVal) state.customEndDate = endVal;
+        renderAll();
       }
+      el.customStartPort.addEventListener('change', (e) => handleCustomRangeChange(e.target.value, null));
+      el.customEndPort.addEventListener('change', (e) => handleCustomRangeChange(null, e.target.value));
+      el.customStartTrade.addEventListener('change', (e) => handleCustomRangeChange(e.target.value, null));
+      el.customEndTrade.addEventListener('change', (e) => handleCustomRangeChange(null, e.target.value));
 
-      function initEvents() {
-        // Privacy / Balance Mask Toggle (on all eye buttons next to nominal amounts)
-        document.querySelectorAll('[data-privacy-trigger="true"]').forEach((btn) => {
-          btn.addEventListener('click', () => {
-            state.privacyHidden = !state.privacyHidden;
-            try {
-              localStorage.setItem(PRIVACY_MODE_KEY, String(state.privacyHidden));
-            } catch (e) {}
-            renderAll();
-            showToast(state.privacyHidden ? 'Nominal saldo disembunyikan' : 'Nominal saldo ditampilkan');
-          });
-        });
-
-        // Navigation Tabs
-        el.tabPortfolio.addEventListener('click', () => switchTab('PORTFOLIO'));
-        el.tabTrade.addEventListener('click', () => switchTab('TRADE'));
-
-        // Info Tooltip Toggle
-        el.btnToggleInfo.addEventListener('click', () => {
-          el.infoTooltipCard.classList.toggle('hidden');
-        });
-        el.btnCloseInfo.addEventListener('click', () => {
-          el.infoTooltipCard.classList.add('hidden');
-        });
-
-        // Daily / Monthly Filter Pills
-        el.btnModeDaily.addEventListener('click', () => {
-          state.viewMode = 'DAILY';
-          state.visibleRowLimit = 60;
-          renderAll();
-        });
-        el.btnModeMonthly.addEventListener('click', () => {
-          state.viewMode = 'MONTHLY';
-          renderAll();
-        });
-
-        // Period Dropdown (Portfolio Tab)
-        el.btnPeriodDropdown.addEventListener('click', (e) => {
-          e.stopPropagation();
-          el.tradePeriodDropdownMenu.classList.add('hidden');
-          el.periodDropdownMenu.classList.toggle('hidden');
-        });
-
-        // Period Dropdown (Trade Tab)
-        el.btnTradePeriodDropdown.addEventListener('click', (e) => {
-          e.stopPropagation();
-          el.periodDropdownMenu.classList.add('hidden');
-          el.tradePeriodDropdownMenu.classList.toggle('hidden');
-        });
-
-        function handlePeriodSelection(periodCode) {
-          state.periodFilter = periodCode;
-          state.visibleRowLimit = 60;
-          el.periodDropdownMenu.classList.add('hidden');
-          el.tradePeriodDropdownMenu.classList.add('hidden');
-          renderAll();
-        }
-
-        document.querySelectorAll('.period-option').forEach((btn) => {
-          btn.addEventListener('click', () => handlePeriodSelection(btn.dataset.period));
-        });
-
-        document.querySelectorAll('.trade-period-option').forEach((btn) => {
-          btn.addEventListener('click', () => handlePeriodSelection(btn.dataset.period));
-        });
-
-        // Quick Chart Period Tabs Bar (1D | 1W | 1M | 3M | YTD | 1Y | All)
-        el.quickChartPeriodTabs.addEventListener('click', (e) => {
-          const btn = e.target.closest('.chart-tab-btn');
-          if (!btn) return;
-          handlePeriodSelection(btn.dataset.chartPeriod);
-        });
-
-        // Custom Date Range Inputs Sync
-        function syncCustomDateRange(startVal, endVal) {
-          state.customStartDate = startVal;
-          state.customEndDate = endVal;
-          el.customStartPort.value = startVal;
-          el.customEndPort.value = endVal;
-          el.customStartTrade.value = startVal;
-          el.customEndTrade.value = endVal;
-          renderAll();
-        }
-
-        el.customStartPort.addEventListener('change', () => syncCustomDateRange(el.customStartPort.value, el.customEndPort.value));
-        el.customEndPort.addEventListener('change', () => syncCustomDateRange(el.customStartPort.value, el.customEndPort.value));
-        el.customStartTrade.addEventListener('change', () => syncCustomDateRange(el.customStartTrade.value, el.customEndTrade.value));
-        el.customEndTrade.addEventListener('change', () => syncCustomDateRange(el.customStartTrade.value, el.customEndTrade.value));
-
-        // Load More Pagination Button
-        el.btnLoadMoreRows.addEventListener('click', () => {
-          state.visibleRowLimit += 100;
-          renderPerformanceTable();
-        });
-
-        // Heatmap Month Navigation & Cell Click
-        el.btnHeatmapPrevMonth.addEventListener('click', () => {
+      // Monthly Heatmap Month Navigation & Cell Click
+      el.btnHeatmapPrevMonth.addEventListener('click', () => {
+        if (state.heatmapMonth === 0) {
+          state.heatmapMonth = 11;
+          state.heatmapYear -= 1;
+        } else {
           state.heatmapMonth -= 1;
-          if (state.heatmapMonth < 0) {
-            state.heatmapMonth = 11;
-            state.heatmapYear -= 1;
-          }
-          el.heatmapSelectedInfo.textContent = 'Ketuk tanggal untuk melihat P&L';
-          renderHeatmapCalendar();
-        });
-
-        el.btnHeatmapNextMonth.addEventListener('click', () => {
-          state.heatmapMonth += 1;
-          if (state.heatmapMonth > 11) {
-            state.heatmapMonth = 0;
-            state.heatmapYear += 1;
-          }
-          el.heatmapSelectedInfo.textContent = 'Ketuk tanggal untuk melihat P&L';
-          renderHeatmapCalendar();
-        });
-
-        el.pnlHeatmapGrid.addEventListener('click', (e) => {
-          const cell = e.target.closest('.heatmap-cell');
-          if (!cell) return;
-          const iso = cell.dataset.heatmapDate;
-          const allEnriched = computeAllEnrichedEntries();
-          const item = allEnriched.find((d) => d.date === iso);
-          if (!item) {
-            el.heatmapSelectedInfo.textContent = `${formatDisplayDate(iso)}: Belum ada data`;
-            el.heatmapSelectedInfo.className = 'text-[#8E9591] truncate';
-          } else {
-            const color = item.pnlNominal > 0.0001 ? 'text-[#22C55E]' : item.pnlNominal < -0.0001 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
-            el.heatmapSelectedInfo.textContent = `${formatDisplayDate(iso)}: ${maskIfPrivate(`${formatNumber(item.pnlNominal, true)} ${formatSignedPercent(item.pnlPercent)}`)}`;
-            el.heatmapSelectedInfo.className = `${color} font-medium truncate`;
-          }
-        });
-
-        document.addEventListener('click', () => {
-          el.periodDropdownMenu.classList.add('hidden');
-          el.tradePeriodDropdownMenu.classList.add('hidden');
-        });
-
-        // Edit row on click
-        el.performanceTableBody.addEventListener('click', (e) => {
-          const rowEl = e.target.closest('.daily-row');
-          if (!rowEl) return;
-          openEntryModal(rowEl.dataset.editDate);
-        });
-
-        // Remove Top-Up / Cashflow item directly from Trade Tab history
-        el.cashflowListContainer.addEventListener('click', (e) => {
-          const btn = e.target.closest('.btn-remove-topup');
-          if (!btn) return;
-          const targetDate = btn.dataset.removeTopupDate;
-          if (!targetDate) return;
-
-          // Two-tap inline confirmation on the button itself
-          if (btn.dataset.confirmed !== 'true') {
-            btn.dataset.confirmed = 'true';
-            btn.textContent = 'Yakin?';
-            btn.className = 'btn-remove-topup px-2.5 py-1 rounded-lg bg-[#E05252] text-[10px] font-semibold text-white active:scale-95 transition';
-            setTimeout(() => {
-              if (btn && btn.isConnected) {
-                btn.dataset.confirmed = 'false';
-                btn.textContent = 'Hapus';
-                btn.className = 'btn-remove-topup px-2 py-1 rounded-lg bg-[#E05252]/10 hover:bg-[#E05252]/20 border border-[#E05252]/30 text-[10px] font-medium text-[#E05252] active:scale-95 transition';
-              }
-            }, 3000);
-            return;
-          }
-
-          const idx = state.entries.findIndex((item) => item.date === targetDate);
-          if (idx === -1) return;
-
-          const entry = state.entries[idx];
-          const prevEntry = getPreviousEntryBeforeDate(targetDate);
-          const isPureTopupNote = entry.note === 'Top-Up Saldo' || entry.note === 'Tarik Saldo';
-
-          // If this row was created solely as a Top-Up entry (equity equals prevEquity + netFlow), remove the row or revert equity
-          if (prevEntry && Math.abs(entry.equity - (prevEntry.equity + entry.netFlow)) < 0.01 && isPureTopupNote) {
-            state.entries.splice(idx, 1);
-          } else {
-            // Otherwise keep the closing equity of that day and only reset netFlow to 0 (or subtract netFlow if pure topup)
-            const adjustedEquity = isPureTopupNote ? Math.max(0, entry.equity - entry.netFlow) : entry.equity;
-            state.entries[idx] = {
-              ...entry,
-              equity: adjustedEquity,
-              netFlow: 0,
-              note: isPureTopupNote ? '' : entry.note
-            };
-          }
-
-          saveState();
-          renderAll();
-          showToast('Data Top-Up berhasil dihapus');
-        });
-
-        // Open Add / Update Modal triggers
-        el.btnFloatingTopup.addEventListener('click', openTopupOnlyModal);
-        el.btnFloatingUpdate.addEventListener('click', () => openEntryModal(null, false));
-        el.btnQuickAddHeader.addEventListener('click', () => openEntryModal(null, false));
-        el.btnEmptyAddFirst.addEventListener('click', () => openEntryModal(null, false));
-        el.btnAddCashflowShortcut.addEventListener('click', openTopupOnlyModal);
-
-        // Quick Top-Up Only Modal Listeners
-        el.btnCloseTopupOnlyModal.addEventListener('click', closeTopupOnlyModal);
-        el.topupOnlyModalBackdrop.addEventListener('click', (e) => {
-          if (e.target === el.topupOnlyModalBackdrop) closeTopupOnlyModal();
-        });
-        el.btnQuickTopupSign.addEventListener('click', () => setQuickTopupDirectionUI('DEPOSIT'));
-        el.btnQuickWithdrawSign.addEventListener('click', () => setQuickTopupDirectionUI('WITHDRAW'));
-        el.inputQuickTopupDate.addEventListener('change', updateQuickTopupPreview);
-        el.inputQuickTopupAmount.addEventListener('input', updateQuickTopupPreview);
-
-        el.topupOnlyForm.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const targetDate = el.inputQuickTopupDate.value;
-          const rawAmt = parseFloat(el.inputQuickTopupAmount.value);
-          if (!targetDate || isNaN(rawAmt) || rawAmt <= 0) {
-            showToast('Masukkan nominal Top-Up yang valid');
-            return;
-          }
-
-          const signedFlow = state.quickTopupDirection === 'DEPOSIT' ? rawAmt : -rawAmt;
-          const existingIdx = state.entries.findIndex((item) => item.date === targetDate);
-
-          if (existingIdx !== -1) {
-            const existing = state.entries[existingIdx];
-            state.entries[existingIdx] = {
-              ...existing,
-              equity: Math.max(0, existing.equity + signedFlow),
-              netFlow: (Number(existing.netFlow) || 0) + signedFlow
-            };
-          } else {
-            const prevEntry = getPreviousEntryBeforeDate(targetDate);
-            const baseEq = prevEntry ? prevEntry.equity : 0;
-            state.entries.push({
-              date: targetDate,
-              equity: Math.max(0, baseEq + signedFlow),
-              netFlow: signedFlow,
-              note: signedFlow > 0 ? 'Top-Up Saldo' : 'Tarik Saldo'
-            });
-          }
-
-          saveState();
-          renderAll();
-          closeTopupOnlyModal();
-          showToast(signedFlow > 0 ? 'Top-Up saldo berhasil (P&L tetap 0)' : 'Penarikan saldo dicatat (P&L tetap 0)');
-        });
-
-        // Close Entry Modal
-        el.btnCloseEntryModal.addEventListener('click', closeEntryModal);
-        el.entryModalBackdrop.addEventListener('click', (e) => {
-          if (e.target === el.entryModalBackdrop) closeEntryModal();
-        });
-
-        // Custom Interactive Calendar Controls
-        el.btnOpenCustomCalendar.addEventListener('click', () => {
-          const isHidden = el.customCalendarBox.classList.contains('hidden');
-          if (isHidden) {
-            renderCustomCalendar();
-            el.customCalendarBox.classList.remove('hidden');
-            el.calendarChevron.classList.add('rotate-180');
-          } else {
-            el.customCalendarBox.classList.add('hidden');
-            el.calendarChevron.classList.remove('rotate-180');
-          }
-        });
-
-        el.btnCalPrevMonth.addEventListener('click', () => {
-          state.calendarViewMonth -= 1;
-          if (state.calendarViewMonth < 0) {
-            state.calendarViewMonth = 11;
-            state.calendarViewYear -= 1;
-          }
-          renderCustomCalendar();
-        });
-
-        el.btnCalNextMonth.addEventListener('click', () => {
-          state.calendarViewMonth += 1;
-          if (state.calendarViewMonth > 11) {
-            state.calendarViewMonth = 0;
-            state.calendarViewYear += 1;
-          }
-          renderCustomCalendar();
-        });
-
-        el.customCalendarDays.addEventListener('click', (e) => {
-          const dayBtn = e.target.closest('.cal-day-btn');
-          if (!dayBtn) return;
-          setSelectedCalendarDate(dayBtn.dataset.calDate, false);
-          el.customCalendarBox.classList.add('hidden');
-          el.calendarChevron.classList.remove('rotate-180');
-        });
-
-        // Date & Equity Live Calculation Listeners
-        el.btnSuggestNextTradingDay.addEventListener('click', () => {
-          const current = el.inputDate.value || formatISODate(new Date());
-          setSelectedCalendarDate(getNextUSTradingDay(current), true);
-        });
-        el.btnSuggestToday.addEventListener('click', () => {
-          setSelectedCalendarDate(formatISODate(new Date()), true);
-        });
-        el.inputEquity.addEventListener('input', updateLivePnlPreview);
-        el.inputCashflowAmount.addEventListener('input', () => {
-          syncEquityWithCashflow();
-          updateLivePnlPreview();
-        });
-
-        // Cashflow Section Toggle & Mode Selector
-        el.btnToggleCashflowSection.addEventListener('click', () => {
-          el.cashflowInputContainer.classList.toggle('hidden');
-          el.cashflowChevron.classList.toggle('rotate-180');
-        });
-        el.btnModeTopupOnly.addEventListener('click', () => {
-          state.topupInputMode = 'TOPUP_ONLY';
-          applyTopupModeUI();
-          syncEquityWithCashflow();
-          updateLivePnlPreview();
-        });
-        el.btnModeMarketClose.addEventListener('click', () => {
-          state.topupInputMode = 'MARKET_CLOSE';
-          applyTopupModeUI();
-          updateLivePnlPreview();
-        });
-        el.btnFlowDeposit.addEventListener('click', () => setCashflowDirectionUI('DEPOSIT'));
-        el.btnFlowWithdraw.addEventListener('click', () => setCashflowDirectionUI('WITHDRAW'));
-
-        // Save Entry Form Submit
-        el.entryForm.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const dateVal = el.inputDate.value;
-          const originalDate = el.editingOriginalDate.value;
-          const equityVal = parseFloat(el.inputEquity.value);
-          const noteVal = (el.inputNote.value || '').trim().slice(0, 60);
-          const rawFlow = parseFloat(el.inputCashflowAmount.value) || 0;
-          const netFlowVal = rawFlow > 0
-            ? (state.cashflowDirection === 'DEPOSIT' ? rawFlow : -rawFlow)
-            : 0;
-
-          if (!dateVal || isNaN(equityVal) || equityVal < 0) {
-            showToast('Masukkan tanggal & nilai equity yang valid');
-            return;
-          }
-
-          if (originalDate && originalDate !== dateVal) {
-            state.entries = state.entries.filter((item) => item.date !== originalDate);
-          }
-
-          const existingIndex = state.entries.findIndex((item) => item.date === dateVal);
-          const entryObj = { date: dateVal, equity: equityVal, netFlow: netFlowVal, note: noteVal };
-
-          if (existingIndex !== -1) {
-            state.entries[existingIndex] = entryObj;
-          } else {
-            state.entries.push(entryObj);
-          }
-
-          const savedDt = parseISODate(dateVal);
-          state.heatmapYear = savedDt.getFullYear();
-          state.heatmapMonth = savedDt.getMonth();
-
-          saveState();
-          renderAll();
-          closeEntryModal();
-          showToast(originalDate ? 'Data tanggal diperbarui' : 'Equity harian tersimpan');
-        });
-
-        // Delete Entry Flow
-        el.btnDeleteEntry.addEventListener('click', () => {
-          el.inlineDeleteConfirm.classList.remove('hidden');
-        });
-        el.btnCancelDelete.addEventListener('click', () => {
-          el.inlineDeleteConfirm.classList.add('hidden');
-        });
-        el.btnConfirmDelete.addEventListener('click', () => {
-          const targetDate = el.editingOriginalDate.value;
-          if (!targetDate) return;
-          state.entries = state.entries.filter((item) => item.date !== targetDate);
-          saveState();
-          renderAll();
-          closeEntryModal();
-          showToast('Data tanggal dihapus');
-        });
-
-        // Theme Switch (Day / Night Mode)
-        el.btnToggleThemeHeader.addEventListener('click', () => {
-          const nextTheme = state.theme === 'DARK' ? 'LIGHT' : 'DARK';
-          setThemeMode(nextTheme);
-          showToast(nextTheme === 'LIGHT' ? 'Mode Siang aktif' : 'Mode Malam aktif');
-        });
-        el.btnThemeDark.addEventListener('click', () => {
-          setThemeMode('DARK');
-          showToast('Mode Malam aktif');
-        });
-        el.btnThemeLight.addEventListener('click', () => {
-          setThemeMode('LIGHT');
-          showToast('Mode Siang aktif');
-        });
-
-        // Refresh App Button (Sync with Google Sheets if connected, or reload local data)
-        el.btnRefreshApp.addEventListener('click', async () => {
-          el.refreshIconSvg.classList.add('rotate-180');
-          setTimeout(() => el.refreshIconSvg.classList.remove('rotate-180'), 500);
-
-          if (getAppsScriptUrl()) {
-            await loadFromGoogleSheets(false);
-          } else {
-            loadState();
-            renderAll();
-            showToast('Tampilan & data lokal diperbarui');
-          }
-        });
-
-        // Settings Modal
-        function openSettings() {
-          el.inlineClearAllConfirm.classList.add('hidden');
-          el.inputAppsScriptUrl.value = getAppsScriptUrl();
-          updateCloudStatusUI(getAppsScriptUrl() ? 'synced' : 'local');
-          el.settingsModalBackdrop.classList.remove('hidden');
         }
-        el.btnOpenSettingsRight.addEventListener('click', openSettings);
-        el.btnSyncStatusHeader.addEventListener('click', openSettings);
-        el.btnCloseSettingsModal.addEventListener('click', () => {
-          el.settingsModalBackdrop.classList.add('hidden');
-        });
-        el.settingsModalBackdrop.addEventListener('click', (e) => {
-          if (e.target === el.settingsModalBackdrop) {
-            el.settingsModalBackdrop.classList.add('hidden');
-          }
-        });
+        el.heatmapSelectedInfo.textContent = 'Ketuk tanggal untuk melihat P&L';
+        renderHeatmapCalendar();
+      });
 
-        // Google Sheets Sync Controls
-        el.btnSaveSyncUrl.addEventListener('click', () => {
-          const urlVal = el.inputAppsScriptUrl.value.trim();
-          setAppsScriptUrl(urlVal);
-          if (urlVal) {
-            loadFromGoogleSheets(false);
-          } else {
-            showToast('URL dihapus, menggunakan penyimpanan lokal HP');
-          }
-        });
+      el.btnHeatmapNextMonth.addEventListener('click', () => {
+        if (state.heatmapMonth === 11) {
+          state.heatmapMonth = 0;
+          state.heatmapYear += 1;
+        } else {
+          state.heatmapMonth += 1;
+        }
+        el.heatmapSelectedInfo.textContent = 'Ketuk tanggal untuk melihat P&L';
+        renderHeatmapCalendar();
+      });
 
-        el.btnPushToCloud.addEventListener('click', () => {
-          const urlVal = el.inputAppsScriptUrl.value.trim();
-          if (urlVal) setAppsScriptUrl(urlVal);
-          if (!getAppsScriptUrl()) {
-            showToast('Tempel Web App URL Google Sheets dulu');
-            return;
-          }
-          syncToGoogleSheets(false);
-        });
+      el.pnlHeatmapGrid.addEventListener('click', (e) => {
+        const cell = e.target.closest('.heatmap-cell');
+        if (!cell) return;
+        const iso = cell.dataset.heatmapDate;
+        const allEnriched = computeAllEnrichedEntries();
+        const found = allEnriched.find((item) => item.date === iso);
+        if (!found) {
+          el.heatmapSelectedInfo.textContent = `${formatDisplayDate(iso)}: Tidak ada data`;
+          return;
+        }
+        const signColor = found.pnlNominal > 0.0001
+          ? 'text-[#22C55E]'
+          : found.pnlNominal < -0.0001
+          ? 'text-[#E05252]'
+          : 'text-[#D1D5DB]';
+        el.heatmapSelectedInfo.innerHTML = `<span class="text-[#F3F4F6] font-medium">${formatDisplayDate(iso)}</span>: <span class="${signColor} font-semibold">${maskIfPrivate(`${formatNumber(found.pnlNominal, true)} ${formatSignedPercent(found.pnlPercent)}`)}</span>`;
+      });
 
-        el.btnToggleScriptGuide.addEventListener('click', () => {
-          el.scriptGuideContainer.classList.toggle('hidden');
-          el.scriptGuideChevron.classList.toggle('rotate-180');
-        });
+      // Delegated Remove Top-Up Button in Cashflow History List
+      el.cashflowListContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-remove-topup');
+        if (!btn) return;
+        const targetDate = btn.dataset.removeTopupDate;
+        if (!targetDate) return;
 
-        el.btnCopyAppsScript.addEventListener('click', () => {
-          const textArea = document.createElement('textarea');
-          textArea.value = el.appsScriptCodeBlock.textContent;
-          document.body.appendChild(textArea);
-          textArea.select();
-          try {
-            document.execCommand('copy');
-            showToast('Kode Apps Script berhasil disalin');
-          } catch (err) {
-            showToast('Gagal menyalin otomatis, salin manual dari kotak');
-          }
-          document.body.removeChild(textArea);
-        });
-
-        // Currency Switch
-        el.btnCurrIDR.addEventListener('click', () => {
-          state.currency = 'IDR';
-          saveState();
-          renderAll();
-          showToast('Format angka: IDR / Tanpa Simbol');
-        });
-        el.btnCurrUSD.addEventListener('click', () => {
-          state.currency = 'USD';
-          saveState();
-          renderAll();
-          showToast('Format mata uang: USD ($)');
-        });
-
-        // Export CSV
-        el.btnExportCsv.addEventListener('click', () => {
-          const enriched = computeAllEnrichedEntries();
-          const header = 'Date,Equity,Net_Cashflow,Daily_PnL_Nominal,Daily_PnL_Percent,Note\n';
-          const rows = enriched.map((d) =>
-            `${d.date},${d.equity},${d.netFlow},${d.pnlNominal.toFixed(2)},${d.pnlPercent.toFixed(4)}%,"${(d.note || '').replace(/"/g, '""')}"`
-          ).join('\n');
-          const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `etf-pnl-performance-${formatISODate(new Date())}.csv`;
-          a.click();
-          URL.revokeObjectURL(url);
-          showToast('File CSV berhasil diunduh');
-        });
-
-        // Export JSON Backup
-        el.btnExportJson.addEventListener('click', () => {
-          const payload = JSON.stringify({
-            exportedAt: new Date().toISOString(),
-            currency: state.currency,
-            entries: state.entries
-          }, null, 2);
-          const blob = new Blob([payload], { type: 'application/json' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `etf-pnl-backup-${formatISODate(new Date())}.json`;
-          a.click();
-          URL.revokeObjectURL(url);
-          showToast('Backup JSON diunduh');
-        });
-
-        // Import JSON Backup
-        el.inputImportJson.addEventListener('change', (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            try {
-              const parsed = JSON.parse(ev.target.result);
-              if (!Array.isArray(parsed.entries)) throw new Error('Invalid format');
-              state.entries = parsed.entries.filter((item) => item.date && typeof item.equity === 'number');
-              if (parsed.currency) state.currency = parsed.currency;
-              saveState();
-              renderAll();
-              el.settingsModalBackdrop.classList.add('hidden');
-              showToast(`Berhasil import ${state.entries.length} data`);
-            } catch (err) {
-              showToast('Format file JSON tidak valid');
+        if (btn.dataset.armed !== 'true') {
+          btn.dataset.armed = 'true';
+          btn.textContent = 'Yakin?';
+          btn.className = 'btn-remove-topup px-2.5 py-1 rounded-lg bg-[#E05252] text-[10px] font-semibold text-white transition';
+          setTimeout(() => {
+            if (btn.isConnected && btn.dataset.armed === 'true') {
+              btn.dataset.armed = 'false';
+              btn.textContent = 'Hapus';
+              btn.className = 'btn-remove-topup px-2 py-1 rounded-lg bg-[#E05252]/10 hover:bg-[#E05252]/20 border border-[#E05252]/30 text-[10px] font-medium text-[#E05252] active:scale-95 transition';
             }
-            el.inputImportJson.value = '';
-          };
-          reader.readAsText(file);
-        });
+          }, 3000);
+          return;
+        }
 
-        // Load Sample Data
-        el.btnLoadSampleData.addEventListener('click', () => {
-          state.entries = [...DEFAULT_SAMPLE_DATA];
-          saveState();
+        const idx = state.entries.findIndex((item) => item.date === targetDate);
+        if (idx === -1) return;
+
+        const removedFlow = Number(state.entries[idx].netFlow) || 0;
+        const prevEq = idx > 0 ? state.entries[idx - 1].equity : null;
+        const eqMatchesTopupOnly = prevEq !== null && Math.abs(state.entries[idx].equity - (prevEq + removedFlow)) < 0.01;
+
+        if (eqMatchesTopupOnly) {
+          state.entries.splice(idx, 1);
+        } else {
+          state.entries[idx].netFlow = 0;
+          if (prevEq !== null) {
+            state.entries[idx].equity = Math.max(0, state.entries[idx].equity - removedFlow);
+          }
+        }
+
+        saveState();
+        renderAll();
+        showToast(`Catatan Top-Up ${formatDisplayDate(targetDate)} dihapus`);
+      });
+
+      document.addEventListener('click', () => {
+        el.periodDropdownMenu.classList.add('hidden');
+        el.tradePeriodDropdownMenu.classList.add('hidden');
+      });
+
+      // Row Click to Edit Entry
+      el.performanceTableBody.addEventListener('click', (e) => {
+        const row = e.target.closest('.daily-row');
+        if (row && row.dataset.editDate) {
+          openEntryModal(row.dataset.editDate);
+        }
+      });
+
+      // Refresh & Cloud Sync Button
+      el.btnRefreshApp.addEventListener('click', async () => {
+        el.refreshIconSvg.classList.add('rotate-180');
+        setTimeout(() => el.refreshIconSvg.classList.remove('rotate-180'), 550);
+
+        if (getAppsScriptUrl()) {
+          await loadFromGoogleSheets(false);
+        } else {
           renderAll();
-          el.settingsModalBackdrop.classList.add('hidden');
-          showToast('Data contoh berhasil dimuat');
-        });
+          showToast('Tampilan diperbarui (Mode Lokal)');
+        }
+      });
 
-        // Clear All Data
-        el.btnClearAllData.addEventListener('click', () => {
-          el.inlineClearAllConfirm.classList.remove('hidden');
-        });
-        el.btnCancelClearAll.addEventListener('click', () => {
-          el.inlineClearAllConfirm.classList.add('hidden');
-        });
-        el.btnConfirmClearAll.addEventListener('click', () => {
-          state.entries = [];
-          saveState();
+      el.btnSyncStatusHeader.addEventListener('click', openSettingsModal);
+
+      // Open Entry Modal Triggers
+      el.btnQuickAddHeader.addEventListener('click', () => openEntryModal(''));
+      el.btnFloatingUpdate.addEventListener('click', () => openEntryModal(''));
+      el.btnEmptyAddFirst.addEventListener('click', () => openEntryModal(''));
+      el.btnFloatingTopup.addEventListener('click', openTopupOnlyModal);
+      el.btnAddCashflowShortcut.addEventListener('click', openTopupOnlyModal);
+
+      // Top-Up Only Modal Listeners
+      el.btnCloseTopupOnlyModal.addEventListener('click', closeTopupOnlyModal);
+      el.topupOnlyModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === el.topupOnlyModalBackdrop) closeTopupOnlyModal();
+      });
+      el.btnQuickTopupSign.addEventListener('click', () => setQuickTopupDirectionUI('DEPOSIT'));
+      el.btnQuickWithdrawSign.addEventListener('click', () => setQuickTopupDirectionUI('WITHDRAW'));
+      el.inputQuickTopupDate.addEventListener('change', updateQuickTopupPreview);
+      el.inputQuickTopupAmount.addEventListener('input', updateQuickTopupPreview);
+
+      el.topupOnlyForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const dateVal = el.inputQuickTopupDate.value;
+        const rawAmtInput = parseFloat(el.inputQuickTopupAmount.value);
+        if (!dateVal || isNaN(rawAmtInput) || rawAmtInput <= 0) {
+          showToast('Masukkan nominal Top-Up yang valid');
+          return;
+        }
+
+        const rawAmtUSD = fromInputAmountToUSD(rawAmtInput);
+        const signedAmtUSD = state.quickTopupDirection === 'DEPOSIT' ? rawAmtUSD : -rawAmtUSD;
+        const existingIdx = state.entries.findIndex((item) => item.date === dateVal);
+
+        if (existingIdx !== -1) {
+          state.entries[existingIdx].equity = Math.max(0, state.entries[existingIdx].equity + signedAmtUSD);
+          state.entries[existingIdx].netFlow = (Number(state.entries[existingIdx].netFlow) || 0) + signedAmtUSD;
+        } else {
+          const baseEntry = getTopupBaseEntry(dateVal);
+          const baseEq = baseEntry ? baseEntry.equity : 0;
+          state.entries.push({
+            date: dateVal,
+            equity: Math.max(0, baseEq + signedAmtUSD),
+            netFlow: signedAmtUSD,
+            note: ''
+          });
+        }
+
+        saveState();
+        renderAll();
+        closeTopupOnlyModal();
+        showToast(
+          state.quickTopupDirection === 'DEPOSIT'
+            ? `Top-Up ${formatNumber(rawAmtUSD)} ditambahkan (P&L tetap 0)`
+            : `Penarikan ${formatNumber(rawAmtUSD)} dicatat (P&L tetap 0)`
+        );
+      });
+
+      // Entry Modal Controls
+      el.btnCloseEntryModal.addEventListener('click', closeEntryModal);
+      el.entryModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === el.entryModalBackdrop) closeEntryModal();
+      });
+
+      // Custom Calendar Controls
+      el.btnOpenCustomCalendar.addEventListener('click', () => toggleCustomCalendar());
+
+      el.btnCalPrevMonth.addEventListener('click', () => {
+        if (state.calMonth === 0) {
+          state.calMonth = 11;
+          state.calYear -= 1;
+        } else {
+          state.calMonth -= 1;
+        }
+        renderCustomCalendar();
+      });
+
+      el.btnCalNextMonth.addEventListener('click', () => {
+        if (state.calMonth === 11) {
+          state.calMonth = 0;
+          state.calYear += 1;
+        } else {
+          state.calMonth += 1;
+        }
+        renderCustomCalendar();
+      });
+
+      el.customCalendarDays.addEventListener('click', (e) => {
+        const dayBtn = e.target.closest('.cal-day-btn');
+        if (!dayBtn || !dayBtn.dataset.calDate) return;
+        setSelectedCalendarDate(dayBtn.dataset.calDate, false);
+        toggleCustomCalendar(false);
+        syncEquityWithCashflow();
+        updateLivePnlPreview();
+      });
+
+      el.btnSuggestNextTradingDay.addEventListener('click', () => {
+        const current = el.inputDate.value || formatISODate(new Date());
+        setSelectedCalendarDate(getNextUSTradingDay(current), true);
+        syncEquityWithCashflow();
+        updateLivePnlPreview();
+      });
+
+      el.btnSuggestToday.addEventListener('click', () => {
+        setSelectedCalendarDate(formatISODate(new Date()), true);
+        syncEquityWithCashflow();
+        updateLivePnlPreview();
+      });
+
+      el.inputEquity.addEventListener('input', updateLivePnlPreview);
+      el.inputCashflowAmount.addEventListener('input', () => {
+        syncEquityWithCashflow();
+        updateLivePnlPreview();
+      });
+
+      el.btnModeTopupOnly.addEventListener('click', () => {
+        state.topupInputMode = 'TOPUP_ONLY';
+        applyTopupModeUI();
+        syncEquityWithCashflow();
+        updateLivePnlPreview();
+      });
+
+      el.btnModeMarketClose.addEventListener('click', () => {
+        state.topupInputMode = 'MARKET_CLOSE';
+        applyTopupModeUI();
+        updateLivePnlPreview();
+      });
+
+      el.btnToggleCashflowSection.addEventListener('click', () => {
+        const isHidden = el.cashflowInputContainer.classList.contains('hidden');
+        el.cashflowInputContainer.classList.toggle('hidden', !isHidden);
+        el.cashflowChevron.classList.toggle('rotate-180', isHidden);
+      });
+
+      el.btnFlowDeposit.addEventListener('click', () => setCashflowDirectionUI('DEPOSIT'));
+      el.btnFlowWithdraw.addEventListener('click', () => setCashflowDirectionUI('WITHDRAW'));
+
+      // Save Form Submission (Stores Base USD internally)
+      el.entryForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const dateVal = el.inputDate.value;
+        const equityValInput = parseFloat(el.inputEquity.value);
+        const originalDate = el.editingOriginalDate.value;
+
+        if (!dateVal || isNaN(equityValInput) || equityValInput < 0) {
+          showToast('Mohon masukkan tanggal dan nominal equity yang valid');
+          return;
+        }
+
+        const rawFlowInput = parseFloat(el.inputCashflowAmount.value) || 0;
+        const equityValUSD = fromInputAmountToUSD(equityValInput);
+        const rawFlowUSD = fromInputAmountToUSD(rawFlowInput);
+        const netFlowUSD = rawFlowUSD > 0 ? (state.cashflowDirection === 'DEPOSIT' ? rawFlowUSD : -rawFlowUSD) : 0;
+        const noteVal = (el.inputNote.value || '').trim().slice(0, 60);
+
+        if (originalDate && originalDate !== dateVal) {
+          state.entries = state.entries.filter((item) => item.date !== originalDate);
+        }
+
+        const existingIndex = state.entries.findIndex((item) => item.date === dateVal);
+        if (existingIndex !== -1) {
+          state.entries[existingIndex] = { date: dateVal, equity: equityValUSD, netFlow: netFlowUSD, note: noteVal };
+        } else {
+          state.entries.push({ date: dateVal, equity: equityValUSD, netFlow: netFlowUSD, note: noteVal });
+        }
+
+        saveState();
+        renderAll();
+        closeEntryModal();
+        showToast(`Data ${formatDisplayDate(dateVal)} tersimpan`);
+      });
+
+      // Delete Entry Flow
+      el.btnDeleteEntry.addEventListener('click', () => {
+        el.inlineDeleteConfirm.classList.remove('hidden');
+      });
+      el.btnCancelDelete.addEventListener('click', () => {
+        el.inlineDeleteConfirm.classList.add('hidden');
+      });
+      el.btnConfirmDelete.addEventListener('click', () => {
+        const target = el.editingOriginalDate.value || el.inputDate.value;
+        state.entries = state.entries.filter((item) => item.date !== target);
+        saveState();
+        renderAll();
+        closeEntryModal();
+        showToast(`Data ${formatDisplayDate(target)} dihapus`);
+      });
+
+      // Settings Modal Controls
+      el.btnOpenSettingsRight.addEventListener('click', openSettingsModal);
+      el.btnCloseSettingsModal.addEventListener('click', closeSettingsModal);
+      el.settingsModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === el.settingsModalBackdrop) closeSettingsModal();
+      });
+
+      // Google Sheets Sync Controls
+      el.btnSaveSyncUrl.addEventListener('click', async () => {
+        const url = el.inputAppsScriptUrl.value.trim();
+        setAppsScriptUrl(url);
+        if (!url) {
+          updateCloudStatusUI('idle');
+          showToast('URL Google Sheets dihapus (Mode Lokal)');
+          return;
+        }
+        await loadFromGoogleSheets(false);
+      });
+
+      el.btnPushToCloud.addEventListener('click', async () => {
+        const url = el.inputAppsScriptUrl.value.trim() || getAppsScriptUrl();
+        if (!url) {
+          showToast('Masukkan Web App URL Google Apps Script terlebih dahulu');
+          return;
+        }
+        setAppsScriptUrl(url);
+        await syncToGoogleSheets(false);
+      });
+
+      el.btnToggleScriptGuide.addEventListener('click', () => {
+        const isHidden = el.scriptGuideContainer.classList.contains('hidden');
+        el.scriptGuideContainer.classList.toggle('hidden', !isHidden);
+        el.scriptGuideChevron.classList.toggle('rotate-180', isHidden);
+      });
+
+      el.btnCopyAppsScript.addEventListener('click', () => {
+        const codeText = el.appsScriptCodeBlock.textContent || '';
+        const tempArea = document.createElement('textarea');
+        tempArea.value = codeText;
+        tempArea.style.position = 'fixed';
+        tempArea.style.opacity = '0';
+        document.body.appendChild(tempArea);
+        tempArea.select();
+        try {
+          document.execCommand('copy');
+          showToast('Kode Google Apps Script disalin');
+        } catch (err) {
+          showToast('Gagal menyalin kode');
+        }
+        document.body.removeChild(tempArea);
+      });
+
+      el.btnThemeDark.addEventListener('click', () => setThemeMode('DARK'));
+      el.btnThemeLight.addEventListener('click', () => setThemeMode('LIGHT'));
+
+      el.btnCurrIDR.addEventListener('click', () => {
+        setDisplayCurrency('IDR');
+        showToast('Mata uang diubah ke IDR (Rp)');
+      });
+
+      el.btnCurrUSD.addEventListener('click', () => {
+        setDisplayCurrency('USD');
+        showToast('Mata uang diubah ke USD ($)');
+      });
+
+      el.inputSettingsUsdIdrRate.addEventListener('change', (e) => {
+        if (setUsdIdrRate(e.target.value, true)) {
           renderAll();
-          el.inlineClearAllConfirm.classList.add('hidden');
-          el.settingsModalBackdrop.classList.add('hidden');
-          showToast('Semua data dikosongkan');
-        });
-      }
+          showToast(`Rate $1 USD = Rp ${Math.round(state.usdIdrRate).toLocaleString('en-US')}`);
+        } else {
+          e.target.value = state.usdIdrRate;
+          showToast('Masukkan angka rate yang valid');
+        }
+      });
 
-      // Bootstrap App
+      // Export CSV
+      el.btnExportCsv.addEventListener('click', () => {
+        const enriched = computeAllEnrichedEntries();
+        if (enriched.length === 0) {
+          showToast('Tidak ada data untuk diekspor');
+          return;
+        }
+        const headers = ['Date', 'Equity_USD', 'Equity_IDR', 'Net_Flow_USD', 'PnL_Nominal_USD', 'PnL_Percent', 'Note'];
+        const lines = [headers.join(',')];
+        enriched.forEach((r) => {
+          const safeNote = `"${(r.note || '').replace(/"/g, '""')}"`;
+          lines.push([
+            r.date,
+            r.equity.toFixed(2),
+            Math.round(r.equity * state.usdIdrRate),
+            r.netFlow.toFixed(2),
+            r.pnlNominal.toFixed(2),
+            r.pnlPercent.toFixed(4),
+            safeNote
+          ].join(','));
+        });
+        const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `etf-performance-usd-${formatISODate(new Date())}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('File CSV berhasil diunduh');
+      });
+
+      // Export JSON
+      el.btnExportJson.addEventListener('click', () => {
+        const payload = JSON.stringify({
+          exportedAt: new Date().toISOString(),
+          currency: state.currency,
+          usdIdrRate: state.usdIdrRate,
+          entries: state.entries
+        }, null, 2);
+        const blob = new Blob([payload], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `etf-backup-usd-${formatISODate(new Date())}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Backup JSON berhasil diunduh');
+      });
+
+      // Import JSON
+      el.inputImportJson.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          try {
+            const parsed = JSON.parse(evt.target.result);
+            if (!parsed || !Array.isArray(parsed.entries)) {
+              throw new Error('Format JSON tidak valid');
+            }
+            const validEntries = parsed.entries
+              .filter((item) => item && typeof item.date === 'string' && !isNaN(Number(item.equity)))
+              .map((item) => ({
+                date: normalizeDateToISO(item.date),
+                equity: Number(item.equity),
+                netFlow: Number(item.netFlow) || 0,
+                note: item.note ? String(item.note).slice(0, 60) : ''
+              }))
+              .filter((item) => item.date);
+            state.entries = validEntries;
+            if (parsed.usdIdrRate && Number(parsed.usdIdrRate) > 0) {
+              setUsdIdrRate(Number(parsed.usdIdrRate), true);
+            }
+            if (parsed.currency === 'USD' || parsed.currency === 'IDR') {
+              state.currency = parsed.currency;
+            }
+            saveState();
+            renderAll();
+            closeSettingsModal();
+            showToast(`Berhasil mengimpor ${validEntries.length} baris data`);
+          } catch (err) {
+            showToast('Gagal membaca file JSON backup');
+          }
+          el.inputImportJson.value = '';
+        };
+        reader.readAsText(file);
+      });
+
+      // Load Sample Data & Clear All Data
+      el.btnLoadSampleData.addEventListener('click', () => {
+        state.entries = [...DEFAULT_SAMPLE_DATA];
+        saveState();
+        renderAll();
+        closeSettingsModal();
+        showToast('Data contoh ETF (USD) dimuat');
+      });
+
+      el.btnClearAllData.addEventListener('click', () => {
+        el.inlineClearAllConfirm.classList.remove('hidden');
+      });
+      el.btnCancelClearAll.addEventListener('click', () => {
+        el.inlineClearAllConfirm.classList.add('hidden');
+      });
+      el.btnConfirmClearAll.addEventListener('click', () => {
+        state.entries = [];
+        saveState();
+        renderAll();
+        closeSettingsModal();
+        showToast('Semua data dikosongkan');
+      });
+
+      // ==================== INITIALIZATION ====================
       loadState();
       if (state.entries.length > 0) {
         const latestDt = parseISODate(state.entries[state.entries.length - 1].date);
         state.heatmapYear = latestDt.getFullYear();
         state.heatmapMonth = latestDt.getMonth();
       }
-      initEvents();
       renderAll();
-      updateCloudStatusUI(getAppsScriptUrl() ? 'synced' : 'local');
 
+      // Auto-sync from Google Sheets on launch if Web App URL is configured
       if (getAppsScriptUrl()) {
         loadFromGoogleSheets(true);
+      } else {
+        updateCloudStatusUI('idle');
       }
     })();
   </script>
