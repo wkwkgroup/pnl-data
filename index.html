@@ -748,6 +748,21 @@
           </button>
         </div>
 
+        <!-- Quick Undo Latest Top-Up Banner (Shown when a Top-Up exists) -->
+        <div id="latestTopupUndoCard" class="hidden p-3 rounded-2xl bg-[#111312] border border-[#E05252]/30 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <span class="text-[10px] font-medium text-[#8E9591] block">Top-Up Terakhir Tercatat</span>
+            <span id="latestTopupUndoSummary" class="text-xs font-semibold text-[#F3F4F6] truncate block [font-variant-numeric:tabular-nums]">24 Nov 26 • +$50.00</span>
+          </div>
+          <button
+            type="button"
+            id="btnUndoLatestTopup"
+            class="shrink-0 px-3 py-1.5 rounded-xl bg-[#E05252]/15 hover:bg-[#E05252]/25 border border-[#E05252]/40 text-[11px] font-semibold text-[#E05252] active:scale-95 transition"
+          >
+            Hapus &amp; Kurangi Saldo
+          </button>
+        </div>
+
         <form id="topupOnlyForm" class="space-y-4">
           <div class="grid grid-cols-2 gap-2">
             <button
@@ -1485,6 +1500,9 @@ function doPost(e) {
         // Top-up only modal
         topupOnlyModalBackdrop: document.getElementById('topupOnlyModalBackdrop'),
         btnCloseTopupOnlyModal: document.getElementById('btnCloseTopupOnlyModal'),
+        latestTopupUndoCard: document.getElementById('latestTopupUndoCard'),
+        latestTopupUndoSummary: document.getElementById('latestTopupUndoSummary'),
+        btnUndoLatestTopup: document.getElementById('btnUndoLatestTopup'),
         topupOnlyForm: document.getElementById('topupOnlyForm'),
         btnQuickTopupSign: document.getElementById('btnQuickTopupSign'),
         btnQuickWithdrawSign: document.getElementById('btnQuickWithdrawSign'),
@@ -2949,12 +2967,65 @@ function doPost(e) {
         el.quickTopupResultPreview.textContent = formatNumber(nextEqUSD);
       }
 
+      function removeTopupByDate(targetDate) {
+        const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
+        const idx = sorted.findIndex((item) => item.date === targetDate);
+        if (idx === -1) return false;
+
+        const targetItem = sorted[idx];
+        const removedFlow = Number(targetItem.netFlow) || 0;
+        if (removedFlow === 0) return false;
+
+        const prevEq = idx > 0 ? sorted[idx - 1].equity : null;
+        const isPureTopupRow =
+          (prevEq !== null && Math.abs(targetItem.equity - (prevEq + removedFlow)) < 0.05) ||
+          (prevEq === null && Math.abs(targetItem.equity - removedFlow) < 0.05);
+
+        if (isPureTopupRow) {
+          // Hapus baris tanggal tersebut sepenuhnya beserta tambahan saldonya
+          sorted.splice(idx, 1);
+          // Jika ada baris setelahnya yang ikut membawa saldo Top-Up ini, kurangi juga selisihnya
+          for (let j = idx; j < sorted.length; j++) {
+            sorted[j].equity = Math.max(0, sorted[j].equity - removedFlow);
+          }
+        } else {
+          // Tanggal tersebut juga memiliki pergerakan P&L bursa: nolkan netFlow dan kurangi saldo dari tanggal tersebut ke depan
+          sorted[idx].netFlow = 0;
+          for (let j = idx; j < sorted.length; j++) {
+            sorted[j].equity = Math.max(0, sorted[j].equity - removedFlow);
+          }
+        }
+
+        state.entries = sorted;
+        saveState();
+        renderAll();
+        return true;
+      }
+
+      function refreshLatestTopupUndoBanner() {
+        const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
+        const topupEntries = sorted.filter((item) => (Number(item.netFlow) || 0) !== 0);
+        if (topupEntries.length === 0) {
+          el.latestTopupUndoCard.classList.add('hidden');
+          el.btnUndoLatestTopup.dataset.targetDate = '';
+          return;
+        }
+        const latestTopup = topupEntries[topupEntries.length - 1];
+        el.latestTopupUndoCard.classList.remove('hidden');
+        el.latestTopupUndoSummary.textContent = `${formatDisplayDate(latestTopup.date)} • ${formatNumber(latestTopup.netFlow, true)}`;
+        el.btnUndoLatestTopup.dataset.targetDate = latestTopup.date;
+        el.btnUndoLatestTopup.dataset.armed = 'false';
+        el.btnUndoLatestTopup.textContent = 'Hapus & Kurangi Saldo';
+        el.btnUndoLatestTopup.className = 'shrink-0 px-3 py-1.5 rounded-xl bg-[#E05252]/15 hover:bg-[#E05252]/25 border border-[#E05252]/40 text-[11px] font-semibold text-[#E05252] active:scale-95 transition';
+      }
+
       function openTopupOnlyModal() {
         const latest = state.entries.length > 0 ? state.entries[state.entries.length - 1] : null;
         el.inputQuickTopupDate.value = latest ? latest.date : formatISODate(new Date());
         el.inputQuickTopupAmount.value = '';
         setQuickTopupDirectionUI('DEPOSIT');
         updateQuickTopupPreview();
+        refreshLatestTopupUndoBanner();
         el.topupOnlyModalBackdrop.classList.remove('hidden');
         setTimeout(() => el.inputQuickTopupAmount.focus(), 80);
       }
@@ -3189,25 +3260,9 @@ function doPost(e) {
           return;
         }
 
-        const idx = state.entries.findIndex((item) => item.date === targetDate);
-        if (idx === -1) return;
-
-        const removedFlow = Number(state.entries[idx].netFlow) || 0;
-        const prevEq = idx > 0 ? state.entries[idx - 1].equity : null;
-        const eqMatchesTopupOnly = prevEq !== null && Math.abs(state.entries[idx].equity - (prevEq + removedFlow)) < 0.01;
-
-        if (eqMatchesTopupOnly) {
-          state.entries.splice(idx, 1);
-        } else {
-          state.entries[idx].netFlow = 0;
-          if (prevEq !== null) {
-            state.entries[idx].equity = Math.max(0, state.entries[idx].equity - removedFlow);
-          }
+        if (removeTopupByDate(targetDate)) {
+          showToast(`Riwayat Top-Up ${formatDisplayDate(targetDate)} & saldonya dihapus`);
         }
-
-        saveState();
-        renderAll();
-        showToast(`Catatan Top-Up ${formatDisplayDate(targetDate)} dihapus`);
       });
 
       document.addEventListener('click', () => {
@@ -3249,6 +3304,29 @@ function doPost(e) {
       el.btnCloseTopupOnlyModal.addEventListener('click', closeTopupOnlyModal);
       el.topupOnlyModalBackdrop.addEventListener('click', (e) => {
         if (e.target === el.topupOnlyModalBackdrop) closeTopupOnlyModal();
+      });
+      el.btnUndoLatestTopup.addEventListener('click', () => {
+        const targetDate = el.btnUndoLatestTopup.dataset.targetDate;
+        if (!targetDate) return;
+
+        if (el.btnUndoLatestTopup.dataset.armed !== 'true') {
+          el.btnUndoLatestTopup.dataset.armed = 'true';
+          el.btnUndoLatestTopup.textContent = 'Ketuk Lagi (Yakin?)';
+          el.btnUndoLatestTopup.className = 'shrink-0 px-3 py-1.5 rounded-xl bg-[#E05252] text-[11px] font-semibold text-white transition';
+          setTimeout(() => {
+            if (el.btnUndoLatestTopup.dataset.armed === 'true') {
+              refreshLatestTopupUndoBanner();
+            }
+          }, 3000);
+          return;
+        }
+
+        if (removeTopupByDate(targetDate)) {
+          refreshLatestTopupUndoBanner();
+          updateQuickTopupPreview();
+          closeTopupOnlyModal();
+          showToast(`Riwayat Top-Up ${formatDisplayDate(targetDate)} & saldonya dihapus`);
+        }
       });
       el.btnQuickTopupSign.addEventListener('click', () => setQuickTopupDirectionUI('DEPOSIT'));
       el.btnQuickWithdrawSign.addEventListener('click', () => setQuickTopupDirectionUI('WITHDRAW'));
