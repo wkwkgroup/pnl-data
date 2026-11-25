@@ -1988,7 +1988,7 @@ function doPost(e) {
                   ${maskIfPrivate(formatNumber(row.endingEquity))}
                 </div>
                 <div class="col-span-5 text-right font-medium ${colorClass} [font-variant-numeric:tabular-nums]">
-                  ${maskIfPrivate(pnlText)}
+                  ${pnlText}
                 </div>
               </div>
             `;
@@ -2039,7 +2039,7 @@ function doPost(e) {
                 ${maskIfPrivate(formatNumber(row.equity))}
               </div>
               <div class="col-span-5 text-right font-medium ${colorClass} [font-variant-numeric:tabular-nums]">
-                ${maskIfPrivate(pnlText)}
+                ${pnlText}
               </div>
             </div>
           `;
@@ -2331,14 +2331,24 @@ function doPost(e) {
           el.cashflowListContainer.innerHTML = cashflowEvents.map((ev) => {
             const isPos = ev.netFlow > 0;
             return `
-              <div class="flex items-center justify-between py-1.5 border-b border-[#222624] last:border-0">
+              <div class="flex items-center justify-between gap-2 py-2 border-b border-[#222624] last:border-0">
                 <div>
                   <span class="text-[#F3F4F6] font-medium block">${isPos ? 'Top-Up / Beli ETF' : 'Penarikan Dana'}</span>
                   <span class="text-[11px] text-[#8E9591]">${formatDisplayDate(ev.date)}</span>
                 </div>
-                <span class="font-semibold ${isPos ? 'text-[#22C55E]' : 'text-[#E05252]'} [font-variant-numeric:tabular-nums]">
-                  ${maskIfPrivate(formatNumber(ev.netFlow, true))}
-                </span>
+                <div class="flex items-center gap-2">
+                  <span class="font-semibold ${isPos ? 'text-[#22C55E]' : 'text-[#E05252]'} [font-variant-numeric:tabular-nums]">
+                    ${maskIfPrivate(formatNumber(ev.netFlow, true))}
+                  </span>
+                  <button
+                    type="button"
+                    data-remove-topup-date="${ev.date}"
+                    title="Hapus catatan Top-Up ini"
+                    class="btn-remove-topup px-2 py-1 rounded-lg bg-[#E05252]/10 hover:bg-[#E05252]/20 border border-[#E05252]/30 text-[10px] font-medium text-[#E05252] active:scale-95 transition"
+                  >
+                    Hapus
+                  </button>
+                </div>
               </div>
             `;
           }).join('');
@@ -2926,6 +2936,54 @@ function doPost(e) {
           const rowEl = e.target.closest('.daily-row');
           if (!rowEl) return;
           openEntryModal(rowEl.dataset.editDate);
+        });
+
+        // Remove Top-Up / Cashflow item directly from Trade Tab history
+        el.cashflowListContainer.addEventListener('click', (e) => {
+          const btn = e.target.closest('.btn-remove-topup');
+          if (!btn) return;
+          const targetDate = btn.dataset.removeTopupDate;
+          if (!targetDate) return;
+
+          // Two-tap inline confirmation on the button itself
+          if (btn.dataset.confirmed !== 'true') {
+            btn.dataset.confirmed = 'true';
+            btn.textContent = 'Yakin?';
+            btn.className = 'btn-remove-topup px-2.5 py-1 rounded-lg bg-[#E05252] text-[10px] font-semibold text-white active:scale-95 transition';
+            setTimeout(() => {
+              if (btn && btn.isConnected) {
+                btn.dataset.confirmed = 'false';
+                btn.textContent = 'Hapus';
+                btn.className = 'btn-remove-topup px-2 py-1 rounded-lg bg-[#E05252]/10 hover:bg-[#E05252]/20 border border-[#E05252]/30 text-[10px] font-medium text-[#E05252] active:scale-95 transition';
+              }
+            }, 3000);
+            return;
+          }
+
+          const idx = state.entries.findIndex((item) => item.date === targetDate);
+          if (idx === -1) return;
+
+          const entry = state.entries[idx];
+          const prevEntry = getPreviousEntryBeforeDate(targetDate);
+          const isPureTopupNote = entry.note === 'Top-Up Saldo' || entry.note === 'Tarik Saldo';
+
+          // If this row was created solely as a Top-Up entry (equity equals prevEquity + netFlow), remove the row or revert equity
+          if (prevEntry && Math.abs(entry.equity - (prevEntry.equity + entry.netFlow)) < 0.01 && isPureTopupNote) {
+            state.entries.splice(idx, 1);
+          } else {
+            // Otherwise keep the closing equity of that day and only reset netFlow to 0 (or subtract netFlow if pure topup)
+            const adjustedEquity = isPureTopupNote ? Math.max(0, entry.equity - entry.netFlow) : entry.equity;
+            state.entries[idx] = {
+              ...entry,
+              equity: adjustedEquity,
+              netFlow: 0,
+              note: isPureTopupNote ? '' : entry.note
+            };
+          }
+
+          saveState();
+          renderAll();
+          showToast('Data Top-Up berhasil dihapus');
         });
 
         // Open Add / Update Modal triggers
