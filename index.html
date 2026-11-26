@@ -152,6 +152,20 @@
       border-color: rgba(34, 197, 94, 0.45) !important;
       box-shadow: 0 12px 32px rgba(15, 23, 20, 0.14) !important;
     }
+    /* iOS Modern Floating Dock Light Theme */
+    html.light-theme #iosFloatingDock {
+      background-color: rgba(255, 255, 255, 0.82) !important;
+      border-color: rgba(209, 217, 213, 0.85) !important;
+      box-shadow: 0 18px 38px -8px rgba(15, 23, 20, 0.14), inset 0 1px 0 0 rgba(255, 255, 255, 0.9) !important;
+    }
+    html.light-theme #btnFloatingTopup {
+      background-color: rgba(241, 245, 243, 0.92) !important;
+      border-color: rgba(209, 217, 213, 0.8) !important;
+      color: #111815 !important;
+    }
+    html.light-theme #btnFloatingTopup:hover {
+      background-color: rgba(230, 236, 233, 0.98) !important;
+    }
     /* Prevent iOS Safari auto-zoom when focusing inputs */
     @supports (-webkit-touch-callout: none) {
       input[type="text"],
@@ -778,28 +792,38 @@
       </div>
     </main>
 
-    <!-- Floating Bottom CTA Bar -->
-    <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] px-4 pb-[calc(1.1rem+env(safe-area-inset-bottom))] pt-3 bg-gradient-to-t from-[#111312] via-[#111312]/95 to-transparent z-20 pointer-events-none">
-      <div class="pointer-events-auto grid grid-cols-12 gap-2">
+    <!-- iOS Modern Floating Frosted Glass Dock -->
+    <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] px-4 pb-[calc(1.05rem+env(safe-area-inset-bottom))] pt-4 bg-gradient-to-t from-[#111312] via-[#111312]/80 to-transparent z-20 pointer-events-none">
+      <div
+        id="iosFloatingDock"
+        class="pointer-events-auto p-1.5 rounded-[28px] bg-[#181B19]/80 backdrop-blur-2xl border border-white/[0.09] shadow-[0_20px_44px_-8px_rgba(0,0,0,0.85),inset_0_1px_0_0_rgba(255,255,255,0.08)] grid grid-cols-12 gap-1.5"
+      >
+        <!-- Secondary iOS Tinted Pill: Top-Up Saldo -->
         <button
           id="btnFloatingTopup"
           type="button"
-          class="col-span-5 py-3.5 px-3 rounded-full bg-[#181B19] hover:bg-[#1F2421] active:scale-[0.99] border border-[#2F3532] hover:border-[#22C55E] text-[#F3F4F6] font-semibold text-xs shadow-lg flex items-center justify-center gap-1.5 transition"
+          class="col-span-5 h-12 px-3 rounded-[22px] bg-[#222724]/85 hover:bg-[#2A302D] active:scale-[0.96] border border-white/[0.06] text-[#F3F4F6] font-semibold text-xs tracking-[-0.01em] flex items-center justify-center gap-2 transition-all duration-200 ease-out"
         >
-          <svg class="w-3.5 h-3.5 text-[#22C55E]" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
-          </svg>
-          <span>Top-Up Saldo</span>
+          <span class="w-6 h-6 rounded-full bg-[#22C55E]/15 text-[#22C55E] flex items-center justify-center shrink-0">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
+            </svg>
+          </span>
+          <span class="truncate">Top-Up</span>
         </button>
+
+        <!-- Primary iOS Vibrant Emerald Pill: Update Equity -->
         <button
           id="btnFloatingUpdate"
           type="button"
-          class="col-span-7 py-3.5 px-4 rounded-full bg-[#22C55E] hover:bg-[#1EB054] active:scale-[0.99] text-[#090D0B] font-semibold text-xs sm:text-sm shadow-lg shadow-[#22C55E]/20 flex items-center justify-center gap-1.5 transition"
+          class="col-span-7 h-12 px-4 rounded-[22px] bg-gradient-to-b from-[#28D166] to-[#1EB856] hover:from-[#2EE070] hover:to-[#22C55E] active:scale-[0.96] text-[#06110A] font-semibold text-[13px] tracking-[-0.01em] shadow-[0_8px_22px_-4px_rgba(34,197,94,0.45),inset_0_1px_0_0_rgba(255,255,255,0.35)] flex items-center justify-center gap-2 transition-all duration-200 ease-out"
         >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 17l6-6 4 4 8-8" />
-          </svg>
-          <span>Update Equity</span>
+          <span class="w-6 h-6 rounded-full bg-black/15 text-[#06110A] flex items-center justify-center shrink-0">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 17l6-6 4 4 8-8m0 0h-5m5 0v5" />
+            </svg>
+          </span>
+          <span class="truncate">Update Equity</span>
         </button>
       </div>
     </div>
