@@ -1186,20 +1186,19 @@
         <div class="p-3.5 rounded-2xl bg-[#111312] border border-[#262B28] space-y-3">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <span id="modalCloudDot" class="w-2 h-2 rounded-full bg-[#8E9591]"></span>
+              <span id="modalCloudDot" class="w-2 h-2 rounded-full bg-[#22C55E]"></span>
               <span class="text-xs font-semibold text-[#F3F4F6]">Google Sheets Cloud Sync</span>
+              <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30">Permanen</span>
             </div>
-            <span id="modalCloudStatusText" class="text-[10px] text-[#8E9591]">Belum terhubung</span>
+            <span id="modalCloudStatusText" class="text-[10px] text-[#22C55E]">Siap</span>
           </div>
 
-          <div>
-            <label for="inputAppsScriptUrl" class="text-[11px] text-[#8E9591] block mb-1">Web App URL (Google Apps Script)</label>
-            <input
-              type="url"
-              id="inputAppsScriptUrl"
-              placeholder="https://script.google.com/macros/s/.../exec"
-              class="w-full px-3 py-2 rounded-xl bg-[#181B19] border border-[#2F3532] text-xs text-[#F3F4F6] placeholder-[#5B635F] focus:outline-none focus:border-[#22C55E]"
-            />
+          <div class="p-2.5 rounded-xl bg-[#181B19] border border-[#262B28] flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <span class="text-[10px] text-[#8E9591] block">Endpoint Web App Terpasang</span>
+              <span id="permanentScriptEndpointLabel" class="text-[11px] font-mono text-[#D1D5DB] truncate block">https://script.google.com/.../exec</span>
+            </div>
+            <span id="loadedRowsBadge" class="shrink-0 px-2.5 py-1 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/30 text-[10px] font-semibold text-[#22C55E] [font-variant-numeric:tabular-nums]">0 baris termuat</span>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
@@ -1208,7 +1207,7 @@
               type="button"
               class="py-2 px-3 rounded-xl bg-[#22C55E] hover:bg-[#1EB054] text-[#090D0B] text-xs font-semibold transition"
             >
-              Simpan &amp; Muat Cloud
+              Muat Ulang dari Sheet
             </button>
             <button
               id="btnPushToCloud"
@@ -1667,7 +1666,8 @@ function doPost(e) {
         btnCloseSettingsModal: document.getElementById('btnCloseSettingsModal'),
         modalCloudDot: document.getElementById('modalCloudDot'),
         modalCloudStatusText: document.getElementById('modalCloudStatusText'),
-        inputAppsScriptUrl: document.getElementById('inputAppsScriptUrl'),
+        permanentScriptEndpointLabel: document.getElementById('permanentScriptEndpointLabel'),
+        loadedRowsBadge: document.getElementById('loadedRowsBadge'),
         btnSaveSyncUrl: document.getElementById('btnSaveSyncUrl'),
         btnPushToCloud: document.getElementById('btnPushToCloud'),
         btnToggleScriptGuide: document.getElementById('btnToggleScriptGuide'),
@@ -1920,6 +1920,13 @@ function doPost(e) {
 
       function updateCloudStatusUI(status, customLabel) {
         const url = getAppsScriptUrl();
+        const rowCount = state.entries.length;
+        if (el.loadedRowsBadge) {
+          el.loadedRowsBadge.textContent = `${rowCount} baris termuat`;
+        }
+        if (el.permanentScriptEndpointLabel && url) {
+          el.permanentScriptEndpointLabel.textContent = url.length > 42 ? `${url.slice(0, 32)}...${url.slice(-10)}` : url;
+        }
         if (!url) {
           el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#8E9591]';
           el.headerCloudLabel.textContent = 'Local';
@@ -1939,7 +1946,7 @@ function doPost(e) {
           el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#22C55E]';
           el.headerCloudLabel.textContent = 'Synced';
           el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-[#22C55E]';
-          el.modalCloudStatusText.textContent = customLabel || 'Tersinkron ke Google Sheets';
+          el.modalCloudStatusText.textContent = customLabel || `${rowCount} baris termuat`;
           el.modalCloudStatusText.className = 'text-[10px] text-[#22C55E]';
         } else if (status === 'error') {
           el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#E05252]';
@@ -1949,9 +1956,9 @@ function doPost(e) {
           el.modalCloudStatusText.className = 'text-[10px] text-[#E05252]';
         } else {
           el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#22C55E]';
-          el.headerCloudLabel.textContent = 'Cloud';
+          el.headerCloudLabel.textContent = 'Synced';
           el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-[#22C55E]';
-          el.modalCloudStatusText.textContent = 'URL tersimpan';
+          el.modalCloudStatusText.textContent = `${rowCount} baris termuat`;
           el.modalCloudStatusText.className = 'text-[10px] text-[#22C55E]';
         }
       }
@@ -2017,10 +2024,10 @@ function doPost(e) {
                 }));
               } catch (e) {}
               renderAll();
-              updateCloudStatusUI('synced', `Dimuat (${state.entries.length} baris)`);
-              if (!silent) showToast(`Berhasil memuat ${state.entries.length} data dari Google Sheets`);
+              updateCloudStatusUI('synced', `${state.entries.length} baris termuat`);
+              showToast(`Google Sheets: ${state.entries.length} baris berhasil dimuat`);
             } else {
-              updateCloudStatusUI('synced', 'Sheet kosong (siap kirim data)');
+              updateCloudStatusUI('synced', '0 baris (Sheet kosong)');
               if (!silent) showToast('Sheet masih kosong, klik "Kirim Semua ke Sheet"');
             }
           } else {
@@ -3188,7 +3195,6 @@ function doPost(e) {
 
       function openSettingsModal() {
         el.inlineClearAllConfirm.classList.add('hidden');
-        el.inputAppsScriptUrl.value = getAppsScriptUrl();
         el.inputSettingsUsdIdrRate.value = state.usdIdrRate;
         updateCloudStatusUI('idle');
         el.settingsModalBackdrop.classList.remove('hidden');
@@ -3680,14 +3686,10 @@ function doPost(e) {
       });
 
       el.btnSaveSyncUrl.addEventListener('click', async () => {
-        setAppsScriptUrl(el.inputAppsScriptUrl.value);
         await loadFromGoogleSheets(false);
       });
 
       el.btnPushToCloud.addEventListener('click', async () => {
-        if (el.inputAppsScriptUrl.value.trim()) {
-          setAppsScriptUrl(el.inputAppsScriptUrl.value);
-        }
         await syncToGoogleSheets(false);
       });
 
