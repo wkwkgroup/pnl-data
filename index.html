@@ -2722,7 +2722,7 @@ function doPost(e) {
             } else {
               cellClass = 'bg-[#222724] border-[#2F3532] text-[#D1D5DB]';
             }
-            pctLabel = `${item.pnlPercent > 0.0001 ? '+' : ''}${item.pnlPercent.toFixed(1)}%`;
+            pctLabel = `${item.pnlPercent > 0.0001 ? '+' : ''}${item.pnlPercent.toFixed(2)}%`;
           }
 
           html += `
@@ -2732,7 +2732,7 @@ function doPost(e) {
               class="heatmap-cell h-11 rounded-xl border ${cellClass} flex flex-col items-center justify-center p-1 hover:brightness-125 active:scale-95 transition"
             >
               <span class="text-[11px] font-semibold leading-none">${day}</span>
-              <span class="text-[9px] mt-1 leading-none opacity-90 [font-variant-numeric:tabular-nums]">${maskIfPrivate(pctLabel)}</span>
+              <span class="text-[8.5px] mt-1 leading-none opacity-90 [font-variant-numeric:tabular-nums]">${maskIfPrivate(pctLabel)}</span>
             </button>
           `;
         }
