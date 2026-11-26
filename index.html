@@ -151,7 +151,8 @@
       input[type="text"],
       input[type="number"],
       input[type="url"],
-      input[type="date"] {
+      input[type="date"],
+      input[type="password"] {
         font-size: 16px !important;
       }
     }
@@ -1404,32 +1405,92 @@ function doPost(e) {
         </div>
 
         <!-- Sample / Reset Controls -->
-        <div class="pt-2 border-t border-[#242926] space-y-2">
-          <div class="grid grid-cols-2 gap-2">
-            <button
-              id="btnLoadSampleData"
-              type="button"
-              class="py-2.5 px-3 rounded-xl bg-[#222724] hover:bg-[#2B312E] text-xs font-medium text-[#D1D5DB] transition"
-            >
-              Muat Data Contoh
-            </button>
-            <button
-              id="btnClearAllData"
-              type="button"
-              class="py-2.5 px-3 rounded-xl bg-[#E05252]/10 hover:bg-[#E05252]/20 border border-[#E05252]/30 text-xs font-medium text-[#E05252] transition"
-            >
-              Kosongkan Data
-            </button>
-          </div>
-
-          <div id="inlineClearAllConfirm" class="hidden p-3 rounded-xl bg-[#E05252]/10 border border-[#E05252]/30 flex items-center justify-between gap-2">
-            <span class="text-xs text-[#F3F4F6]">Hapus semua riwayat?</span>
+        <div class="pt-2 border-t border-[#242926] space-y-3">
+          <!-- PIN Security Section -->
+        <div class="pt-2 border-t border-[#242926]">
+          <div class="p-3.5 rounded-2xl bg-[#111312] border border-[#262B28] space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-[#22C55E]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <span class="text-xs font-semibold text-[#F3F4F6]">PIN Keamanan (Anti-Hapus)</span>
+              </div>
+              <span id="pinStatusBadge" class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#222724] text-[#8E9591]">Belum Aktif</span>
+            </div>
+            <p class="text-[11px] text-[#8E9591] leading-relaxed">
+              Lindungi penghapusan tanggal, riwayat Top-Up, import backup, dan penimpaan Google Sheets dengan PIN 4 digit.
+            </p>
             <div class="flex items-center gap-2">
-              <button type="button" id="btnCancelClearAll" class="px-2.5 py-1 rounded-lg bg-[#222724] text-xs text-[#D1D5DB]">Batal</button>
-              <button type="button" id="btnConfirmClearAll" class="px-2.5 py-1 rounded-lg bg-[#E05252] text-xs font-semibold text-white">Ya, Hapus</button>
+              <input
+                type="password"
+                id="inputSetupPin"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                maxlength="4"
+                placeholder="PIN 4 digit"
+                class="flex-1 px-3 py-2 rounded-xl bg-[#181B19] border border-[#2F3532] text-xs font-semibold tracking-widest text-center text-[#F3F4F6] focus:outline-none focus:border-[#22C55E]"
+              />
+              <button
+                type="button"
+                id="btnSaveSecurityPin"
+                class="px-3.5 py-2 rounded-xl bg-[#22C55E] hover:bg-[#1EB054] text-[#090D0B] text-xs font-semibold transition"
+              >
+                Simpan PIN
+              </button>
+              <button
+                type="button"
+                id="btnRemoveSecurityPin"
+                class="hidden px-3 py-2 rounded-xl bg-[#E05252]/15 hover:bg-[#E05252]/25 border border-[#E05252]/30 text-xs font-medium text-[#E05252] transition"
+              >
+                Nonaktifkan
+              </button>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- ==================== SECURITY PIN VERIFICATION MODAL ==================== -->
+    <div id="pinVerifyModalBackdrop" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="w-full max-w-[340px] bg-[#181B19] border border-[#2F3532] rounded-3xl p-5 shadow-2xl space-y-4 text-center">
+        <div class="w-11 h-11 rounded-2xl bg-[#22C55E]/10 border border-[#22C55E]/30 text-[#22C55E] flex items-center justify-center mx-auto">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold text-[#F3F4F6]">Verifikasi PIN Keamanan</h4>
+          <p id="pinVerifyActionDesc" class="text-[11px] text-[#8E9591] mt-1">Masukkan PIN 4 digit untuk melanjutkan</p>
+        </div>
+        <form id="pinVerifyForm" class="space-y-3">
+          <input
+            type="password"
+            id="inputVerifyPin"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="4"
+            required
+            placeholder="••••"
+            class="w-full py-2.5 px-4 rounded-xl bg-[#111312] border border-[#2F3532] text-lg font-bold tracking-[0.5em] text-center text-[#F3F4F6] focus:outline-none focus:border-[#22C55E]"
+          />
+          <p id="pinVerifyErrorMsg" class="hidden text-[11px] text-[#E05252] font-medium">PIN salah. Silakan coba lagi.</p>
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button
+              type="button"
+              id="btnCancelVerifyPin"
+              class="py-2.5 px-3 rounded-xl bg-[#222724] text-xs font-medium text-[#D1D5DB] transition"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              class="py-2.5 px-3 rounded-xl bg-[#22C55E] hover:bg-[#1EB054] text-xs font-semibold text-[#090D0B] transition"
+            >
+              Buka Kunci
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -1453,6 +1514,7 @@ function doPost(e) {
       const THEME_MODE_KEY = 'etf_portfolio_theme_mode_v1';
       const USD_IDR_RATE_KEY = 'etf_portfolio_usd_idr_rate_v1';
       const DISPLAY_CURR_KEY = 'etf_portfolio_display_curr_v1';
+      const SECURITY_PIN_KEY = 'etf_portfolio_security_pin_v1';
       const DEFAULT_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxTKWdE0QaysCZkFFzO6gjLz50Zxllud8_P80ltoUiqAWz7_MYqZaIkc9uIbvkwjxMn/exec';
       const DEFAULT_USD_IDR_RATE = 16500;
 
@@ -1683,21 +1745,68 @@ function doPost(e) {
         btnExportCsv: document.getElementById('btnExportCsv'),
         btnExportJson: document.getElementById('btnExportJson'),
         inputImportJson: document.getElementById('inputImportJson'),
-        btnLoadSampleData: document.getElementById('btnLoadSampleData'),
-        btnClearAllData: document.getElementById('btnClearAllData'),
-        inlineClearAllConfirm: document.getElementById('inlineClearAllConfirm'),
-        btnCancelClearAll: document.getElementById('btnCancelClearAll'),
-        btnConfirmClearAll: document.getElementById('btnConfirmClearAll'),
+        pinStatusBadge: document.getElementById('pinStatusBadge'),
+        inputSetupPin: document.getElementById('inputSetupPin'),
+        btnSaveSecurityPin: document.getElementById('btnSaveSecurityPin'),
+        btnRemoveSecurityPin: document.getElementById('btnRemoveSecurityPin'),
+        pinVerifyModalBackdrop: document.getElementById('pinVerifyModalBackdrop'),
+        pinVerifyActionDesc: document.getElementById('pinVerifyActionDesc'),
+        pinVerifyForm: document.getElementById('pinVerifyForm'),
+        inputVerifyPin: document.getElementById('inputVerifyPin'),
+        pinVerifyErrorMsg: document.getElementById('pinVerifyErrorMsg'),
+        btnCancelVerifyPin: document.getElementById('btnCancelVerifyPin'),
         toastBanner: document.getElementById('toastBanner')
       };
 
-      // ==================== UTILITIES ====================
-      function parseISODate(isoStr) {
-        const clean = normalizeDateToISO(isoStr);
-        const parts = clean.split('-').map(Number);
-        if (parts.length !== 3 || parts.some(isNaN)) {
-          return new Date();
+      // ==================== SECURITY PIN & ANTI-DELETE GUARD ====================
+      let pendingProtectedAction = null;
+
+      function getSecurityPin() {
+        try {
+          return (localStorage.getItem(SECURITY_PIN_KEY) || '').trim();
+        } catch (e) {
+          return '';
         }
+      }
+
+      function updateSecurityPinUI() {
+        const pin = getSecurityPin();
+        if (!el.pinStatusBadge) return;
+        if (pin) {
+          el.pinStatusBadge.textContent = 'Aktif (Terkunci)';
+          el.pinStatusBadge.className = 'text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30';
+          el.btnRemoveSecurityPin.classList.remove('hidden');
+          el.inputSetupPin.placeholder = 'Ganti PIN';
+        } else {
+          el.pinStatusBadge.textContent = 'Belum Aktif';
+          el.pinStatusBadge.className = 'text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#222724] text-[#8E9591]';
+          el.btnRemoveSecurityPin.classList.add('hidden');
+          el.inputSetupPin.placeholder = 'PIN 4 digit';
+        }
+      }
+
+      function requirePinVerification(actionLabel, callback) {
+        const activePin = getSecurityPin();
+        if (!activePin) {
+          callback();
+          return;
+        }
+        pendingProtectedAction = callback;
+        el.pinVerifyActionDesc.textContent = actionLabel || 'Masukkan PIN 4 digit untuk melanjutkan';
+        el.inputVerifyPin.value = '';
+        el.pinVerifyErrorMsg.classList.add('hidden');
+        el.pinVerifyModalBackdrop.classList.remove('hidden');
+        setTimeout(() => el.inputVerifyPin.focus(), 80);
+      }
+
+      function closePinVerifyModal() {
+        pendingProtectedAction = null;
+        el.pinVerifyModalBackdrop.classList.add('hidden');
+      }
+
+      // ==================== DATE & CURRENCY UTILITIES ====================
+      function parseISODate(isoStr) {
+        const parts = String(isoStr).split('-').map(Number);
         return new Date(parts[0], parts[1] - 1, parts[2]);
       }
 
@@ -1907,17 +2016,6 @@ function doPost(e) {
         }
       }
 
-      function setAppsScriptUrl(url) {
-        try {
-          const clean = url.trim();
-          if (clean) {
-            localStorage.setItem(APPS_SCRIPT_URL_KEY, clean);
-          } else {
-            localStorage.removeItem(APPS_SCRIPT_URL_KEY);
-          }
-        } catch (e) {}
-      }
-
       function updateCloudStatusUI(status, customLabel) {
         const url = getAppsScriptUrl();
         const rowCount = state.entries.length;
@@ -2025,7 +2123,7 @@ function doPost(e) {
               } catch (e) {}
               renderAll();
               updateCloudStatusUI('synced', `${state.entries.length} baris termuat`);
-              showToast(`Google Sheets: ${state.entries.length} baris berhasil dimuat`);
+              if (!silent) showToast(`Google Sheets: ${state.entries.length} baris berhasil dimuat`);
             } else {
               updateCloudStatusUI('synced', '0 baris (Sheet kosong)');
               if (!silent) showToast('Sheet masih kosong, klik "Kirim Semua ke Sheet"');
@@ -2446,17 +2544,13 @@ function doPost(e) {
             el.chartTrendArrow.className = `text-xs font-bold ${pColor}`;
             el.chartActivePnl.textContent = maskIfPrivate(`${formatNumber(periodPnlSum, true)} ${formatSignedPercent(periodPct)}`);
             el.chartActivePnl.className = `text-xs font-semibold ${pColor} [font-variant-numeric:tabular-nums]`;
-            el.chartPeriodSubLabel.textContent = CHART_PERIOD_SUBLABELS[state.periodFilter] || 'periode aktif';
+            el.chartPeriodSubLabel.textContent = CHART_PERIOD_SUBLABELS[state.periodFilter] || 'periode terpilih';
           } else {
-            const pnlColor = pointData.pnlNominal > 0.0001
-              ? 'text-[#22C55E]'
-              : pointData.pnlNominal < -0.0001
-              ? 'text-[#E05252]'
-              : 'text-[#D1D5DB]';
+            const dColor = pointData.pnlNominal > 0.0001 ? 'text-[#22C55E]' : pointData.pnlNominal < -0.0001 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
             el.chartTrendArrow.textContent = pointData.pnlNominal < -0.0001 ? '↘' : '↗';
-            el.chartTrendArrow.className = `text-xs font-bold ${pnlColor}`;
+            el.chartTrendArrow.className = `text-xs font-bold ${dColor}`;
             el.chartActivePnl.textContent = maskIfPrivate(`${formatNumber(pointData.pnlNominal, true)} ${formatSignedPercent(pointData.pnlPercent)}`);
-            el.chartActivePnl.className = `text-xs font-semibold ${pnlColor} [font-variant-numeric:tabular-nums]`;
+            el.chartActivePnl.className = `text-xs font-semibold ${dColor} [font-variant-numeric:tabular-nums]`;
             el.chartPeriodSubLabel.textContent = 'P&L harian';
           }
         }
@@ -2466,44 +2560,143 @@ function doPost(e) {
         svg.innerHTML = `
           <defs>
             <linearGradient id="equityAreaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="${strokeColor}" stop-opacity="0.28" />
+              <stop offset="0%" stop-color="${strokeColor}" stop-opacity="0.24" />
               <stop offset="100%" stop-color="${strokeColor}" stop-opacity="0.0" />
             </linearGradient>
           </defs>
           <line x1="${padX}" y1="${baselineY}" x2="${width - padX}" y2="${baselineY}" stroke="${baselineStroke}" stroke-width="1.2" stroke-dasharray="4 4" />
           ${areaPath ? `<path d="${areaPath}" fill="url(#equityAreaGrad)" />` : ''}
           ${points.length > 1 ? `<path d="${linePath}" fill="none" stroke="${strokeColor}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />` : ''}
-          <line id="chartHoverLine" x1="${lastPt.x}" y1="4" x2="${lastPt.x}" y2="${baselineY}" stroke="#3F4743" stroke-width="1" stroke-dasharray="3 3" opacity="0" />
+          <line id="chartScrubLine" x1="${lastPt.x}" y1="${padTop}" x2="${lastPt.x}" y2="${baselineY}" stroke="${strokeColor}" stroke-width="1" stroke-dasharray="2 2" opacity="0" />
           <circle id="chartActiveDot" cx="${lastPt.x}" cy="${lastPt.y}" r="4.5" fill="${strokeColor}" stroke="${dotStroke}" stroke-width="2" />
         `;
 
-        const hoverLine = svg.querySelector('#chartHoverLine');
         const activeDot = svg.querySelector('#chartActiveDot');
+        const scrubLine = svg.querySelector('#chartScrubLine');
 
         function handleScrub(clientX) {
-          const rect = el.sparklineWrapper.getBoundingClientRect();
-          const relX = Math.max(0, Math.min(rect.width, clientX - rect.left));
-          const ratio = rect.width > 0 ? relX / rect.width : 1;
-          const idx = Math.round(ratio * (points.length - 1));
-          const target = points[idx];
-          if (!target) return;
-
-          hoverLine.setAttribute('x1', target.x);
-          hoverLine.setAttribute('x2', target.x);
-          hoverLine.setAttribute('opacity', '1');
-          activeDot.setAttribute('cx', target.x);
-          activeDot.setAttribute('cy', target.y);
-          updateChartHeader(target.data, false);
+          const rect = svg.getBoundingClientRect();
+          if (!rect.width) return;
+          const relX = ((clientX - rect.left) / rect.width) * width;
+          let nearest = points[0];
+          let minDist = Math.abs(relX - points[0].x);
+          for (let i = 1; i < points.length; i++) {
+            const dist = Math.abs(relX - points[i].x);
+            if (dist < minDist) {
+              minDist = dist;
+              nearest = points[i];
+            }
+          }
+          if (activeDot) {
+            activeDot.setAttribute('cx', nearest.x.toFixed(1));
+            activeDot.setAttribute('cy', nearest.y.toFixed(1));
+          }
+          if (scrubLine) {
+            scrubLine.setAttribute('x1', nearest.x.toFixed(1));
+            scrubLine.setAttribute('x2', nearest.x.toFixed(1));
+            scrubLine.setAttribute('opacity', '0.75');
+          }
+          updateChartHeader(nearest.data, false);
         }
 
-        el.sparklineWrapper.onpointermove = (e) => handleScrub(e.clientX);
-        el.sparklineWrapper.onpointerdown = (e) => handleScrub(e.clientX);
-        el.sparklineWrapper.onpointerleave = () => {
-          hoverLine.setAttribute('opacity', '0');
-          activeDot.setAttribute('cx', lastPt.x);
-          activeDot.setAttribute('cy', lastPt.y);
+        function resetScrub() {
+          if (activeDot) {
+            activeDot.setAttribute('cx', lastPt.x.toFixed(1));
+            activeDot.setAttribute('cy', lastPt.y.toFixed(1));
+          }
+          if (scrubLine) {
+            scrubLine.setAttribute('opacity', '0');
+          }
           updateChartHeader(lastPt.data, true);
-        };
+        }
+
+        svg.onpointermove = (e) => handleScrub(e.clientX);
+        svg.onpointerdown = (e) => handleScrub(e.clientX);
+        svg.onpointerleave = resetScrub;
+        svg.onpointerup = resetScrub;
+      }
+
+      function renderMonthlyHeatmap() {
+        const allEnriched = computeAllEnrichedEntries();
+        const entryMap = new Map();
+        allEnriched.forEach((item, idx) => entryMap.set(item.date, { ...item, isFirstEntry: idx === 0 }));
+
+        const year = state.heatmapYear;
+        const month = state.heatmapMonth;
+        el.heatmapMonthLabel.textContent = `${MONTHS_SHORT[month]} ${year}`;
+
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const weekdayCells = [];
+        let greenCount = 0;
+        let redCount = 0;
+
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dt = new Date(year, month, day);
+          const dow = dt.getDay();
+          if (dow === 0 || dow === 6) continue;
+          const iso = formatISODate(dt);
+          const data = entryMap.get(iso) || null;
+          if (data && !data.isFirstEntry) {
+            if (data.pnlNominal > 0.0001) greenCount++;
+            else if (data.pnlNominal < -0.0001) redCount++;
+          }
+          weekdayCells.push({ day, dow, iso, data });
+        }
+
+        el.heatmapMonthSummary.textContent = `${greenCount} hari hijau • ${redCount} hari merah`;
+
+        if (weekdayCells.length === 0) {
+          el.pnlHeatmapGrid.innerHTML = '';
+          return;
+        }
+
+        const leadingBlanks = weekdayCells[0].dow - 1;
+        let cellsHtml = '';
+
+        for (let b = 0; b < leadingBlanks; b++) {
+          cellsHtml += `<div class="h-12 rounded-xl bg-transparent"></div>`;
+        }
+
+        weekdayCells.forEach((cell) => {
+          const d = cell.data;
+          let boxClass = 'bg-[#111312] border-[#222624] text-[#8E9591]';
+          let pctText = '-';
+
+          if (d) {
+            if (d.isFirstEntry) {
+              boxClass = 'bg-[#222724] border-[#2F3532] text-[#D1D5DB]';
+              pctText = 'Awal';
+            } else if (d.pnlNominal > 0.0001) {
+              const strong = d.pnlPercent >= 1.5;
+              boxClass = strong
+                ? 'bg-[#22C55E]/35 border-[#22C55E]/70 text-[#22C55E]'
+                : 'bg-[#22C55E]/15 border-[#22C55E]/40 text-[#22C55E]';
+              pctText = `+${d.pnlPercent.toFixed(2)}%`;
+            } else if (d.pnlNominal < -0.0001) {
+              const strong = d.pnlPercent <= -1.5;
+              boxClass = strong
+                ? 'bg-[#E05252]/35 border-[#E05252]/70 text-[#E05252]'
+                : 'bg-[#E05252]/15 border-[#E05252]/40 text-[#E05252]';
+              pctText = `${d.pnlPercent.toFixed(2)}%`;
+            } else {
+              boxClass = 'bg-[#222724] border-[#2F3532] text-[#D1D5DB]';
+              pctText = '0.00%';
+            }
+          }
+
+          cellsHtml += `
+            <button
+              type="button"
+              data-heatmap-date="${cell.iso}"
+              class="heatmap-cell h-12 rounded-xl border ${boxClass} flex flex-col items-center justify-center px-0.5 hover:brightness-110 active:scale-95 transition"
+            >
+              <span class="text-[11px] font-semibold leading-tight text-[#F3F4F6]">${cell.day}</span>
+              <span class="text-[8.5px] font-medium leading-tight mt-0.5 [font-variant-numeric:tabular-nums]">${pctText}</span>
+            </button>
+          `;
+        });
+
+        el.pnlHeatmapGrid.innerHTML = cellsHtml;
       }
 
       function renderTradeAnalytics() {
@@ -2512,6 +2705,19 @@ function doPost(e) {
 
         el.tradePeriodTag.textContent = PERIOD_LABELS[state.periodFilter] || 'Bulanan';
         renderSparklineChart(filtered);
+        renderMonthlyHeatmap();
+
+        document.querySelectorAll('.chart-tab-btn').forEach((btn) => {
+          const isMatch = btn.dataset.chartPeriod === state.periodFilter;
+          const indicator = btn.querySelector('.tab-indicator');
+          if (isMatch) {
+            btn.className = 'chart-tab-btn min-h-[42px] py-2.5 px-1 rounded-xl text-xs font-semibold text-[#F3F4F6] bg-[#222724]/70 active:bg-[#222724] flex flex-col items-center justify-center gap-1.5 cursor-pointer select-none transition';
+            if (indicator) indicator.className = 'tab-indicator w-5 h-0.5 rounded-full bg-[#22C55E]';
+          } else {
+            btn.className = 'chart-tab-btn min-h-[42px] py-2.5 px-1 rounded-xl text-xs font-medium text-[#8E9591] hover:text-[#F3F4F6] active:bg-[#222724] flex flex-col items-center justify-center gap-1.5 cursor-pointer select-none transition';
+            if (indicator) indicator.className = 'tab-indicator w-5 h-0.5 rounded-full bg-transparent';
+          }
+        });
 
         if (filtered.length === 0) {
           el.statTotalPnl.textContent = maskIfPrivate(formatNumber(0, true));
@@ -2533,152 +2739,139 @@ function doPost(e) {
           el.statMaxDrawdownPct.textContent = '0.00%';
           el.statMaxDrawdownRange.textContent = 'Dari puncak tertinggi';
           el.statMaxDrawdownNominal.textContent = `Drop nominal: ${maskIfPrivate(formatNumber(0))}`;
-          el.cashflowListContainer.innerHTML = '<p class="text-[#8E9591]">Belum ada catatan Top-Up / Tarik dana.</p>';
-          renderHeatmapCalendar();
+          el.cashflowListContainer.innerHTML = `<p class="text-[#8E9591]">Belum ada catatan Top-Up atau penarikan dana.</p>`;
           return;
         }
 
-        const firstItem = filtered[0];
-        const isFirstOverall = firstItem.date === allEnriched[0].date;
+        const totalNetPnl = filtered.reduce((acc, item, idx) => (idx === 0 && state.periodFilter !== '1D' ? 0 : acc + item.pnlNominal), 0);
+        const startEquity = filtered[0].equity;
+        const totalNetFlowInPeriod = filtered.reduce((acc, item, idx) => (idx === 0 && state.periodFilter !== '1D' ? 0 : acc + item.netFlow), 0);
+        const denom = startEquity + totalNetFlowInPeriod;
+        const totalPct = denom > 0 ? (totalNetPnl / denom) * 100 : 0;
 
-        const periodPnl = filtered.reduce((acc, d, idx) => {
-          if (idx === 0 && isFirstOverall) return acc;
-          return acc + d.pnlNominal;
-        }, 0);
-
-        const baseEquity = firstItem.equity;
-        const periodPct = baseEquity > 0 ? (periodPnl / baseEquity) * 100 : 0;
-
-        const pnlColor = periodPnl > 0.0001 ? 'text-[#22C55E]' : periodPnl < -0.0001 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
-        el.statTotalPnl.textContent = maskIfPrivate(formatNumber(periodPnl, true));
+        const pnlColor = totalNetPnl > 0.0001 ? 'text-[#22C55E]' : totalNetPnl < -0.0001 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
+        el.statTotalPnl.textContent = maskIfPrivate(formatNumber(totalNetPnl, true));
         el.statTotalPnl.className = `text-sm font-semibold ${pnlColor} block [font-variant-numeric:tabular-nums]`;
-        el.statTotalPnlPct.textContent = `${periodPct > 0.0001 ? '+' : ''}${periodPct.toFixed(2)}%`;
+        el.statTotalPnlPct.textContent = `${totalPct > 0.0001 ? '+' : ''}${totalPct.toFixed(2)}%`;
         el.statTotalPnlPct.className = `text-xs ${pnlColor} [font-variant-numeric:tabular-nums]`;
 
-        const activeDays = filtered.filter((d) => !(d.date === allEnriched[0].date));
+        const activeDays = filtered.length > 1 ? filtered.slice(1) : filtered;
         let wins = 0;
         let losses = 0;
         let draws = 0;
-        let bestDay = null;
-        let worstDay = null;
-        let bestPctDay = null;
-        let worstPctDay = null;
+        let maxProfitItem = null;
+        let maxLossItem = null;
+        let maxProfitPctItem = null;
+        let maxLossPctItem = null;
 
         activeDays.forEach((d) => {
           if (d.pnlNominal > 0.0001) wins++;
           else if (d.pnlNominal < -0.0001) losses++;
           else draws++;
 
-          if (!bestDay || d.pnlNominal > bestDay.pnlNominal) bestDay = d;
-          if (!worstDay || d.pnlNominal < worstDay.pnlNominal) worstDay = d;
-          if (!bestPctDay || d.pnlPercent > bestPctDay.pnlPercent) bestPctDay = d;
-          if (!worstPctDay || d.pnlPercent < worstPctDay.pnlPercent) worstPctDay = d;
+          if (!maxProfitItem || d.pnlNominal > maxProfitItem.pnlNominal) maxProfitItem = d;
+          if (!maxLossItem || d.pnlNominal < maxLossItem.pnlNominal) maxLossItem = d;
+          if (!maxProfitPctItem || d.pnlPercent > maxProfitPctItem.pnlPercent) maxProfitPctItem = d;
+          if (!maxLossPctItem || d.pnlPercent < maxLossPctItem.pnlPercent) maxLossPctItem = d;
         });
 
-        const winRate = activeDays.length > 0 ? (wins / activeDays.length) * 100 : 0;
+        const totalEvaluated = wins + losses + draws;
+        const winRate = totalEvaluated > 0 ? (wins / totalEvaluated) * 100 : 0;
         el.statWinRate.textContent = `${winRate.toFixed(1)}%`;
         el.statWinCounts.textContent = `${wins}W • ${losses}L • ${draws}D`;
 
-        if (bestDay && bestDay.pnlNominal > 0) {
-          el.statMaxProfit.textContent = maskIfPrivate(formatNumber(bestDay.pnlNominal, true));
-          el.statMaxProfitDate.textContent = formatDisplayDate(bestDay.date);
+        if (maxProfitItem && maxProfitItem.pnlNominal > 0.0001) {
+          el.statMaxProfit.textContent = maskIfPrivate(formatNumber(maxProfitItem.pnlNominal, true));
+          el.statMaxProfitDate.textContent = formatDisplayDate(maxProfitItem.date);
         } else {
           el.statMaxProfit.textContent = maskIfPrivate(formatNumber(0, true));
           el.statMaxProfitDate.textContent = '-';
         }
 
-        if (worstDay && worstDay.pnlNominal < 0) {
-          el.statMaxLoss.textContent = maskIfPrivate(formatNumber(worstDay.pnlNominal, true));
-          el.statMaxLossDate.textContent = formatDisplayDate(worstDay.date);
+        if (maxLossItem && maxLossItem.pnlNominal < -0.0001) {
+          el.statMaxLoss.textContent = maskIfPrivate(formatNumber(maxLossItem.pnlNominal, true));
+          el.statMaxLossDate.textContent = formatDisplayDate(maxLossItem.date);
         } else {
           el.statMaxLoss.textContent = maskIfPrivate(formatNumber(0, true));
           el.statMaxLossDate.textContent = '-';
         }
 
-        if (bestPctDay && bestPctDay.pnlPercent > 0) {
-          el.statMaxProfitPct.textContent = `+${bestPctDay.pnlPercent.toFixed(2)}%`;
-          el.statMaxProfitPctDate.textContent = formatDisplayDate(bestPctDay.date);
+        if (maxProfitPctItem && maxProfitPctItem.pnlPercent > 0.0001) {
+          el.statMaxProfitPct.textContent = `+${maxProfitPctItem.pnlPercent.toFixed(2)}%`;
+          el.statMaxProfitPctDate.textContent = formatDisplayDate(maxProfitPctItem.date);
         } else {
           el.statMaxProfitPct.textContent = '0.00%';
           el.statMaxProfitPctDate.textContent = '-';
         }
 
-        if (worstPctDay && worstPctDay.pnlPercent < 0) {
-          el.statMaxLossPct.textContent = `${worstPctDay.pnlPercent.toFixed(2)}%`;
-          el.statMaxLossPctDate.textContent = formatDisplayDate(worstPctDay.date);
+        if (maxLossPctItem && maxLossPctItem.pnlPercent < -0.0001) {
+          el.statMaxLossPct.textContent = `${maxLossPctItem.pnlPercent.toFixed(2)}%`;
+          el.statMaxLossPctDate.textContent = formatDisplayDate(maxLossPctItem.date);
         } else {
           el.statMaxLossPct.textContent = '0.00%';
           el.statMaxLossPctDate.textContent = '-';
         }
 
-        const avgDaily = activeDays.length > 0 ? periodPnl / activeDays.length : 0;
+        const avgDaily = activeDays.length > 0 ? totalNetPnl / activeDays.length : 0;
         el.statAvgDaily.textContent = maskIfPrivate(formatNumber(avgDaily, true));
-        el.statAvgDaily.className = `text-sm font-semibold ${avgDaily > 0.0001 ? 'text-[#22C55E]' : avgDaily < -0.0001 ? 'text-[#E05252]' : 'text-[#F3F4F6]'} block [font-variant-numeric:tabular-nums]`;
         el.statTradingDays.textContent = `${activeDays.length} hari bursa`;
 
-        const totalNetFlow = filtered.reduce((acc, d) => acc + d.netFlow, 0);
-        el.statNetCashflow.textContent = maskIfPrivate(formatNumber(totalNetFlow, true));
+        const overallNetFlow = allEnriched.reduce((acc, item) => acc + item.netFlow, 0);
+        el.statNetCashflow.textContent = maskIfPrivate(formatNumber(overallNetFlow, true));
         el.statInitialEquity.textContent = maskIfPrivate(formatNumber(allEnriched[0].equity));
 
-        let peakItem = filtered[0];
+        let peakEquity = filtered[0].equity;
+        let peakDate = filtered[0].date;
         let maxDrawdownPct = 0;
         let maxDrawdownNominal = 0;
-        let ddPeakDate = filtered[0].date;
-        let ddTroughDate = filtered[0].date;
+        let ddPeakDate = '';
+        let ddTroughDate = '';
 
         filtered.forEach((item) => {
-          if (item.equity > peakItem.equity) {
-            peakItem = item;
+          if (item.equity > peakEquity) {
+            peakEquity = item.equity;
+            peakDate = item.date;
           }
-          if (peakItem.equity > 0) {
-            const dropNominal = item.equity - peakItem.equity;
-            const dropPct = (dropNominal / peakItem.equity) * 100;
-            if (dropPct < maxDrawdownPct) {
+          if (peakEquity > 0) {
+            const dropNominal = peakEquity - item.equity;
+            const dropPct = (dropNominal / peakEquity) * 100;
+            if (dropPct > maxDrawdownPct) {
               maxDrawdownPct = dropPct;
               maxDrawdownNominal = dropNominal;
-              ddPeakDate = peakItem.date;
+              ddPeakDate = peakDate;
               ddTroughDate = item.date;
             }
           }
         });
 
-        if (maxDrawdownPct < -0.0001) {
-          el.statMaxDrawdownPct.textContent = `${maxDrawdownPct.toFixed(2)}%`;
-          el.statMaxDrawdownPct.className = 'text-base font-semibold text-[#E05252] block [font-variant-numeric:tabular-nums]';
-          el.statMaxDrawdownRange.textContent = `${formatDisplayDate(ddPeakDate)} -> ${formatDisplayDate(ddTroughDate)}`;
-          el.statMaxDrawdownNominal.textContent = `Drop nominal: ${maskIfPrivate(formatNumber(maxDrawdownNominal, true))}`;
-        } else {
-          el.statMaxDrawdownPct.textContent = '0.00%';
-          el.statMaxDrawdownPct.className = 'text-base font-semibold text-[#22C55E] block [font-variant-numeric:tabular-nums]';
-          el.statMaxDrawdownRange.textContent = 'Tidak ada penurunan dari puncak';
-          el.statMaxDrawdownNominal.textContent = `Drop nominal: ${maskIfPrivate(formatNumber(0))}`;
-        }
+        el.statMaxDrawdownPct.textContent = maxDrawdownPct > 0.0001 ? `-${maxDrawdownPct.toFixed(2)}%` : '0.00%';
+        el.statMaxDrawdownRange.textContent = ddPeakDate && ddTroughDate && maxDrawdownPct > 0.0001
+          ? `${formatDisplayDate(ddPeakDate)} → ${formatDisplayDate(ddTroughDate)}`
+          : 'Dari puncak tertinggi';
+        el.statMaxDrawdownNominal.textContent = `Drop nominal: ${maskIfPrivate(formatNumber(maxDrawdownNominal))}`;
 
-        const cashflowEvents = allEnriched.filter((d) => d.netFlow !== 0).reverse();
-        if (cashflowEvents.length === 0) {
-          el.cashflowListContainer.innerHTML = `
-            <p class="text-[#8E9591] leading-relaxed">
-              Belum ada penambahan modal (Top-Up) atau penarikan dana. Gunakan tombol <span class="text-[#22C55E]">Top-Up Saldo</span> di bawah saat menambah modal ETF.
-            </p>
-          `;
+        // Render Cashflow History with 2-Tap Delete Button (Protected by PIN if active)
+        const flowEntries = allEnriched.filter((item) => item.netFlow !== 0).reverse();
+        if (flowEntries.length === 0) {
+          el.cashflowListContainer.innerHTML = `<p class="text-[#8E9591]">Belum ada Top-Up atau Tarik dana tambahan di luar modal awal (${maskIfPrivate(formatNumber(allEnriched[0].equity))}).</p>`;
         } else {
-          el.cashflowListContainer.innerHTML = cashflowEvents.map((ev) => {
-            const isPos = ev.netFlow > 0;
+          el.cashflowListContainer.innerHTML = flowEntries.map((item) => {
+            const isDep = item.netFlow > 0;
             return `
-              <div class="flex items-center justify-between gap-2 py-2 border-b border-[#222624] last:border-0">
-                <div>
-                  <span class="text-[#F3F4F6] font-medium block">${isPos ? 'Top-Up / Beli ETF' : 'Penarikan Dana'}</span>
-                  <span class="text-[11px] text-[#8E9591]">${formatDisplayDate(ev.date)}</span>
+              <div class="flex items-center justify-between py-2 border-b border-[#222624] last:border-0 gap-2">
+                <div class="min-w-0">
+                  <span class="text-[#E5E7EB] font-medium block">${formatDisplayDate(item.date)}</span>
+                  <span class="text-[11px] text-[#8E9591]">${isDep ? 'Top-Up / Beli ETF' : 'Penarikan Dana'}</span>
                 </div>
-                <div class="flex items-center gap-2">
-                  <span class="font-semibold ${isPos ? 'text-[#22C55E]' : 'text-[#E05252]'} [font-variant-numeric:tabular-nums]">
-                    ${maskIfPrivate(formatNumber(ev.netFlow, true))}
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="font-semibold ${isDep ? 'text-[#22C55E]' : 'text-[#E05252]'} [font-variant-numeric:tabular-nums]">
+                    ${maskIfPrivate(formatNumber(item.netFlow, true))}
                   </span>
                   <button
                     type="button"
-                    data-remove-topup-date="${ev.date}"
-                    title="Hapus catatan Top-Up ini"
-                    class="btn-remove-topup px-2 py-1 rounded-lg bg-[#E05252]/10 hover:bg-[#E05252]/20 border border-[#E05252]/30 text-[10px] font-medium text-[#E05252] active:scale-95 transition"
+                    data-delete-topup-date="${item.date}"
+                    title="Hapus transaksi Top-Up / Tarik dana ini"
+                    class="px-2 py-1 rounded-lg bg-[#E05252]/10 hover:bg-[#E05252]/20 border border-[#E05252]/30 text-[10px] font-medium text-[#E05252] transition"
                   >
                     Hapus
                   </button>
@@ -2687,219 +2880,24 @@ function doPost(e) {
             `;
           }).join('');
         }
-
-        renderHeatmapCalendar();
       }
 
-      // ==================== MONTHLY P&L HEATMAP CALENDAR (SENIN - JUMAT) ====================
-      function renderHeatmapCalendar() {
-        const allEnriched = computeAllEnrichedEntries();
-        const firstEntryDate = allEnriched.length > 0 ? allEnriched[0].date : '';
-        const entryMap = new Map();
-        allEnriched.forEach((item) => entryMap.set(item.date, item));
-
-        const year = state.heatmapYear;
-        const month = state.heatmapMonth;
-        el.heatmapMonthLabel.textContent = `${MONTHS_SHORT[month]} ${year}`;
-
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        let firstWeekdayDate = null;
-        for (let d = 1; d <= daysInMonth; d++) {
-          const dow = new Date(year, month, d).getDay();
-          if (dow >= 1 && dow <= 5) {
-            firstWeekdayDate = new Date(year, month, d);
-            break;
-          }
-        }
-
-        const leadingEmpty = firstWeekdayDate ? firstWeekdayDate.getDay() - 1 : 0;
-        let html = '';
-        for (let i = 0; i < leadingEmpty; i++) {
-          html += `<div class="h-11 rounded-xl bg-transparent"></div>`;
-        }
-
-        let greenDays = 0;
-        let redDays = 0;
-
-        for (let day = 1; day <= daysInMonth; day++) {
-          const dt = new Date(year, month, day);
-          const dow = dt.getDay();
-          if (dow === 0 || dow === 6) continue;
-
-          const iso = formatISODate(dt);
-          const item = entryMap.get(iso);
-
-          let cellClass = 'bg-[#222724] border-[#2F3532] text-[#8E9591]';
-          let pctLabel = '-';
-
-          if (item) {
-            if (iso === firstEntryDate) {
-              cellClass = 'bg-[#222724] border-[#2F3532] text-[#D1D5DB]';
-              pctLabel = 'Awal';
-            } else if (item.pnlNominal > 0.0001) {
-              greenDays++;
-              cellClass = 'bg-[#22C55E]/25 border-[#22C55E]/60 text-[#F3F4F6]';
-              pctLabel = `+${item.pnlPercent.toFixed(2)}%`;
-            } else if (item.pnlNominal < -0.0001) {
-              redDays++;
-              cellClass = 'bg-[#E05252]/25 border-[#E05252]/60 text-[#F3F4F6]';
-              pctLabel = `${item.pnlPercent.toFixed(2)}%`;
-            } else {
-              cellClass = 'bg-[#222724] border-[#2F3532] text-[#D1D5DB]';
-              pctLabel = '0.00%';
-            }
-          }
-
-          html += `
-            <button
-              type="button"
-              data-heatmap-date="${iso}"
-              class="heatmap-cell h-11 rounded-xl border ${cellClass} flex flex-col items-center justify-center p-1 hover:brightness-125 active:scale-95 transition"
-            >
-              <span class="text-[11px] font-semibold leading-none">${day}</span>
-              <span class="text-[8.5px] mt-1 leading-none opacity-90 [font-variant-numeric:tabular-nums]">${maskIfPrivate(pctLabel)}</span>
-            </button>
-          `;
-        }
-
-        el.pnlHeatmapGrid.innerHTML = html;
-        el.heatmapMonthSummary.textContent = `${greenDays} hari hijau • ${redDays} hari merah`;
-      }
-
-      // ==================== RENDER ALL ====================
-      function renderAll() {
-        el.selectedPeriodLabel.textContent = PERIOD_LABELS[state.periodFilter] || 'Bulanan';
-        document.querySelectorAll('.period-option').forEach((btn) => {
-          const active = btn.dataset.period === state.periodFilter;
-          btn.className = active
-            ? 'period-option w-full text-left px-3.5 py-2 text-xs text-[#22C55E] font-medium bg-[#222724]/60'
-            : 'period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]';
-        });
-
-        document.querySelectorAll('.trade-period-option').forEach((btn) => {
-          const active = btn.dataset.period === state.periodFilter;
-          btn.className = active
-            ? 'trade-period-option w-full text-left px-3.5 py-2 text-xs text-[#22C55E] font-medium bg-[#222724]/60'
-            : 'trade-period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]';
-        });
-
-        document.querySelectorAll('.chart-tab-btn').forEach((btn) => {
-          const active = btn.dataset.chartPeriod === state.periodFilter;
-          const indicator = btn.querySelector('.tab-indicator');
-          if (active) {
-            btn.className = 'chart-tab-btn min-h-[42px] py-2.5 px-1 rounded-xl text-xs font-semibold text-[#F3F4F6] bg-[#222724]/50 flex flex-col items-center justify-center gap-1.5 cursor-pointer select-none transition';
-            if (indicator) indicator.className = 'tab-indicator w-5 h-0.5 rounded-full bg-[#22C55E]';
-          } else {
-            btn.className = 'chart-tab-btn min-h-[42px] py-2.5 px-1 rounded-xl text-xs font-medium text-[#8E9591] hover:text-[#F3F4F6] active:bg-[#222724] flex flex-col items-center justify-center gap-1.5 cursor-pointer select-none transition';
-            if (indicator) indicator.className = 'tab-indicator w-5 h-0.5 rounded-full bg-transparent';
-          }
-        });
-
-        const isCustom = state.periodFilter === 'CUSTOM';
-        el.customRangeBarPortfolio.classList.toggle('hidden', !isCustom);
-        el.customRangeBarTrade.classList.toggle('hidden', !isCustom);
-        if (isCustom && state.entries.length > 0) {
-          if (!state.customStartDate) state.customStartDate = state.entries[0].date;
-          if (!state.customEndDate) state.customEndDate = state.entries[state.entries.length - 1].date;
-          el.customStartPort.value = state.customStartDate;
-          el.customEndPort.value = state.customEndDate;
-          el.customStartTrade.value = state.customStartDate;
-          el.customEndTrade.value = state.customEndDate;
-        }
-
-        const activePillClass = 'px-3.5 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition';
-        const inactivePillClass = 'px-3.5 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
-        el.btnModeDaily.className = state.viewMode === 'DAILY' ? activePillClass : inactivePillClass;
-        el.btnModeMonthly.className = state.viewMode === 'MONTHLY' ? activePillClass : inactivePillClass;
-        el.btnModeYearly.className = state.viewMode === 'YEARLY' ? activePillClass : inactivePillClass;
-
-        if (state.currency === 'IDR') {
-          el.btnCurrIDR.className = 'py-2.5 px-3 rounded-xl border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left';
-          el.btnCurrUSD.className = 'py-2.5 px-3 rounded-xl border border-[#2F3532] bg-[#111312] text-xs font-medium text-[#8E9591] text-left';
-          el.btnQuickCurrIDR.className = 'px-2.5 py-1 rounded-full bg-[#22C55E] text-[#090D0B] whitespace-nowrap transition';
-          el.btnQuickCurrUSD.className = 'px-2.5 py-1 rounded-full text-[#8E9591] hover:text-[#F3F4F6] whitespace-nowrap transition';
-          el.equityInputPrefix.textContent = 'Rp';
-          el.equityInputPrefix.classList.remove('hidden');
-          el.inputEquity.classList.add('pl-9');
-          el.inputEquity.classList.remove('pl-7');
-          el.inputEquity.placeholder = 'Contoh: 1750000';
-          el.inputQuickTopupAmount.placeholder = 'Contoh: 500000';
-          el.quickTopupCurrLabel.textContent = 'IDR';
-          el.entryEquityCurrLabel.textContent = 'IDR';
-        } else {
-          el.btnCurrUSD.className = 'py-2.5 px-3 rounded-xl border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left';
-          el.btnCurrIDR.className = 'py-2.5 px-3 rounded-xl border border-[#2F3532] bg-[#111312] text-xs font-medium text-[#8E9591] text-left';
-          el.btnQuickCurrUSD.className = 'px-2.5 py-1 rounded-full bg-[#22C55E] text-[#090D0B] whitespace-nowrap transition';
-          el.btnQuickCurrIDR.className = 'px-2.5 py-1 rounded-full text-[#8E9591] hover:text-[#F3F4F6] whitespace-nowrap transition';
-          el.equityInputPrefix.textContent = '$';
-          el.equityInputPrefix.classList.remove('hidden');
-          el.inputEquity.classList.add('pl-7');
-          el.inputEquity.classList.remove('pl-9');
-          el.inputEquity.placeholder = 'Contoh: 105.50';
-          el.inputQuickTopupAmount.placeholder = 'Contoh: 50';
-          el.quickTopupCurrLabel.textContent = 'USD';
-          el.entryEquityCurrLabel.textContent = 'USD';
-        }
-
-        el.headerRateDisplay.textContent = Math.round(state.usdIdrRate).toLocaleString('en-US');
-
-        renderPerformanceTable();
-        renderTradeAnalytics();
-      }
-
-      // ==================== MODAL & FORM LOGIC ====================
-      function getPreviousEntryBeforeDate(targetDate, ignoreOriginalDate = '') {
-        const sorted = [...state.entries]
-          .filter((e) => e.date !== targetDate && e.date !== ignoreOriginalDate)
-          .sort((a, b) => a.date.localeCompare(b.date));
-        const prior = sorted.filter((e) => e.date < targetDate);
-        return prior.length > 0 ? prior[prior.length - 1] : null;
-      }
-
-      function updateDateBadgeAndWarning() {
-        const val = el.inputDate.value;
-        if (!val) return;
-        const dt = parseISODate(val);
-        const dow = dt.getDay();
-        const isWeekend = dow === 0 || dow === 6;
-
-        el.calendarSelectedText.textContent = formatDisplayDate(val);
-        el.dayNameBadge.textContent = DAYS_ID[dow];
-        if (isWeekend) {
-          el.dayNameBadge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400';
-          el.weekendWarning.classList.remove('hidden');
-        } else {
-          el.dayNameBadge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]';
-          el.weekendWarning.classList.add('hidden');
-        }
-      }
-
-      function setSelectedCalendarDate(isoStr, syncCalendarView = true) {
-        el.inputDate.value = isoStr;
-        if (syncCalendarView && isoStr) {
-          const dt = parseISODate(isoStr);
-          state.calYear = dt.getFullYear();
-          state.calMonth = dt.getMonth();
-        }
-        updateDateBadgeAndWarning();
-        renderCustomCalendar();
-      }
-
+      // ==================== CUSTOM INTERACTIVE CALENDAR LOGIC ====================
       function renderCustomCalendar() {
         const year = state.calYear;
         const month = state.calMonth;
         el.calMonthYearTitle.textContent = `${MONTHS_FULL[month]} ${year}`;
 
-        const firstDayOfMonth = new Date(year, month, 1).getDay();
+        const firstDayOfWeek = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const selectedIso = el.inputDate.value;
         const todayIso = formatISODate(new Date());
-        const existingDates = new Set(state.entries.map((e) => e.date));
+        const existingSet = new Set(state.entries.map((e) => e.date));
 
         let html = '';
 
-        for (let i = 0; i < firstDayOfMonth; i++) {
-          html += `<div class="h-9"></div>`;
+        for (let i = 0; i < firstDayOfWeek; i++) {
+          html += `<div class="h-8"></div>`;
         }
 
         for (let day = 1; day <= daysInMonth; day++) {
@@ -2909,19 +2907,20 @@ function doPost(e) {
           const isWeekend = dow === 0 || dow === 6;
           const isSelected = iso === selectedIso;
           const isToday = iso === todayIso;
-          const hasEntry = existingDates.has(iso);
+          const hasEntry = existingSet.has(iso);
 
-          let btnClass = 'h-9 rounded-xl text-xs flex flex-col items-center justify-center relative transition ';
+          let btnClasses = 'relative h-8 rounded-lg text-xs font-medium flex flex-col items-center justify-center transition ';
+
           if (isSelected) {
-            btnClass += 'bg-[#22C55E] text-[#090D0B] font-bold shadow-md shadow-[#22C55E]/20';
+            btnClasses += 'bg-[#22C55E] text-[#090D0B] font-semibold shadow-xs ';
           } else if (isWeekend) {
-            btnClass += 'text-[#58605C] hover:bg-[#181B19]';
+            btnClasses += 'text-[#555D59] hover:bg-[#1A1E1C] ';
           } else {
-            btnClass += 'text-[#E5E7EB] hover:bg-[#1E2320] font-medium';
+            btnClasses += 'text-[#E5E7EB] hover:bg-[#1F2421] ';
           }
 
           if (isToday && !isSelected) {
-            btnClass += ' border border-[#22C55E]/50';
+            btnClasses += 'border border-[#22C55E]/50 ';
           }
 
           const dotHtml = hasEntry
@@ -2929,7 +2928,7 @@ function doPost(e) {
             : `<span class="w-1 h-1 mt-0.5"></span>`;
 
           html += `
-            <button type="button" data-cal-date="${iso}" class="cal-day-btn ${btnClass}">
+            <button type="button" data-cal-date="${iso}" class="${btnClasses}">
               <span class="leading-none">${day}</span>
               ${dotHtml}
             </button>
@@ -2940,17 +2939,48 @@ function doPost(e) {
       }
 
       function toggleCustomCalendar(forceState) {
-        const willShow = typeof forceState === 'boolean'
+        const shouldOpen = typeof forceState === 'boolean'
           ? forceState
           : el.customCalendarBox.classList.contains('hidden');
-        el.customCalendarBox.classList.toggle('hidden', !willShow);
-        el.calendarChevron.classList.toggle('rotate-180', willShow);
-        if (willShow) {
+
+        el.customCalendarBox.classList.toggle('hidden', !shouldOpen);
+        el.calendarChevron.classList.toggle('rotate-180', shouldOpen);
+        if (shouldOpen) {
           renderCustomCalendar();
         }
       }
 
-      function applyTopupModeUI() {
+      // ==================== MODAL & FORM HELPERS ====================
+      function updateDateHelperUI(isoStr) {
+        if (!isoStr) return;
+        const dt = parseISODate(isoStr);
+        state.calMonth = dt.getMonth();
+        state.calYear = dt.getFullYear();
+        el.calendarSelectedText.textContent = formatDisplayDate(isoStr);
+
+        const dayIdx = dt.getDay();
+        const dayName = DAYS_ID[dayIdx];
+        el.dayNameBadge.textContent = dayName;
+
+        const isWeekend = dayIdx === 0 || dayIdx === 6;
+        if (isWeekend) {
+          el.dayNameBadge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400';
+          el.weekendWarning.classList.remove('hidden');
+        } else {
+          el.dayNameBadge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]';
+          el.weekendWarning.classList.add('hidden');
+        }
+
+        if (!el.customCalendarBox.classList.contains('hidden')) {
+          renderCustomCalendar();
+        }
+
+        updateLivePnlPreview();
+      }
+
+      function setTopupInputMode(mode) {
+        state.topupInputMode = mode === 'MARKET_CLOSE' ? 'MARKET_CLOSE' : 'TOPUP_ONLY';
+
         if (state.topupInputMode === 'TOPUP_ONLY') {
           el.btnModeTopupOnly.className = 'w-full p-2.5 rounded-xl text-left border border-[#22C55E] bg-[#22C55E]/10 transition';
           el.btnModeTopupOnly.querySelector('span').className = 'text-xs font-semibold text-[#22C55E]';
@@ -2962,66 +2992,60 @@ function doPost(e) {
           el.btnModeMarketClose.querySelector('span').className = 'text-xs font-semibold text-[#22C55E]';
           el.btnModeTopupOnly.className = 'w-full p-2.5 rounded-xl text-left border border-[#2F3532] bg-[#181B19] hover:border-[#3E4642] transition';
           el.btnModeTopupOnly.querySelector('span').className = 'text-xs font-semibold text-[#D1D5DB]';
-          el.cashflowModeHint.innerHTML = '<strong class="text-[#22C55E]">Mode 2 Aktif:</strong> Ketik saldo penutupan akhir dari broker Anda pada kolom Total Equity di atas; sistem otomatis menghitung P&amp;L murni tanpa tercampur nominal Top-Up.';
+          el.cashflowModeHint.innerHTML = '<strong class="text-[#22C55E]">Mode 2 Aktif:</strong> Ketik <strong class="text-[#D1D5DB]">Total Equity Penutupan</strong> sesuai aplikasi broker Anda di kolom atas, lalu isi nominal Top-Up di sini agar P&amp;L dihitung akurat.';
         }
-      }
 
-      function syncEquityWithCashflow() {
-        const rawFlowInput = parseFloat(el.inputCashflowAmount.value);
-        if (state.topupInputMode !== 'TOPUP_ONLY' || isNaN(rawFlowInput) || rawFlowInput <= 0) return;
-
-        const targetDate = el.inputDate.value;
-        const originalDate = el.editingOriginalDate.value;
-        const prevEntry = getPreviousEntryBeforeDate(targetDate, originalDate);
-        const rawFlowUSD = fromInputAmountToUSD(rawFlowInput);
-        const signedFlowUSD = state.cashflowDirection === 'DEPOSIT' ? rawFlowUSD : -rawFlowUSD;
-
-        if (prevEntry) {
-          el.inputEquity.value = fromUSDToInputAmount(Math.max(0, prevEntry.equity + signedFlowUSD));
-        } else {
-          el.inputEquity.value = fromUSDToInputAmount(Math.max(0, signedFlowUSD));
-        }
+        updateLivePnlPreview();
       }
 
       function updateLivePnlPreview() {
         const targetDate = el.inputDate.value;
-        const originalDate = el.editingOriginalDate.value;
-        const prevEntry = getPreviousEntryBeforeDate(targetDate, originalDate);
+        const rawFlowInput = Math.abs(parseFloat(el.inputCashflowAmount.value)) || 0;
+        const signedFlowUSD = fromInputAmountToUSD(state.cashflowDirection === 'DEPOSIT' ? rawFlowInput : -rawFlowInput);
 
-        if (prevEntry) {
-          el.prevEquityHint.textContent = `Sebelumnya (${formatDisplayDate(prevEntry.date)}): ${formatNumber(prevEntry.equity)}`;
+        const priorEntries = state.entries
+          .filter((e) => e.date < targetDate)
+          .sort((a, b) => a.date.localeCompare(b.date));
+
+        if (priorEntries.length === 0) {
+          el.prevEquityHint.textContent = 'Hari pertama (Modal awal)';
         } else {
-          el.prevEquityHint.textContent = 'Modal Awal Pertama';
+          const prevEq = priorEntries[priorEntries.length - 1].equity;
+          el.prevEquityHint.textContent = `Sebelumnya: ${formatNumber(prevEq)}`;
         }
 
-        const eqValInput = parseFloat(el.inputEquity.value);
-        const rawFlowInput = parseFloat(el.inputCashflowAmount.value) || 0;
-        const eqValUSD = fromInputAmountToUSD(eqValInput);
-        const rawFlowUSD = fromInputAmountToUSD(rawFlowInput);
-        const signedFlowUSD = state.cashflowDirection === 'DEPOSIT' ? rawFlowUSD : -rawFlowUSD;
+        if (rawFlowInput > 0 && state.topupInputMode === 'TOPUP_ONLY' && !el.cashflowInputContainer.classList.contains('hidden')) {
+          const basePrevEq = priorEntries.length > 0 ? priorEntries[priorEntries.length - 1].equity : 0;
+          const autoEquityUSD = Math.max(0, basePrevEq + signedFlowUSD);
+          el.inputEquity.value = fromUSDToInputAmount(autoEquityUSD);
+        }
 
-        if (isNaN(eqValUSD)) {
+        const rawEquityInput = parseFloat(el.inputEquity.value);
+        const equityValUSD = fromInputAmountToUSD(rawEquityInput);
+
+        if (isNaN(equityValUSD)) {
           el.livePnlPreview.textContent = `${formatNumber(0, true)} (0.00%)`;
           el.livePnlPreview.className = 'text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]';
           return;
         }
 
-        if (!prevEntry) {
+        if (priorEntries.length === 0) {
           el.livePnlPreview.textContent = `${formatNumber(0, true)} (0.00%)`;
           el.livePnlPreview.className = 'text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]';
           return;
         }
 
-        const pnlNominalUSD = eqValUSD - prevEntry.equity - signedFlowUSD;
-        const baseUSD = prevEntry.equity + signedFlowUSD;
-        const pnlPct = baseUSD > 0 ? (pnlNominalUSD / baseUSD) * 100 : 0;
-        const color = pnlNominalUSD > 0.0001 ? 'text-[#22C55E]' : pnlNominalUSD < -0.0001 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
+        const prevEq = priorEntries[priorEntries.length - 1].equity;
+        const pnl = equityValUSD - prevEq - signedFlowUSD;
+        const base = prevEq + signedFlowUSD;
+        const pct = base > 0 ? (pnl / base) * 100 : 0;
 
-        el.livePnlPreview.textContent = `${formatNumber(pnlNominalUSD, true)} ${formatSignedPercent(pnlPct)}`;
+        const color = pnl > 0.0001 ? 'text-[#22C55E]' : pnl < -0.0001 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
+        el.livePnlPreview.textContent = `${formatNumber(pnl, true)} ${formatSignedPercent(pct)}`;
         el.livePnlPreview.className = `text-sm font-semibold ${color} [font-variant-numeric:tabular-nums]`;
       }
 
-      function setCashflowDirectionUI(dir) {
+      function setCashflowDirection(dir) {
         state.cashflowDirection = dir;
         if (dir === 'DEPOSIT') {
           el.btnFlowDeposit.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition';
@@ -3030,81 +3054,32 @@ function doPost(e) {
           el.btnFlowWithdraw.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#E05252]/15 text-[#E05252] border border-[#E05252]/40 transition';
           el.btnFlowDeposit.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#181B19] text-[#8E9591] border border-[#2F3532] transition';
         }
-        syncEquityWithCashflow();
         updateLivePnlPreview();
       }
 
-      function openEntryModal(editDate = '', autoExpandCashflow = false) {
-        el.inlineDeleteConfirm.classList.add('hidden');
-        toggleCustomCalendar(false);
+      function updateQuickTopupPreview() {
+        const dateVal = el.inputQuickTopupDate.value;
+        const rawAmt = Math.abs(parseFloat(el.inputQuickTopupAmount.value)) || 0;
+        const signedAmtUSD = fromInputAmountToUSD(state.quickTopupDirection === 'DEPOSIT' ? rawAmt : -rawAmt);
 
-        if (editDate) {
-          const existing = state.entries.find((e) => e.date === editDate);
-          if (!existing) return;
-          el.entryModalTitle.textContent = 'Edit Data Equity';
-          el.editingOriginalDate.value = existing.date;
-          setSelectedCalendarDate(existing.date, true);
-          el.inputEquity.value = fromUSDToInputAmount(existing.equity);
-          el.inputNote.value = existing.note || '';
-          el.btnDeleteEntry.classList.remove('hidden');
+        const priorEntries = state.entries
+          .filter((e) => e.date < dateVal)
+          .sort((a, b) => a.date.localeCompare(b.date));
+        const existingSameDay = state.entries.find((e) => e.date === dateVal);
 
-          if (existing.netFlow !== 0) {
-            el.cashflowInputContainer.classList.remove('hidden');
-            el.cashflowChevron.classList.add('rotate-180');
-            state.topupInputMode = 'MARKET_CLOSE';
-            applyTopupModeUI();
-            setCashflowDirectionUI(existing.netFlow > 0 ? 'DEPOSIT' : 'WITHDRAW');
-            el.inputCashflowAmount.value = fromUSDToInputAmount(Math.abs(existing.netFlow));
-          } else {
-            el.cashflowInputContainer.classList.add('hidden');
-            el.cashflowChevron.classList.remove('rotate-180');
-            state.topupInputMode = 'TOPUP_ONLY';
-            applyTopupModeUI();
-            setCashflowDirectionUI('DEPOSIT');
-            el.inputCashflowAmount.value = '';
-          }
-        } else {
-          el.entryModalTitle.textContent = 'Update Equity Harian';
-          el.editingOriginalDate.value = '';
-          const latest = state.entries.length > 0 ? state.entries[state.entries.length - 1] : null;
-          const nextDate = latest ? getNextUSTradingDay(latest.date) : formatISODate(new Date());
-          setSelectedCalendarDate(nextDate, true);
-          el.inputEquity.value = latest ? fromUSDToInputAmount(latest.equity) : '';
-          el.inputNote.value = '';
-          el.btnDeleteEntry.classList.add('hidden');
+        const baseEq = existingSameDay
+          ? existingSameDay.equity
+          : priorEntries.length > 0
+          ? priorEntries[priorEntries.length - 1].equity
+          : 0;
 
-          if (autoExpandCashflow) {
-            el.cashflowInputContainer.classList.remove('hidden');
-            el.cashflowChevron.classList.add('rotate-180');
-          } else {
-            el.cashflowInputContainer.classList.add('hidden');
-            el.cashflowChevron.classList.remove('rotate-180');
-          }
-          state.topupInputMode = 'TOPUP_ONLY';
-          applyTopupModeUI();
-          setCashflowDirectionUI('DEPOSIT');
-          el.inputCashflowAmount.value = '';
-        }
-
-        updateDateBadgeAndWarning();
-        updateLivePnlPreview();
-        el.entryModalBackdrop.classList.remove('hidden');
+        el.quickTopupBaseHint.textContent = `Saldo acuan: ${formatNumber(baseEq)}`;
+        const nextEq = Math.max(0, baseEq + signedAmtUSD);
+        el.quickTopupResultPreview.textContent = formatNumber(nextEq);
+        el.quickTopupResultPreview.className = `text-sm font-semibold ${state.quickTopupDirection === 'DEPOSIT' ? 'text-[#22C55E]' : 'text-[#E05252]'} [font-variant-numeric:tabular-nums]`;
       }
 
-      function closeEntryModal() {
-        toggleCustomCalendar(false);
-        el.entryModalBackdrop.classList.add('hidden');
-      }
-
-      // ==================== TOP-UP ONLY MODAL LOGIC ====================
-      function getTopupBaseEntry(targetDate) {
-        if (state.entries.length === 0) return null;
-        const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
-        const sameOrBefore = sorted.filter((e) => e.date <= targetDate);
-        return sameOrBefore.length > 0 ? sameOrBefore[sameOrBefore.length - 1] : sorted[sorted.length - 1];
-      }
-
-      function setQuickTopupDirectionUI(dir) {
+      function setQuickTopupDirection(dir) {
         state.quickTopupDirection = dir;
         if (dir === 'DEPOSIT') {
           el.btnQuickTopupSign.className = 'py-2 rounded-xl text-xs font-semibold bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition';
@@ -3116,86 +3091,136 @@ function doPost(e) {
         updateQuickTopupPreview();
       }
 
-      function updateQuickTopupPreview() {
-        const targetDate = el.inputQuickTopupDate.value || formatISODate(new Date());
-        const baseEntry = getTopupBaseEntry(targetDate);
-        const baseEqUSD = baseEntry ? baseEntry.equity : 0;
-        el.quickTopupBaseHint.textContent = `Saldo saat ini: ${formatNumber(baseEqUSD)}`;
-
-        const rawAmtInput = parseFloat(el.inputQuickTopupAmount.value) || 0;
-        const rawAmtUSD = fromInputAmountToUSD(rawAmtInput);
-        const signedAmtUSD = state.quickTopupDirection === 'DEPOSIT' ? rawAmtUSD : -rawAmtUSD;
-        const nextEqUSD = Math.max(0, baseEqUSD + signedAmtUSD);
-        el.quickTopupResultPreview.textContent = formatNumber(nextEqUSD);
-      }
-
       function removeTopupByDate(targetDate) {
-        const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
-        const idx = sorted.findIndex((item) => item.date === targetDate);
-        if (idx === -1) return false;
+        const idx = state.entries.findIndex((e) => e.date === targetDate);
+        if (idx === -1) return;
 
-        const targetItem = sorted[idx];
-        const removedFlow = Number(targetItem.netFlow) || 0;
-        if (removedFlow === 0) return false;
+        const targetEntry = state.entries[idx];
+        const removedFlow = Number(targetEntry.netFlow) || 0;
+        if (removedFlow === 0) return;
 
-        const prevEq = idx > 0 ? sorted[idx - 1].equity : null;
-        const isPureTopupRow =
-          (prevEq !== null && Math.abs(targetItem.equity - (prevEq + removedFlow)) < 0.05) ||
-          (prevEq === null && Math.abs(targetItem.equity - removedFlow) < 0.05);
+        const prevEntry = idx > 0 ? state.entries[idx - 1] : null;
+        const expectedPureTopupEquity = prevEntry ? prevEntry.equity + removedFlow : removedFlow;
+        const isPureTopupRow = Math.abs(targetEntry.equity - expectedPureTopupEquity) < 0.005;
 
         if (isPureTopupRow) {
-          sorted.splice(idx, 1);
-          for (let j = idx; j < sorted.length; j++) {
-            sorted[j].equity = Math.max(0, sorted[j].equity - removedFlow);
-          }
+          state.entries.splice(idx, 1);
         } else {
-          sorted[idx].netFlow = 0;
-          for (let j = idx; j < sorted.length; j++) {
-            sorted[j].equity = Math.max(0, sorted[j].equity - removedFlow);
-          }
+          targetEntry.equity = Math.max(0, targetEntry.equity - removedFlow);
+          targetEntry.netFlow = 0;
         }
 
-        state.entries = sorted;
         saveState();
         renderAll();
-        return true;
+        showToast(`Riwayat Top-Up ${formatDisplayDate(targetDate)} dihapus & saldo disesuaikan`);
       }
 
-      function refreshLatestTopupUndoBanner() {
-        const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
-        const topupEntries = sorted.filter((item) => (Number(item.netFlow) || 0) !== 0);
-        if (topupEntries.length === 0) {
+      function refreshLatestTopupUndoCard() {
+        const latestFlowEntry = [...state.entries]
+          .sort((a, b) => a.date.localeCompare(b.date))
+          .filter((e) => (Number(e.netFlow) || 0) !== 0)
+          .pop();
+
+        if (!latestFlowEntry) {
           el.latestTopupUndoCard.classList.add('hidden');
-          el.btnUndoLatestTopup.dataset.targetDate = '';
           return;
         }
-        const latestTopup = topupEntries[topupEntries.length - 1];
+
         el.latestTopupUndoCard.classList.remove('hidden');
-        el.latestTopupUndoSummary.textContent = `${formatDisplayDate(latestTopup.date)} • ${formatNumber(latestTopup.netFlow, true)}`;
-        el.btnUndoLatestTopup.dataset.targetDate = latestTopup.date;
-        el.btnUndoLatestTopup.dataset.armed = 'false';
+        el.latestTopupUndoSummary.textContent = `${formatDisplayDate(latestFlowEntry.date)} • ${formatNumber(latestFlowEntry.netFlow, true)}`;
+        el.btnUndoLatestTopup.dataset.targetDate = latestFlowEntry.date;
+        delete el.btnUndoLatestTopup.dataset.confirming;
         el.btnUndoLatestTopup.textContent = 'Hapus & Kurangi Saldo';
-        el.btnUndoLatestTopup.className = 'shrink-0 px-3 py-1.5 rounded-xl bg-[#E05252]/15 hover:bg-[#E05252]/25 border border-[#E05252]/40 text-[11px] font-semibold text-[#E05252] active:scale-95 transition';
       }
 
       function openTopupOnlyModal() {
-        const latest = state.entries.length > 0 ? state.entries[state.entries.length - 1] : null;
-        el.inputQuickTopupDate.value = latest ? latest.date : formatISODate(new Date());
+        const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
+        const defaultDate = sorted.length > 0
+          ? getNextUSTradingDay(sorted[sorted.length - 1].date)
+          : formatISODate(new Date());
+
+        el.quickTopupCurrLabel.textContent = state.currency;
+        el.inputQuickTopupAmount.placeholder = state.currency === 'USD' ? 'Contoh: 50' : 'Contoh: 825000';
+        el.inputQuickTopupDate.value = defaultDate;
         el.inputQuickTopupAmount.value = '';
-        setQuickTopupDirectionUI('DEPOSIT');
-        updateQuickTopupPreview();
-        refreshLatestTopupUndoBanner();
+        setQuickTopupDirection('DEPOSIT');
+        refreshLatestTopupUndoCard();
         el.topupOnlyModalBackdrop.classList.remove('hidden');
-        setTimeout(() => el.inputQuickTopupAmount.focus(), 80);
       }
 
       function closeTopupOnlyModal() {
         el.topupOnlyModalBackdrop.classList.add('hidden');
       }
 
+      function openEntryModal(editDate = null, openCashflowImmediately = false) {
+        el.inlineDeleteConfirm.classList.add('hidden');
+        toggleCustomCalendar(false);
+        el.entryEquityCurrLabel.textContent = state.currency;
+        el.equityInputPrefix.textContent = state.currency === 'USD' ? '$' : 'Rp';
+        el.inputEquity.placeholder = state.currency === 'USD' ? 'Contoh: 105.50' : 'Contoh: 1750000';
+        el.inputCashflowAmount.placeholder = state.currency === 'USD' ? 'Nominal Top-Up (Contoh: 50)' : 'Nominal Top-Up (Contoh: 825000)';
+
+        if (editDate) {
+          const found = state.entries.find((e) => e.date === editDate);
+          if (!found) return;
+          el.entryModalTitle.textContent = 'Edit Equity Harian';
+          el.editingOriginalDate.value = found.date;
+          el.inputDate.value = found.date;
+          el.inputEquity.value = fromUSDToInputAmount(found.equity);
+          el.inputNote.value = found.note || '';
+          el.btnDeleteEntry.classList.remove('hidden');
+
+          if (found.netFlow && found.netFlow !== 0) {
+            el.cashflowInputContainer.classList.remove('hidden');
+            el.cashflowChevron.classList.add('rotate-180');
+            setCashflowDirection(found.netFlow > 0 ? 'DEPOSIT' : 'WITHDRAW');
+            el.inputCashflowAmount.value = fromUSDToInputAmount(Math.abs(found.netFlow));
+            setTopupInputMode('MARKET_CLOSE');
+          } else {
+            el.cashflowInputContainer.classList.add('hidden');
+            el.cashflowChevron.classList.remove('rotate-180');
+            setCashflowDirection('DEPOSIT');
+            el.inputCashflowAmount.value = '';
+            setTopupInputMode('TOPUP_ONLY');
+          }
+        } else {
+          el.entryModalTitle.textContent = 'Update Equity Harian';
+          el.editingOriginalDate.value = '';
+          el.btnDeleteEntry.classList.add('hidden');
+
+          const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
+          const suggestedDate = sorted.length > 0
+            ? getNextUSTradingDay(sorted[sorted.length - 1].date)
+            : formatISODate(new Date());
+
+          el.inputDate.value = suggestedDate;
+          el.inputEquity.value = '';
+          el.inputNote.value = '';
+          el.inputCashflowAmount.value = '';
+          setCashflowDirection('DEPOSIT');
+          setTopupInputMode('TOPUP_ONLY');
+
+          if (openCashflowImmediately) {
+            el.cashflowInputContainer.classList.remove('hidden');
+            el.cashflowChevron.classList.add('rotate-180');
+          } else {
+            el.cashflowInputContainer.classList.add('hidden');
+            el.cashflowChevron.classList.remove('rotate-180');
+          }
+        }
+
+        updateDateHelperUI(el.inputDate.value);
+        el.entryModalBackdrop.classList.remove('hidden');
+      }
+
+      function closeEntryModal() {
+        toggleCustomCalendar(false);
+        el.entryModalBackdrop.classList.add('hidden');
+      }
+
       function openSettingsModal() {
-        el.inlineClearAllConfirm.classList.add('hidden');
         el.inputSettingsUsdIdrRate.value = state.usdIdrRate;
+        updateSecurityPinUI();
         updateCloudStatusUI('idle');
         el.settingsModalBackdrop.classList.remove('hidden');
       }
@@ -3204,637 +3229,710 @@ function doPost(e) {
         el.settingsModalBackdrop.classList.add('hidden');
       }
 
-      // ==================== EVENT LISTENERS ====================
-      // Primary Tab Switching
-      el.tabPortfolio.addEventListener('click', () => {
-        state.activeTab = 'PORTFOLIO';
-        el.tabPortfolio.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors';
-        el.tabTrade.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] hover:text-[#D1D5DB] border-b-2 border-transparent transition-colors';
-        el.viewPortfolio.classList.remove('hidden');
-        el.viewTrade.classList.add('hidden');
-      });
+      // ==================== FULL RENDER ORCHESTRATOR ====================
+      function renderAll() {
+        el.selectedPeriodLabel.textContent = PERIOD_LABELS[state.periodFilter] || 'Bulanan';
+        el.headerRateDisplay.textContent = Math.round(state.usdIdrRate).toLocaleString('en-US');
 
-      el.tabTrade.addEventListener('click', () => {
-        state.activeTab = 'TRADE';
-        el.tabTrade.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors';
-        el.tabPortfolio.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] hover:text-[#D1D5DB] border-b-2 border-transparent transition-colors';
-        el.viewTrade.classList.remove('hidden');
-        el.viewPortfolio.classList.add('hidden');
-        renderTradeAnalytics();
-      });
-
-      // Quick USD / IDR Currency Switcher in Header
-      el.btnQuickCurrUSD.addEventListener('click', () => {
-        if (state.currency !== 'USD') {
-          setDisplayCurrency('USD');
-          showToast('Mata uang tampilan: USD ($)');
-        }
-      });
-
-      el.btnQuickCurrIDR.addEventListener('click', () => {
-        if (state.currency !== 'IDR') {
-          setDisplayCurrency('IDR');
-          showToast(`Mata uang tampilan: IDR (Kurs Rp ${Math.round(state.usdIdrRate).toLocaleString('en-US')})`);
-        }
-      });
-
-      // Quick Inline USD/IDR Exchange Rate Editor
-      el.btnQuickEditRate.addEventListener('click', () => {
-        const isHidden = el.quickRateEditorBar.classList.contains('hidden');
-        el.quickRateEditorBar.classList.toggle('hidden', !isHidden);
-        if (isHidden) {
-          el.inputQuickUsdIdrRate.value = state.usdIdrRate;
-          setTimeout(() => el.inputQuickUsdIdrRate.focus(), 60);
-        }
-      });
-
-      el.btnSaveQuickRate.addEventListener('click', () => {
-        if (setUsdIdrRate(el.inputQuickUsdIdrRate.value, true)) {
-          el.quickRateEditorBar.classList.add('hidden');
-          renderAll();
-          showToast(`Kurs diperbarui: $1 = Rp ${Math.round(state.usdIdrRate).toLocaleString('en-US')}`);
+        if (state.currency === 'USD') {
+          el.btnQuickCurrUSD.className = 'px-2.5 py-1 rounded-full bg-[#22C55E] text-[#090D0B] whitespace-nowrap transition';
+          el.btnQuickCurrIDR.className = 'px-2.5 py-1 rounded-full text-[#8E9591] hover:text-[#F3F4F6] whitespace-nowrap transition';
+          el.btnCurrUSD.className = 'py-2.5 px-3 rounded-xl border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left';
+          el.btnCurrIDR.className = 'py-2.5 px-3 rounded-xl border border-[#2F3532] bg-[#111312] text-xs font-medium text-[#8E9591] text-left';
         } else {
-          showToast('Masukkan angka kurs yang valid');
+          el.btnQuickCurrIDR.className = 'px-2.5 py-1 rounded-full bg-[#22C55E] text-[#090D0B] whitespace-nowrap transition';
+          el.btnQuickCurrUSD.className = 'px-2.5 py-1 rounded-full text-[#8E9591] hover:text-[#F3F4F6] whitespace-nowrap transition';
+          el.btnCurrIDR.className = 'py-2.5 px-3 rounded-xl border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left';
+          el.btnCurrUSD.className = 'py-2.5 px-3 rounded-xl border border-[#2F3532] bg-[#111312] text-xs font-medium text-[#8E9591] text-left';
         }
-      });
 
-      el.inputQuickUsdIdrRate.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          el.btnSaveQuickRate.click();
+        if (state.viewMode === 'DAILY') {
+          el.btnModeDaily.className = 'px-3.5 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition';
+          el.btnModeMonthly.className = 'px-3.5 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
+          el.btnModeYearly.className = 'px-3.5 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
+        } else if (state.viewMode === 'MONTHLY') {
+          el.btnModeMonthly.className = 'px-3.5 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition';
+          el.btnModeDaily.className = 'px-3.5 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
+          el.btnModeYearly.className = 'px-3.5 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
+        } else {
+          el.btnModeYearly.className = 'px-3.5 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition';
+          el.btnModeDaily.className = 'px-3.5 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
+          el.btnModeMonthly.className = 'px-3.5 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
         }
-      });
 
-      // Delegated Privacy Eye Button Clicks (beside nominal balances)
-      document.addEventListener('click', (e) => {
-        const trigger = e.target.closest('[data-privacy-trigger="true"]');
-        if (trigger) {
-          e.stopPropagation();
-          togglePrivacyMode();
+        document.querySelectorAll('.period-option').forEach((opt) => {
+          const isMatch = opt.dataset.period === state.periodFilter;
+          opt.className = isMatch
+            ? 'period-option w-full text-left px-3.5 py-2 text-xs text-[#22C55E] font-medium bg-[#222724]/60'
+            : 'period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]';
+        });
+
+        document.querySelectorAll('.trade-period-option').forEach((opt) => {
+          const isMatch = opt.dataset.period === state.periodFilter;
+          opt.className = isMatch
+            ? 'trade-period-option w-full text-left px-3.5 py-2 text-xs text-[#22C55E] font-medium bg-[#222724]/60'
+            : 'trade-period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]';
+        });
+
+        const showCustom = state.periodFilter === 'CUSTOM';
+        el.customRangeBarPortfolio.classList.toggle('hidden', !showCustom);
+        el.customRangeBarTrade.classList.toggle('hidden', !showCustom);
+
+        if (showCustom && state.entries.length > 0) {
+          if (!state.customStartDate) state.customStartDate = state.entries[0].date;
+          if (!state.customEndDate) state.customEndDate = state.entries[state.entries.length - 1].date;
+          el.customStartPort.value = state.customStartDate;
+          el.customEndPort.value = state.customEndDate;
+          el.customStartTrade.value = state.customStartDate;
+          el.customEndTrade.value = state.customEndDate;
         }
-      });
 
-      // Quick Theme Toggle in Header
-      el.btnToggleThemeHeader.addEventListener('click', () => {
-        setThemeMode(state.theme === 'DARK' ? 'LIGHT' : 'DARK');
-      });
-
-      // Info Tooltip Toggle
-      el.btnToggleInfo.addEventListener('click', () => {
-        el.infoTooltipCard.classList.toggle('hidden');
-      });
-      el.btnCloseInfo.addEventListener('click', () => {
-        el.infoTooltipCard.classList.add('hidden');
-      });
-
-      // Daily / Monthly / Yearly Pill Buttons
-      el.btnModeDaily.addEventListener('click', () => {
-        state.viewMode = 'DAILY';
-        state.visibleRowLimit = 35;
-        renderAll();
-      });
-      el.btnModeMonthly.addEventListener('click', () => {
-        state.viewMode = 'MONTHLY';
-        renderAll();
-      });
-      el.btnModeYearly.addEventListener('click', () => {
-        state.viewMode = 'YEARLY';
-        renderAll();
-      });
-
-      // Load More Pagination Button
-      el.btnLoadMoreRows.addEventListener('click', () => {
-        state.visibleRowLimit += 50;
         renderPerformanceTable();
-      });
-
-      // Period Dropdown (Portfolio Tab)
-      el.btnPeriodDropdown.addEventListener('click', (e) => {
-        e.stopPropagation();
-        el.tradePeriodDropdownMenu.classList.add('hidden');
-        el.periodDropdownMenu.classList.toggle('hidden');
-      });
-
-      document.querySelectorAll('.period-option').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          state.periodFilter = btn.dataset.period;
-          state.visibleRowLimit = 35;
-          el.periodDropdownMenu.classList.add('hidden');
-          renderAll();
-        });
-      });
-
-      // Period Dropdown (Trade Tab)
-      el.btnTradePeriodDropdown.addEventListener('click', (e) => {
-        e.stopPropagation();
-        el.periodDropdownMenu.classList.add('hidden');
-        el.tradePeriodDropdownMenu.classList.toggle('hidden');
-      });
-
-      document.querySelectorAll('.trade-period-option').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          state.periodFilter = btn.dataset.period;
-          state.visibleRowLimit = 35;
-          el.tradePeriodDropdownMenu.classList.add('hidden');
-          renderAll();
-        });
-      });
-
-      // Quick Bibit-Style Period Tabs (1D | 1W | 1M | 3M | YTD | 1Y | All)
-      document.querySelectorAll('.chart-tab-btn').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          state.periodFilter = btn.dataset.chartPeriod;
-          state.visibleRowLimit = 35;
-          renderAll();
-        });
-      });
-
-      // Custom Date Range Inputs Sync
-      function handleCustomRangeChange(startVal, endVal) {
-        if (startVal) state.customStartDate = startVal;
-        if (endVal) state.customEndDate = endVal;
-        renderAll();
+        renderTradeAnalytics();
       }
-      el.customStartPort.addEventListener('change', (e) => handleCustomRangeChange(e.target.value, null));
-      el.customEndPort.addEventListener('change', (e) => handleCustomRangeChange(null, e.target.value));
-      el.customStartTrade.addEventListener('change', (e) => handleCustomRangeChange(e.target.value, null));
-      el.customEndTrade.addEventListener('change', (e) => handleCustomRangeChange(null, e.target.value));
 
-      // Monthly Heatmap Month Navigation & Cell Click
-      el.btnHeatmapPrevMonth.addEventListener('click', () => {
-        if (state.heatmapMonth === 0) {
-          state.heatmapMonth = 11;
-          state.heatmapYear -= 1;
+      function switchTab(tabName) {
+        state.activeTab = tabName;
+        if (tabName === 'PORTFOLIO') {
+          el.tabPortfolio.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors';
+          el.tabPortfolio.setAttribute('aria-selected', 'true');
+          el.tabTrade.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] hover:text-[#D1D5DB] border-b-2 border-transparent transition-colors';
+          el.tabTrade.setAttribute('aria-selected', 'false');
+          el.viewPortfolio.classList.remove('hidden');
+          el.viewTrade.classList.add('hidden');
         } else {
-          state.heatmapMonth -= 1;
+          el.tabTrade.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors';
+          el.tabTrade.setAttribute('aria-selected', 'true');
+          el.tabPortfolio.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] hover:text-[#D1D5DB] border-b-2 border-transparent transition-colors';
+          el.tabPortfolio.setAttribute('aria-selected', 'false');
+          el.viewTrade.classList.remove('hidden');
+          el.viewPortfolio.classList.add('hidden');
+          renderTradeAnalytics();
         }
-        el.heatmapSelectedInfo.textContent = 'Ketuk tanggal untuk melihat P&L';
-        renderHeatmapCalendar();
-      });
+      }
 
-      el.btnHeatmapNextMonth.addEventListener('click', () => {
-        if (state.heatmapMonth === 11) {
-          state.heatmapMonth = 0;
-          state.heatmapYear += 1;
-        } else {
-          state.heatmapMonth += 1;
-        }
-        el.heatmapSelectedInfo.textContent = 'Ketuk tanggal untuk melihat P&L';
-        renderHeatmapCalendar();
-      });
+      // ==================== EVENT LISTENERS ====================
+      function bindEvents() {
+        // Tab Switching
+        el.tabPortfolio.addEventListener('click', () => switchTab('PORTFOLIO'));
+        el.tabTrade.addEventListener('click', () => switchTab('TRADE'));
 
-      el.pnlHeatmapGrid.addEventListener('click', (e) => {
-        const cell = e.target.closest('.heatmap-cell');
-        if (!cell) return;
-        const iso = cell.dataset.heatmapDate;
-        const allEnriched = computeAllEnrichedEntries();
-        const found = allEnriched.find((item) => item.date === iso);
-        if (!found) {
-          el.heatmapSelectedInfo.textContent = `${formatDisplayDate(iso)}: Tidak ada data`;
-          return;
-        }
-        const signColor = found.pnlNominal > 0.0001
-          ? 'text-[#22C55E]'
-          : found.pnlNominal < -0.0001
-          ? 'text-[#E05252]'
-          : 'text-[#D1D5DB]';
-        el.heatmapSelectedInfo.innerHTML = `<span class="text-[#F3F4F6] font-medium">${formatDisplayDate(iso)}</span>: <span class="${signColor} font-semibold">${maskIfPrivate(`${formatNumber(found.pnlNominal, true)} ${formatSignedPercent(found.pnlPercent)}`)}</span>`;
-      });
-
-      // Delegated Remove Top-Up Button in Cashflow History List
-      el.cashflowListContainer.addEventListener('click', (e) => {
-        const btn = e.target.closest('.btn-remove-topup');
-        if (!btn) return;
-        const targetDate = btn.dataset.removeTopupDate;
-        if (!targetDate) return;
-
-        if (btn.dataset.armed !== 'true') {
-          btn.dataset.armed = 'true';
-          btn.textContent = 'Yakin?';
-          btn.className = 'btn-remove-topup px-2.5 py-1 rounded-lg bg-[#E05252] text-[10px] font-semibold text-white transition';
-          setTimeout(() => {
-            if (btn.isConnected && btn.dataset.armed === 'true') {
-              btn.dataset.armed = 'false';
-              btn.textContent = 'Hapus';
-              btn.className = 'btn-remove-topup px-2 py-1 rounded-lg bg-[#E05252]/10 hover:bg-[#E05252]/20 border border-[#E05252]/30 text-[10px] font-medium text-[#E05252] active:scale-95 transition';
-            }
-          }, 3000);
-          return;
-        }
-
-        if (removeTopupByDate(targetDate)) {
-          showToast(`Riwayat Top-Up ${formatDisplayDate(targetDate)} & saldonya dihapus`);
-        }
-      });
-
-      document.addEventListener('click', () => {
-        el.periodDropdownMenu.classList.add('hidden');
-        el.tradePeriodDropdownMenu.classList.add('hidden');
-      });
-
-      // Row Click to Edit Entry
-      el.performanceTableBody.addEventListener('click', (e) => {
-        const row = e.target.closest('.daily-row');
-        if (row && row.dataset.editDate) {
-          openEntryModal(row.dataset.editDate);
-        }
-      });
-
-      // Refresh & Cloud Sync Button
-      el.btnRefreshApp.addEventListener('click', async () => {
-        el.refreshIconSvg.classList.add('rotate-180');
-        setTimeout(() => el.refreshIconSvg.classList.remove('rotate-180'), 550);
-
-        if (getAppsScriptUrl()) {
-          await loadFromGoogleSheets(false);
-        } else {
-          renderAll();
-          showToast('Tampilan diperbarui (Mode Lokal)');
-        }
-      });
-
-      el.btnSyncStatusHeader.addEventListener('click', openSettingsModal);
-
-      // Open Entry Modal Triggers
-      el.btnQuickAddHeader.addEventListener('click', () => openEntryModal(''));
-      el.btnFloatingUpdate.addEventListener('click', () => openEntryModal(''));
-      el.btnEmptyAddFirst.addEventListener('click', () => openEntryModal(''));
-      el.btnFloatingTopup.addEventListener('click', openTopupOnlyModal);
-      el.btnAddCashflowShortcut.addEventListener('click', openTopupOnlyModal);
-
-      // Top-Up Only Modal Listeners
-      el.btnCloseTopupOnlyModal.addEventListener('click', closeTopupOnlyModal);
-      el.topupOnlyModalBackdrop.addEventListener('click', (e) => {
-        if (e.target === el.topupOnlyModalBackdrop) closeTopupOnlyModal();
-      });
-
-      el.btnQuickTopupSign.addEventListener('click', () => setQuickTopupDirectionUI('DEPOSIT'));
-      el.btnQuickWithdrawSign.addEventListener('click', () => setQuickTopupDirectionUI('WITHDRAW'));
-      el.inputQuickTopupDate.addEventListener('change', updateQuickTopupPreview);
-      el.inputQuickTopupAmount.addEventListener('input', updateQuickTopupPreview);
-
-      el.btnUndoLatestTopup.addEventListener('click', () => {
-        const targetDate = el.btnUndoLatestTopup.dataset.targetDate;
-        if (!targetDate) return;
-
-        if (el.btnUndoLatestTopup.dataset.armed !== 'true') {
-          el.btnUndoLatestTopup.dataset.armed = 'true';
-          el.btnUndoLatestTopup.textContent = 'Ketuk Lagi untuk Hapus';
-          el.btnUndoLatestTopup.className = 'shrink-0 px-3 py-1.5 rounded-xl bg-[#E05252] text-[11px] font-semibold text-white active:scale-95 transition';
-          setTimeout(() => {
-            if (el.btnUndoLatestTopup.isConnected && el.btnUndoLatestTopup.dataset.armed === 'true') {
-              refreshLatestTopupUndoBanner();
-            }
-          }, 3500);
-          return;
-        }
-
-        if (removeTopupByDate(targetDate)) {
-          refreshLatestTopupUndoBanner();
-          updateQuickTopupPreview();
-          showToast(`Top-Up ${formatDisplayDate(targetDate)} dihapus & saldo dikurangi`);
-        }
-      });
-
-      el.topupOnlyForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const targetDate = el.inputQuickTopupDate.value;
-        const rawAmtInput = parseFloat(el.inputQuickTopupAmount.value);
-        if (!targetDate || isNaN(rawAmtInput) || rawAmtInput <= 0) {
-          showToast('Masukkan nominal Top-Up / Tarik yang valid');
-          return;
-        }
-
-        const rawAmtUSD = fromInputAmountToUSD(rawAmtInput);
-        const signedAmtUSD = state.quickTopupDirection === 'DEPOSIT' ? rawAmtUSD : -rawAmtUSD;
-
-        state.entries.sort((a, b) => a.date.localeCompare(b.date));
-        const existingIdx = state.entries.findIndex((item) => item.date === targetDate);
-
-        if (existingIdx !== -1) {
-          state.entries[existingIdx].netFlow = (Number(state.entries[existingIdx].netFlow) || 0) + signedAmtUSD;
-          for (let j = existingIdx; j < state.entries.length; j++) {
-            state.entries[j].equity = Math.max(0, state.entries[j].equity + signedAmtUSD);
-          }
-        } else {
-          const baseEntry = getTopupBaseEntry(targetDate);
-          const baseEqUSD = baseEntry ? baseEntry.equity : 0;
-          const newEqUSD = Math.max(0, baseEqUSD + signedAmtUSD);
-          state.entries.push({
-            date: targetDate,
-            equity: newEqUSD,
-            netFlow: signedAmtUSD,
-            note: signedAmtUSD > 0 ? 'Top-Up Saldo' : 'Tarik Saldo'
-          });
-          state.entries.sort((a, b) => a.date.localeCompare(b.date));
-          const insertedIdx = state.entries.findIndex((item) => item.date === targetDate);
-          for (let j = insertedIdx + 1; j < state.entries.length; j++) {
-            state.entries[j].equity = Math.max(0, state.entries[j].equity + signedAmtUSD);
-          }
-        }
-
-        saveState();
-        renderAll();
-        closeTopupOnlyModal();
-        showToast(signedAmtUSD > 0 ? 'Top-Up saldo berhasil ditambahkan' : 'Penarikan saldo berhasil dicatat');
-      });
-
-      // Entry Modal Listeners
-      el.btnCloseEntryModal.addEventListener('click', closeEntryModal);
-      el.entryModalBackdrop.addEventListener('click', (e) => {
-        if (e.target === el.entryModalBackdrop) closeEntryModal();
-      });
-
-      el.btnOpenCustomCalendar.addEventListener('click', () => toggleCustomCalendar());
-      el.btnCalPrevMonth.addEventListener('click', () => {
-        if (state.calMonth === 0) {
-          state.calMonth = 11;
-          state.calYear -= 1;
-        } else {
-          state.calMonth -= 1;
-        }
-        renderCustomCalendar();
-      });
-      el.btnCalNextMonth.addEventListener('click', () => {
-        if (state.calMonth === 11) {
-          state.calMonth = 0;
-          state.calYear += 1;
-        } else {
-          state.calMonth += 1;
-        }
-        renderCustomCalendar();
-      });
-
-      el.customCalendarDays.addEventListener('click', (e) => {
-        const btn = e.target.closest('.cal-day-btn');
-        if (!btn) return;
-        const picked = btn.dataset.calDate;
-        if (picked) {
-          setSelectedCalendarDate(picked, false);
-          toggleCustomCalendar(false);
-          syncEquityWithCashflow();
-          updateLivePnlPreview();
-        }
-      });
-
-      el.btnSuggestNextTradingDay.addEventListener('click', () => {
-        const currentVal = el.inputDate.value || formatISODate(new Date());
-        const nextTrading = getNextUSTradingDay(currentVal);
-        setSelectedCalendarDate(nextTrading, true);
-        syncEquityWithCashflow();
-        updateLivePnlPreview();
-      });
-
-      el.btnSuggestToday.addEventListener('click', () => {
-        setSelectedCalendarDate(formatISODate(new Date()), true);
-        syncEquityWithCashflow();
-        updateLivePnlPreview();
-      });
-
-      el.btnToggleCashflowSection.addEventListener('click', () => {
-        const willOpen = el.cashflowInputContainer.classList.contains('hidden');
-        el.cashflowInputContainer.classList.toggle('hidden', !willOpen);
-        el.cashflowChevron.classList.toggle('rotate-180', willOpen);
-      });
-
-      el.btnModeTopupOnly.addEventListener('click', () => {
-        state.topupInputMode = 'TOPUP_ONLY';
-        applyTopupModeUI();
-        syncEquityWithCashflow();
-        updateLivePnlPreview();
-      });
-
-      el.btnModeMarketClose.addEventListener('click', () => {
-        state.topupInputMode = 'MARKET_CLOSE';
-        applyTopupModeUI();
-        updateLivePnlPreview();
-      });
-
-      el.btnFlowDeposit.addEventListener('click', () => setCashflowDirectionUI('DEPOSIT'));
-      el.btnFlowWithdraw.addEventListener('click', () => setCashflowDirectionUI('WITHDRAW'));
-      el.inputCashflowAmount.addEventListener('input', () => {
-        syncEquityWithCashflow();
-        updateLivePnlPreview();
-      });
-      el.inputEquity.addEventListener('input', updateLivePnlPreview);
-
-      el.entryForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const targetDate = el.inputDate.value;
-        const originalDate = el.editingOriginalDate.value;
-        const rawEqInput = parseFloat(el.inputEquity.value);
-        if (!targetDate || isNaN(rawEqInput) || rawEqInput < 0) {
-          showToast('Masukkan nominal Total Equity yang valid');
-          return;
-        }
-
-        const eqUSD = fromInputAmountToUSD(rawEqInput);
-        const rawFlowInput = parseFloat(el.inputCashflowAmount.value) || 0;
-        const rawFlowUSD = fromInputAmountToUSD(rawFlowInput);
-        const signedFlowUSD = rawFlowUSD > 0
-          ? (state.cashflowDirection === 'DEPOSIT' ? rawFlowUSD : -rawFlowUSD)
-          : 0;
-        const noteText = (el.inputNote.value || '').trim().slice(0, 60);
-
-        if (originalDate && originalDate !== targetDate) {
-          state.entries = state.entries.filter((item) => item.date !== originalDate);
-        }
-
-        const existingIdx = state.entries.findIndex((item) => item.date === targetDate);
-        if (existingIdx !== -1) {
-          state.entries[existingIdx] = {
-            date: targetDate,
-            equity: eqUSD,
-            netFlow: signedFlowUSD,
-            note: noteText
-          };
-        } else {
-          state.entries.push({
-            date: targetDate,
-            equity: eqUSD,
-            netFlow: signedFlowUSD,
-            note: noteText
-          });
-        }
-
-        saveState();
-        renderAll();
-        closeEntryModal();
-        showToast(originalDate ? 'Data equity diperbarui' : 'Data equity disimpan');
-      });
-
-      el.btnDeleteEntry.addEventListener('click', () => {
-        el.inlineDeleteConfirm.classList.remove('hidden');
-      });
-      el.btnCancelDelete.addEventListener('click', () => {
-        el.inlineDeleteConfirm.classList.add('hidden');
-      });
-      el.btnConfirmDelete.addEventListener('click', () => {
-        const targetDate = el.editingOriginalDate.value || el.inputDate.value;
-        state.entries = state.entries.filter((item) => item.date !== targetDate);
-        saveState();
-        renderAll();
-        closeEntryModal();
-        showToast('Data tanggal dihapus');
-      });
-
-      // Settings Modal Listeners
-      el.btnOpenSettingsRight.addEventListener('click', openSettingsModal);
-      el.btnCloseSettingsModal.addEventListener('click', closeSettingsModal);
-      el.settingsModalBackdrop.addEventListener('click', (e) => {
-        if (e.target === el.settingsModalBackdrop) closeSettingsModal();
-      });
-
-      el.btnSaveSyncUrl.addEventListener('click', async () => {
-        await loadFromGoogleSheets(false);
-      });
-
-      el.btnPushToCloud.addEventListener('click', async () => {
-        await syncToGoogleSheets(false);
-      });
-
-      el.btnToggleScriptGuide.addEventListener('click', () => {
-        const willOpen = el.scriptGuideContainer.classList.contains('hidden');
-        el.scriptGuideContainer.classList.toggle('hidden', !willOpen);
-        el.scriptGuideChevron.classList.toggle('rotate-180', willOpen);
-      });
-
-      el.btnCopyAppsScript.addEventListener('click', () => {
-        const text = el.appsScriptCodeBlock.textContent || '';
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.style.position = 'fixed';
-        ta.style.opacity = '0';
-        document.body.appendChild(ta);
-        ta.select();
-        try {
-          document.execCommand('copy');
-          showToast('Kode Google Apps Script disalin');
-        } catch (err) {
-          showToast('Gagal menyalin kode');
-        }
-        document.body.removeChild(ta);
-      });
-
-      el.btnThemeDark.addEventListener('click', () => setThemeMode('DARK'));
-      el.btnThemeLight.addEventListener('click', () => setThemeMode('LIGHT'));
-
-      el.btnCurrUSD.addEventListener('click', () => {
-        setDisplayCurrency('USD');
-        showToast('Format mata uang: USD ($)');
-      });
-      el.btnCurrIDR.addEventListener('click', () => {
-        setDisplayCurrency('IDR');
-        showToast('Format mata uang: IDR (Rp)');
-      });
-
-      el.inputSettingsUsdIdrRate.addEventListener('change', (e) => {
-        if (setUsdIdrRate(e.target.value, true)) {
-          renderAll();
-          showToast(`Rate $1 USD = Rp ${Math.round(state.usdIdrRate).toLocaleString('en-US')}`);
-        }
-      });
-
-      el.btnExportCsv.addEventListener('click', () => {
-        const enriched = computeAllEnrichedEntries();
-        const lines = ['Date,Equity_USD,Net_Flow_USD,PnL_USD,PnL_Percent,Note'];
-        enriched.forEach((r) => {
-          const safeNote = `"${(r.note || '').replace(/"/g, '""')}"`;
-          lines.push(`${r.date},${r.equity.toFixed(2)},${r.netFlow.toFixed(2)},${r.pnlNominal.toFixed(2)},${r.pnlPercent.toFixed(2)},${safeNote}`);
+        // Currency Quick Switch & Rate Editor
+        el.btnQuickCurrUSD.addEventListener('click', () => {
+          setDisplayCurrency('USD');
+          showToast('Tampilan mata uang: USD ($)');
         });
-        const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `etf-portfolio-${formatISODate(new Date())}.csv`;
-        link.click();
-        showToast('File CSV berhasil diunduh');
-      });
-
-      el.btnExportJson.addEventListener('click', () => {
-        const payload = JSON.stringify({
-          exportedAt: new Date().toISOString(),
-          currency: 'USD',
-          usdIdrRate: state.usdIdrRate,
-          entries: state.entries
-        }, null, 2);
-        const blob = new Blob([payload], { type: 'application/json' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `etf-portfolio-backup-${formatISODate(new Date())}.json`;
-        link.click();
-        showToast('Backup JSON berhasil diunduh');
-      });
-
-      el.inputImportJson.addEventListener('change', (e) => {
-        const file = e.target.files && e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          try {
-            const parsed = JSON.parse(ev.target.result);
-            if (parsed && Array.isArray(parsed.entries)) {
-              state.entries = parsed.entries
-                .map((item) => ({
-                  date: normalizeDateToISO(item.date),
-                  equity: Number(item.equity) || 0,
-                  netFlow: Number(item.netFlow) || 0,
-                  note: item.note ? String(item.note).slice(0, 60) : ''
-                }))
-                .filter((item) => item.date);
-              saveState();
-              renderAll();
-              closeSettingsModal();
-              showToast(`Berhasil import ${state.entries.length} data`);
-            } else {
-              showToast('Format file JSON tidak valid');
-            }
-          } catch (err) {
-            showToast('Gagal membaca file JSON');
+        el.btnQuickCurrIDR.addEventListener('click', () => {
+          setDisplayCurrency('IDR');
+          showToast(`Tampilan mata uang: IDR (Kurs Rp ${Math.round(state.usdIdrRate).toLocaleString('en-US')})`);
+        });
+        el.btnQuickEditRate.addEventListener('click', () => {
+          el.quickRateEditorBar.classList.toggle('hidden');
+          if (!el.quickRateEditorBar.classList.contains('hidden')) {
+            el.inputQuickUsdIdrRate.value = state.usdIdrRate;
+            el.inputQuickUsdIdrRate.focus();
           }
-          e.target.value = '';
-        };
-        reader.readAsText(file);
-      });
+        });
+        el.btnSaveQuickRate.addEventListener('click', () => {
+          if (setUsdIdrRate(el.inputQuickUsdIdrRate.value, true)) {
+            el.quickRateEditorBar.classList.add('hidden');
+            renderAll();
+            showToast(`Kurs diperbarui: $1 = Rp ${Math.round(state.usdIdrRate).toLocaleString('en-US')}`);
+          } else {
+            showToast('Masukkan angka kurs Rupiah yang valid');
+          }
+        });
+        el.inputSettingsUsdIdrRate.addEventListener('change', () => {
+          if (setUsdIdrRate(el.inputSettingsUsdIdrRate.value, true)) {
+            renderAll();
+            showToast(`Kurs diperbarui: $1 = Rp ${Math.round(state.usdIdrRate).toLocaleString('en-US')}`);
+          }
+        });
 
-      el.btnLoadSampleData.addEventListener('click', () => {
-        state.entries = [...DEFAULT_SAMPLE_DATA];
-        saveState();
-        renderAll();
-        closeSettingsModal();
-        showToast('Data contoh berhasil dimuat');
-      });
+        // Privacy Mode Eye Buttons
+        document.querySelectorAll('[data-privacy-trigger="true"]').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            togglePrivacyMode();
+          });
+        });
 
-      el.btnClearAllData.addEventListener('click', () => {
-        el.inlineClearAllConfirm.classList.remove('hidden');
-      });
-      el.btnCancelClearAll.addEventListener('click', () => {
-        el.inlineClearAllConfirm.classList.add('hidden');
-      });
-      el.btnConfirmClearAll.addEventListener('click', () => {
-        state.entries = [];
-        saveState();
-        renderAll();
-        closeSettingsModal();
-        showToast('Semua data dikosongkan');
-      });
+        // Theme Mode Toggle (Header & Settings)
+        el.btnToggleThemeHeader.addEventListener('click', () => {
+          setThemeMode(state.theme === 'DARK' ? 'LIGHT' : 'DARK');
+        });
+        el.btnThemeDark.addEventListener('click', () => setThemeMode('DARK'));
+        el.btnThemeLight.addEventListener('click', () => setThemeMode('LIGHT'));
 
-      // Auto-sync when returning to browser tab on mobile/desktop
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && getAppsScriptUrl()) {
-          loadFromGoogleSheets(true);
+        // Header Refresh Button
+        el.btnRefreshApp.addEventListener('click', async () => {
+          el.refreshIconSvg.classList.add('animate-spin');
+          if (getAppsScriptUrl()) {
+            await loadFromGoogleSheets(false);
+          } else {
+            loadState();
+            renderAll();
+            showToast('Tampilan diperbarui');
+          }
+          setTimeout(() => {
+            el.refreshIconSvg.classList.remove('animate-spin');
+          }, 500);
+        });
+
+        // Info Card Toggle
+        el.btnToggleInfo.addEventListener('click', () => {
+          el.infoTooltipCard.classList.toggle('hidden');
+        });
+        el.btnCloseInfo.addEventListener('click', () => {
+          el.infoTooltipCard.classList.add('hidden');
+        });
+
+        // Daily / Monthly / Yearly Toggle
+        el.btnModeDaily.addEventListener('click', () => {
+          state.viewMode = 'DAILY';
+          state.visibleRowLimit = 35;
+          renderAll();
+        });
+        el.btnModeMonthly.addEventListener('click', () => {
+          state.viewMode = 'MONTHLY';
+          renderAll();
+        });
+        el.btnModeYearly.addEventListener('click', () => {
+          state.viewMode = 'YEARLY';
+          renderAll();
+        });
+
+        // Load More Rows Button
+        el.btnLoadMoreRows.addEventListener('click', () => {
+          state.visibleRowLimit += 50;
+          renderPerformanceTable();
+        });
+
+        // Period Dropdown (Portfolio Tab)
+        el.btnPeriodDropdown.addEventListener('click', (e) => {
+          e.stopPropagation();
+          el.periodDropdownMenu.classList.toggle('hidden');
+          el.tradePeriodDropdownMenu.classList.add('hidden');
+        });
+
+        document.querySelectorAll('.period-option').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            state.periodFilter = btn.dataset.period;
+            state.visibleRowLimit = 35;
+            el.periodDropdownMenu.classList.add('hidden');
+            renderAll();
+          });
+        });
+
+        // Period Dropdown (Trade Tab)
+        el.btnTradePeriodDropdown.addEventListener('click', (e) => {
+          e.stopPropagation();
+          el.tradePeriodDropdownMenu.classList.toggle('hidden');
+          el.periodDropdownMenu.classList.add('hidden');
+        });
+
+        document.querySelectorAll('.trade-period-option').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            state.periodFilter = btn.dataset.period;
+            state.visibleRowLimit = 35;
+            el.tradePeriodDropdownMenu.classList.add('hidden');
+            renderAll();
+          });
+        });
+
+        // Quick Chart Period Tabs
+        document.querySelectorAll('.chart-tab-btn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const chosenPeriod = btn.dataset.chartPeriod;
+            if (!chosenPeriod) return;
+            state.periodFilter = chosenPeriod;
+            state.visibleRowLimit = 35;
+            renderAll();
+          });
+        });
+
+        // Custom Date Range Inputs Sync
+        function handleCustomDateChange(startVal, endVal) {
+          if (startVal) state.customStartDate = startVal;
+          if (endVal) state.customEndDate = endVal;
+          state.visibleRowLimit = 35;
+          renderAll();
         }
-      });
+        el.customStartPort.addEventListener('change', () => handleCustomDateChange(el.customStartPort.value, el.customEndPort.value));
+        el.customEndPort.addEventListener('change', () => handleCustomDateChange(el.customStartPort.value, el.customEndPort.value));
+        el.customStartTrade.addEventListener('change', () => handleCustomDateChange(el.customStartTrade.value, el.customEndTrade.value));
+        el.customEndTrade.addEventListener('change', () => handleCustomDateChange(el.customStartTrade.value, el.customEndTrade.value));
 
-      // ==================== INITIALIZATION ====================
+        // Monthly Heatmap Navigation & Cell Inspection
+        el.btnHeatmapPrevMonth.addEventListener('click', () => {
+          state.heatmapMonth -= 1;
+          if (state.heatmapMonth < 0) {
+            state.heatmapMonth = 11;
+            state.heatmapYear -= 1;
+          }
+          renderMonthlyHeatmap();
+        });
+        el.btnHeatmapNextMonth.addEventListener('click', () => {
+          state.heatmapMonth += 1;
+          if (state.heatmapMonth > 11) {
+            state.heatmapMonth = 0;
+            state.heatmapYear += 1;
+          }
+          renderMonthlyHeatmap();
+        });
+
+        el.pnlHeatmapGrid.addEventListener('click', (e) => {
+          const cellBtn = e.target.closest('[data-heatmap-date]');
+          if (!cellBtn) return;
+          const iso = cellBtn.dataset.heatmapDate;
+          const allEnriched = computeAllEnrichedEntries();
+          const found = allEnriched.find((item) => item.date === iso);
+          if (!found) {
+            el.heatmapSelectedInfo.textContent = `${formatDisplayDate(iso)}: Belum ada data bursa`;
+            el.heatmapSelectedInfo.className = 'text-[#8E9591] truncate';
+          } else {
+            const color = found.pnlNominal > 0.0001 ? 'text-[#22C55E]' : found.pnlNominal < -0.0001 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
+            el.heatmapSelectedInfo.innerHTML = `${formatDisplayDate(iso)}: <strong class="${color}">${maskIfPrivate(`${formatNumber(found.pnlNominal, true)} ${formatSignedPercent(found.pnlPercent)}`)}</strong>`;
+          }
+        });
+
+        // Close Dropdowns on Outside Click
+        document.addEventListener('click', () => {
+          el.periodDropdownMenu.classList.add('hidden');
+          el.tradePeriodDropdownMenu.classList.add('hidden');
+        });
+
+        // Row Click -> Edit Entry
+        el.performanceTableBody.addEventListener('click', (e) => {
+          const row = e.target.closest('[data-edit-date]');
+          if (row) {
+            openEntryModal(row.dataset.editDate, false);
+          }
+        });
+
+        // Delete Top-Up / Withdrawal from Cashflow History List (Protected by PIN)
+        el.cashflowListContainer.addEventListener('click', (e) => {
+          const delBtn = e.target.closest('[data-delete-topup-date]');
+          if (!delBtn) return;
+          const targetDate = delBtn.dataset.deleteTopupDate;
+          if (!delBtn.dataset.confirming) {
+            delBtn.dataset.confirming = 'true';
+            delBtn.textContent = 'Yakin?';
+            delBtn.className = 'px-2 py-1 rounded-lg bg-[#E05252] text-[10px] font-semibold text-white transition';
+            setTimeout(() => {
+              if (delBtn && delBtn.isConnected) {
+                delete delBtn.dataset.confirming;
+                delBtn.textContent = 'Hapus';
+                delBtn.className = 'px-2 py-1 rounded-lg bg-[#E05252]/10 hover:bg-[#E05252]/20 border border-[#E05252]/30 text-[10px] font-medium text-[#E05252] transition';
+              }
+            }, 3000);
+            return;
+          }
+
+          requirePinVerification(`Hapus riwayat Top-Up tanggal ${formatDisplayDate(targetDate)}`, () => {
+            removeTopupByDate(targetDate);
+          });
+        });
+
+        // Quick Open Modals
+        el.btnSyncStatusHeader.addEventListener('click', openSettingsModal);
+        el.btnQuickAddHeader.addEventListener('click', () => openEntryModal(null, false));
+        el.btnFloatingUpdate.addEventListener('click', () => openEntryModal(null, false));
+        el.btnEmptyAddFirst.addEventListener('click', () => openEntryModal(null, false));
+        el.btnFloatingTopup.addEventListener('click', openTopupOnlyModal);
+        el.btnAddCashflowShortcut.addEventListener('click', openTopupOnlyModal);
+
+        // Top-Up Only Modal Listeners
+        el.btnCloseTopupOnlyModal.addEventListener('click', closeTopupOnlyModal);
+        el.topupOnlyModalBackdrop.addEventListener('click', (e) => {
+          if (e.target === el.topupOnlyModalBackdrop) closeTopupOnlyModal();
+        });
+        el.btnQuickTopupSign.addEventListener('click', () => setQuickTopupDirection('DEPOSIT'));
+        el.btnQuickWithdrawSign.addEventListener('click', () => setQuickTopupDirection('WITHDRAW'));
+        el.inputQuickTopupDate.addEventListener('change', updateQuickTopupPreview);
+        el.inputQuickTopupAmount.addEventListener('input', updateQuickTopupPreview);
+
+        el.btnUndoLatestTopup.addEventListener('click', () => {
+          const targetDate = el.btnUndoLatestTopup.dataset.targetDate;
+          if (!targetDate) return;
+          if (!el.btnUndoLatestTopup.dataset.confirming) {
+            el.btnUndoLatestTopup.dataset.confirming = 'true';
+            el.btnUndoLatestTopup.textContent = 'Ketuk Lagi untuk Hapus';
+            el.btnUndoLatestTopup.className = 'shrink-0 px-3 py-1.5 rounded-xl bg-[#E05252] text-[11px] font-semibold text-white active:scale-95 transition';
+            setTimeout(() => {
+              if (el.btnUndoLatestTopup && el.btnUndoLatestTopup.isConnected && el.btnUndoLatestTopup.dataset.confirming) {
+                delete el.btnUndoLatestTopup.dataset.confirming;
+                el.btnUndoLatestTopup.textContent = 'Hapus & Kurangi Saldo';
+                el.btnUndoLatestTopup.className = 'shrink-0 px-3 py-1.5 rounded-xl bg-[#E05252]/15 hover:bg-[#E05252]/25 border border-[#E05252]/40 text-[11px] font-semibold text-[#E05252] active:scale-95 transition';
+              }
+            }, 3500);
+            return;
+          }
+
+          requirePinVerification(`Hapus Top-Up terakhir (${formatDisplayDate(targetDate)})`, () => {
+            removeTopupByDate(targetDate);
+            closeTopupOnlyModal();
+          });
+        });
+
+        el.topupOnlyForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const dateVal = el.inputQuickTopupDate.value;
+          const rawAmt = Math.abs(parseFloat(el.inputQuickTopupAmount.value)) || 0;
+          if (!dateVal || rawAmt <= 0) {
+            showToast('Masukkan nominal Top-Up / Tarik yang valid');
+            return;
+          }
+
+          const signedAmtUSD = fromInputAmountToUSD(state.quickTopupDirection === 'DEPOSIT' ? rawAmt : -rawAmt);
+          const existingIdx = state.entries.findIndex((item) => item.date === dateVal);
+
+          if (existingIdx !== -1) {
+            const existing = state.entries[existingIdx];
+            existing.equity = Math.max(0, existing.equity + signedAmtUSD);
+            existing.netFlow = (Number(existing.netFlow) || 0) + signedAmtUSD;
+          } else {
+            const priorEntries = state.entries
+              .filter((item) => item.date < dateVal)
+              .sort((a, b) => a.date.localeCompare(b.date));
+            const baseEq = priorEntries.length > 0 ? priorEntries[priorEntries.length - 1].equity : 0;
+            state.entries.push({
+              date: dateVal,
+              equity: Math.max(0, baseEq + signedAmtUSD),
+              netFlow: signedAmtUSD,
+              note: signedAmtUSD > 0 ? 'Top-Up Saldo' : 'Tarik Saldo'
+            });
+          }
+
+          saveState();
+          renderAll();
+          closeTopupOnlyModal();
+          showToast(signedAmtUSD > 0 ? `Top-Up +${formatNumber(signedAmtUSD)} tersimpan (P&L tetap 0)` : `Tarik saldo ${formatNumber(signedAmtUSD)} tersimpan`);
+        });
+
+        // Entry Modal Close
+        el.btnCloseEntryModal.addEventListener('click', closeEntryModal);
+        el.entryModalBackdrop.addEventListener('click', (e) => {
+          if (e.target === el.entryModalBackdrop) closeEntryModal();
+        });
+
+        // Custom Calendar Trigger & Navigation
+        el.btnOpenCustomCalendar.addEventListener('click', () => {
+          toggleCustomCalendar();
+        });
+        el.btnCalPrevMonth.addEventListener('click', () => {
+          state.calMonth -= 1;
+          if (state.calMonth < 0) {
+            state.calMonth = 11;
+            state.calYear -= 1;
+          }
+          renderCustomCalendar();
+        });
+        el.btnCalNextMonth.addEventListener('click', () => {
+          state.calMonth += 1;
+          if (state.calMonth > 11) {
+            state.calMonth = 0;
+            state.calYear += 1;
+          }
+          renderCustomCalendar();
+        });
+        el.customCalendarDays.addEventListener('click', (e) => {
+          const dayBtn = e.target.closest('[data-cal-date]');
+          if (!dayBtn) return;
+          el.inputDate.value = dayBtn.dataset.calDate;
+          updateDateHelperUI(el.inputDate.value);
+          toggleCustomCalendar(false);
+        });
+
+        // Date Helpers
+        el.btnSuggestNextTradingDay.addEventListener('click', () => {
+          const current = el.inputDate.value || formatISODate(new Date());
+          el.inputDate.value = getNextUSTradingDay(current);
+          updateDateHelperUI(el.inputDate.value);
+        });
+        el.btnSuggestToday.addEventListener('click', () => {
+          el.inputDate.value = formatISODate(new Date());
+          updateDateHelperUI(el.inputDate.value);
+        });
+
+        // Cashflow Accordion & Mode Switcher
+        el.btnToggleCashflowSection.addEventListener('click', () => {
+          el.cashflowInputContainer.classList.toggle('hidden');
+          el.cashflowChevron.classList.toggle('rotate-180');
+          updateLivePnlPreview();
+        });
+        el.btnModeTopupOnly.addEventListener('click', () => setTopupInputMode('TOPUP_ONLY'));
+        el.btnModeMarketClose.addEventListener('click', () => setTopupInputMode('MARKET_CLOSE'));
+        el.btnFlowDeposit.addEventListener('click', () => setCashflowDirection('DEPOSIT'));
+        el.btnFlowWithdraw.addEventListener('click', () => setCashflowDirection('WITHDRAW'));
+
+        el.inputEquity.addEventListener('input', () => {
+          if (state.topupInputMode === 'TOPUP_ONLY' && !el.cashflowInputContainer.classList.contains('hidden')) {
+            setTopupInputMode('MARKET_CLOSE');
+          }
+          updateLivePnlPreview();
+        });
+        el.inputCashflowAmount.addEventListener('input', updateLivePnlPreview);
+
+        // Save Form Entry
+        el.entryForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const dateVal = el.inputDate.value;
+          const rawEquityInput = parseFloat(el.inputEquity.value);
+          const equityValUSD = fromInputAmountToUSD(rawEquityInput);
+          const originalDate = el.editingOriginalDate.value;
+
+          if (!dateVal || isNaN(equityValUSD) || equityValUSD < 0) {
+            showToast('Masukkan nilai equity yang valid');
+            return;
+          }
+
+          const rawFlowInput = Math.abs(parseFloat(el.inputCashflowAmount.value)) || 0;
+          const signedFlowUSD = fromInputAmountToUSD(state.cashflowDirection === 'DEPOSIT' ? rawFlowInput : -rawFlowInput);
+          const noteVal = (el.inputNote.value || '').trim().slice(0, 60);
+
+          if (originalDate && originalDate !== dateVal) {
+            state.entries = state.entries.filter((item) => item.date !== originalDate);
+          }
+
+          const existingIdx = state.entries.findIndex((item) => item.date === dateVal);
+          const newRecord = {
+            date: dateVal,
+            equity: equityValUSD,
+            netFlow: signedFlowUSD,
+            note: noteVal
+          };
+
+          if (existingIdx !== -1) {
+            state.entries[existingIdx] = newRecord;
+          } else {
+            state.entries.push(newRecord);
+          }
+
+          const savedDt = parseISODate(dateVal);
+          state.heatmapYear = savedDt.getFullYear();
+          state.heatmapMonth = savedDt.getMonth();
+
+          saveState();
+          renderAll();
+          closeEntryModal();
+          showToast(originalDate ? 'Data berhasil diperbarui' : 'Equity harian tersimpan');
+        });
+
+        // Delete Entry Inline Confirmation (Protected by PIN)
+        el.btnDeleteEntry.addEventListener('click', () => {
+          el.inlineDeleteConfirm.classList.remove('hidden');
+        });
+        el.btnCancelDelete.addEventListener('click', () => {
+          el.inlineDeleteConfirm.classList.add('hidden');
+        });
+        el.btnConfirmDelete.addEventListener('click', () => {
+          const targetDate = el.editingOriginalDate.value;
+          if (!targetDate) return;
+          requirePinVerification(`Hapus data tanggal ${formatDisplayDate(targetDate)}`, () => {
+            state.entries = state.entries.filter((item) => item.date !== targetDate);
+            saveState();
+            renderAll();
+            closeEntryModal();
+            showToast('Data tanggal dihapus');
+          });
+        });
+
+        // Settings Modal
+        el.btnOpenSettingsRight.addEventListener('click', openSettingsModal);
+        el.btnCloseSettingsModal.addEventListener('click', closeSettingsModal);
+        el.settingsModalBackdrop.addEventListener('click', (e) => {
+          if (e.target === el.settingsModalBackdrop) closeSettingsModal();
+        });
+
+        // PIN Security Setup & Verification
+        el.btnSaveSecurityPin.addEventListener('click', () => {
+          const newPin = (el.inputSetupPin.value || '').trim();
+          if (!/^\d{4}$/.test(newPin)) {
+            showToast('PIN harus berupa 4 digit angka (contoh: 1234)');
+            return;
+          }
+          const existingPin = getSecurityPin();
+          const applyNewPin = () => {
+            try {
+              localStorage.setItem(SECURITY_PIN_KEY, newPin);
+            } catch (e) {}
+            el.inputSetupPin.value = '';
+            updateSecurityPinUI();
+            showToast('PIN Keamanan 4 digit berhasil diaktifkan');
+          };
+
+          if (existingPin) {
+            requirePinVerification('Masukkan PIN lama untuk mengganti PIN', applyNewPin);
+          } else {
+            applyNewPin();
+          }
+        });
+
+        el.btnRemoveSecurityPin.addEventListener('click', () => {
+          requirePinVerification('Masukkan PIN untuk menonaktifkan kunci keamanan', () => {
+            try {
+              localStorage.removeItem(SECURITY_PIN_KEY);
+            } catch (e) {}
+            updateSecurityPinUI();
+            showToast('PIN Keamanan dinonaktifkan');
+          });
+        });
+
+        el.pinVerifyForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const entered = (el.inputVerifyPin.value || '').trim();
+          const activePin = getSecurityPin();
+          if (entered === activePin) {
+            const actionToRun = pendingProtectedAction;
+            closePinVerifyModal();
+            if (typeof actionToRun === 'function') actionToRun();
+          } else {
+            el.pinVerifyErrorMsg.classList.remove('hidden');
+            el.inputVerifyPin.value = '';
+            el.inputVerifyPin.focus();
+          }
+        });
+
+        el.btnCancelVerifyPin.addEventListener('click', closePinVerifyModal);
+        el.pinVerifyModalBackdrop.addEventListener('click', (e) => {
+          if (e.target === el.pinVerifyModalBackdrop) closePinVerifyModal();
+        });
+
+        // Google Sheets Sync Actions
+        el.btnSaveSyncUrl.addEventListener('click', async () => {
+          await loadFromGoogleSheets(false);
+        });
+
+        el.btnPushToCloud.addEventListener('click', async () => {
+          requirePinVerification('Timpa isi Google Sheets dengan data di layar', async () => {
+            await syncToGoogleSheets(false);
+          });
+        });
+
+        el.btnToggleScriptGuide.addEventListener('click', () => {
+          el.scriptGuideContainer.classList.toggle('hidden');
+          el.scriptGuideChevron.classList.toggle('rotate-180');
+        });
+
+        el.btnCopyAppsScript.addEventListener('click', async () => {
+          const codeText = el.appsScriptCodeBlock.textContent;
+          try {
+            await navigator.clipboard.writeText(codeText);
+            showToast('Kode Google Apps Script disalin');
+          } catch (err) {
+            showToast('Gagal menyalin otomatis, silakan blok & salin manual');
+          }
+        });
+
+        el.btnCurrIDR.addEventListener('click', () => {
+          setDisplayCurrency('IDR');
+          showToast(`Tampilan mata uang: IDR (Kurs Rp ${Math.round(state.usdIdrRate).toLocaleString('en-US')})`);
+        });
+        el.btnCurrUSD.addEventListener('click', () => {
+          setDisplayCurrency('USD');
+          showToast('Tampilan mata uang: USD ($)');
+        });
+
+        // Export CSV
+        el.btnExportCsv.addEventListener('click', () => {
+          const enriched = computeAllEnrichedEntries();
+          const header = ['Date', 'Equity_USD', 'Equity_IDR', 'Net_Flow_USD', 'Daily_PnL_USD', 'Daily_PnL_Pct', 'Note'];
+          const rows = enriched.map((r) => [
+            r.date,
+            r.equity.toFixed(2),
+            Math.round(r.equity * state.usdIdrRate),
+            r.netFlow.toFixed(2),
+            r.pnlNominal.toFixed(2),
+            r.pnlPercent.toFixed(2) + '%',
+            `"${(r.note || '').replace(/"/g, '""')}"`
+          ]);
+          const csvContent = [header, ...rows].map((e) => e.join(',')).join('\n');
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `etf-pnl-report-${formatISODate(new Date())}.csv`;
+          link.click();
+          URL.revokeObjectURL(url);
+          showToast('File CSV berhasil diunduh');
+        });
+
+        // Backup JSON
+        el.btnExportJson.addEventListener('click', () => {
+          const payload = JSON.stringify({
+            currency: state.currency,
+            usdIdrRate: state.usdIdrRate,
+            entries: state.entries
+          }, null, 2);
+          const blob = new Blob([payload], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `etf-pnl-backup-${formatISODate(new Date())}.json`;
+          link.click();
+          URL.revokeObjectURL(url);
+          showToast('Backup JSON berhasil diunduh');
+        });
+
+        // Import JSON (Protected by PIN)
+        el.inputImportJson.addEventListener('change', (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            try {
+              const parsed = JSON.parse(evt.target.result);
+              if (Array.isArray(parsed.entries)) {
+                requirePinVerification('Timpa data saat ini dengan file Backup JSON', () => {
+                  state.entries = parsed.entries
+                    .filter((item) => item && item.date && !isNaN(Number(item.equity)))
+                    .map((item) => ({
+                      date: normalizeDateToISO(item.date),
+                      equity: Number(item.equity),
+                      netFlow: Number(item.netFlow) || 0,
+                      note: item.note ? String(item.note).slice(0, 60) : ''
+                    }))
+                    .filter((item) => item.date);
+                  saveState();
+                  renderAll();
+                  closeSettingsModal();
+                  showToast('Backup JSON berhasil dipulihkan');
+                });
+              } else {
+                showToast('Format file JSON tidak valid');
+              }
+            } catch (err) {
+              showToast('Gagal membaca file JSON');
+            }
+          };
+          reader.readAsText(file);
+          e.target.value = '';
+        });
+      }
+
+      // ==================== BOOTSTRAP ====================
       loadState();
       if (state.entries.length > 0) {
         const latestDt = parseISODate(state.entries[state.entries.length - 1].date);
         state.heatmapYear = latestDt.getFullYear();
         state.heatmapMonth = latestDt.getMonth();
       }
+      bindEvents();
       renderAll();
+
+      // Auto-sync from Google Sheets on startup and whenever app returns to foreground (iOS/Mobile)
       if (getAppsScriptUrl()) {
-        loadFromGoogleSheets(true);
+        loadFromGoogleSheets(false);
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            loadFromGoogleSheets(true);
+          }
+        });
+      } else {
+        updateCloudStatusUI('idle');
       }
     })();
   </script>
