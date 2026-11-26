@@ -479,7 +479,7 @@
         </button>
       </div>
 
-      <!-- Empty State (Shown when user clears all data) -->
+      <!-- Empty State (Shown when no entries exist) -->
       <div id="emptyStateContainer" class="hidden flex-1 flex flex-col items-center justify-center text-center py-14 px-4">
         <div class="w-12 h-12 rounded-2xl bg-[#181B19] border border-[#262B28] flex items-center justify-center text-[#22C55E] mb-3">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -553,7 +553,7 @@
         </div>
       </div>
 
-      <!-- Interactive Bibit-Style Portfolio Performance Card -->
+      <!-- Interactive Portfolio Performance Card -->
       <div class="rounded-2xl bg-[#181B19] border border-[#262B28] p-4 pb-3">
         <!-- Top Header: Nilai Portofolio + Trend Arrow + Period Return -->
         <div class="flex items-start justify-between gap-2 mb-1">
@@ -1035,79 +1035,9 @@
                 class="w-full pl-7 px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-base font-semibold text-[#F3F4F6] [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E] transition"
               />
             </div>
-          </div>
-
-          <!-- Optional Top-Up / Withdrawal Accordion -->
-          <div class="rounded-xl bg-[#111312] border border-[#262B28] overflow-hidden">
-            <button
-              type="button"
-              id="btnToggleCashflowSection"
-              class="w-full px-3.5 py-2.5 flex items-center justify-between text-xs text-[#8E9591] hover:text-[#D1D5DB] transition"
-            >
-              <span>+ Tambah Pembelian / Top-Up Modal (Opsional)</span>
-              <svg id="cashflowChevron" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-
-            <div id="cashflowInputContainer" class="hidden px-3.5 pb-3.5 pt-2.5 border-t border-[#1E2220] space-y-3">
-              <!-- Mode Selector: Mode 1 (Top-Up Saja) vs Mode 2 (Saldo Penutupan Bursa) -->
-              <div class="space-y-1.5">
-                <span class="text-[11px] font-medium text-[#D1D5DB] block">Pilih Kondisi Waktu Input:</span>
-                <div class="grid grid-cols-1 gap-1.5">
-                  <button
-                    type="button"
-                    id="btnModeTopupOnly"
-                    class="w-full p-2.5 rounded-xl text-left border border-[#22C55E] bg-[#22C55E]/10 transition"
-                  >
-                    <div class="flex items-center justify-between">
-                      <span class="text-xs font-semibold text-[#22C55E]">Mode 1 — Catat Top-Up / Tarik Saja</span>
-                      <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#22C55E]/20 text-[#22C55E] font-medium">P&amp;L = 0</span>
-                    </div>
-                    <p class="text-[10px] text-[#9CA3AF] mt-0.5">Pasar belum tutup &rarr; otomatis hitung Equity = Kemarin + Top-Up.</p>
-                  </button>
-                  <button
-                    type="button"
-                    id="btnModeMarketClose"
-                    class="w-full p-2.5 rounded-xl text-left border border-[#2F3532] bg-[#181B19] hover:border-[#3E4642] transition"
-                  >
-                    <div class="flex items-center justify-between">
-                      <span class="text-xs font-semibold text-[#D1D5DB]">Mode 2 — Input Saldo Penutupan Bursa</span>
-                      <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#222724] text-[#8E9591]">Hitung P&amp;L Asli</span>
-                    </div>
-                    <p class="text-[10px] text-[#8E9591] mt-0.5">Pasar sudah tutup &rarr; ketik Saldo Akhir broker + nominal Top-Up hari ini.</p>
-                  </button>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  id="btnFlowDeposit"
-                  class="py-1.5 rounded-lg text-xs font-medium bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition"
-                >
-                  + Beli / Top-Up Modal
-                </button>
-                <button
-                  type="button"
-                  id="btnFlowWithdraw"
-                  class="py-1.5 rounded-lg text-xs font-medium bg-[#181B19] text-[#8E9591] border border-[#2F3532] transition"
-                >
-                  - Tarik Dana
-                </button>
-              </div>
-              <input
-                type="number"
-                id="inputCashflowAmount"
-                step="any"
-                min="0"
-                placeholder="Nominal Top-Up / Tarik (Contoh: 50)"
-                class="w-full px-3 py-2 rounded-lg bg-[#181B19] border border-[#2F3532] text-xs text-[#F3F4F6] [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E]"
-              />
-              <p id="cashflowModeHint" class="text-[10px] text-[#8E9591] leading-normal">
-                <strong class="text-[#22C55E]">Mode 1 Aktif:</strong> Kolom Total Equity otomatis menjadi <strong class="text-[#D1D5DB]">Equity Sebelumnya + Top-Up</strong> (P&amp;L = 0). Nanti setelah bursa AS tutup, edit tanggal ini lalu pilih <strong class="text-[#D1D5DB]">Mode 2</strong> untuk mengisi saldo penutupan broker.
-              </p>
-            </div>
+            <p id="existingTopupDayInfo" class="hidden text-[11px] text-[#22C55E] mt-1.5">
+              • Tanggal ini memiliki catatan Top-Up/Tarik dana (otomatis diperhitungkan dalam P&amp;L).
+            </p>
           </div>
 
           <!-- Live Calculated P&L Preview Box -->
@@ -1404,9 +1334,7 @@ function doPost(e) {
           </label>
         </div>
 
-        <!-- Sample / Reset Controls -->
-        <div class="pt-2 border-t border-[#242926] space-y-3">
-          <!-- PIN Security Section -->
+        <!-- PIN Security Section -->
         <div class="pt-2 border-t border-[#242926]">
           <div class="p-3.5 rounded-2xl bg-[#111312] border border-[#262B28] space-y-2.5">
             <div class="flex items-center justify-between">
@@ -1550,8 +1478,6 @@ function doPost(e) {
         theme: 'DARK',
         privacyHidden: false,
         entries: [],
-        cashflowDirection: 'DEPOSIT',
-        topupInputMode: 'TOPUP_ONLY',
         quickTopupDirection: 'DEPOSIT',
         calMonth: 10,
         calYear: 2026,
@@ -1710,16 +1636,8 @@ function doPost(e) {
         prevEquityHint: document.getElementById('prevEquityHint'),
         equityInputPrefix: document.getElementById('equityInputPrefix'),
         inputEquity: document.getElementById('inputEquity'),
+        existingTopupDayInfo: document.getElementById('existingTopupDayInfo'),
         inputNote: document.getElementById('inputNote'),
-        btnToggleCashflowSection: document.getElementById('btnToggleCashflowSection'),
-        cashflowChevron: document.getElementById('cashflowChevron'),
-        cashflowInputContainer: document.getElementById('cashflowInputContainer'),
-        btnModeTopupOnly: document.getElementById('btnModeTopupOnly'),
-        btnModeMarketClose: document.getElementById('btnModeMarketClose'),
-        cashflowModeHint: document.getElementById('cashflowModeHint'),
-        btnFlowDeposit: document.getElementById('btnFlowDeposit'),
-        btnFlowWithdraw: document.getElementById('btnFlowWithdraw'),
-        inputCashflowAmount: document.getElementById('inputCashflowAmount'),
         livePnlPreview: document.getElementById('livePnlPreview'),
         btnDeleteEntry: document.getElementById('btnDeleteEntry'),
         inlineDeleteConfirm: document.getElementById('inlineDeleteConfirm'),
@@ -2981,30 +2899,17 @@ function doPost(e) {
         updateLivePnlPreview();
       }
 
-      function setTopupInputMode(mode) {
-        state.topupInputMode = mode === 'MARKET_CLOSE' ? 'MARKET_CLOSE' : 'TOPUP_ONLY';
-
-        if (state.topupInputMode === 'TOPUP_ONLY') {
-          el.btnModeTopupOnly.className = 'w-full p-2.5 rounded-xl text-left border border-[#22C55E] bg-[#22C55E]/10 transition';
-          el.btnModeTopupOnly.querySelector('span').className = 'text-xs font-semibold text-[#22C55E]';
-          el.btnModeMarketClose.className = 'w-full p-2.5 rounded-xl text-left border border-[#2F3532] bg-[#181B19] hover:border-[#3E4642] transition';
-          el.btnModeMarketClose.querySelector('span').className = 'text-xs font-semibold text-[#D1D5DB]';
-          el.cashflowModeHint.innerHTML = '<strong class="text-[#22C55E]">Mode 1 Aktif:</strong> Kolom Total Equity otomatis menjadi <strong class="text-[#D1D5DB]">Equity Sebelumnya + Top-Up</strong> (P&amp;L = 0). Nanti setelah bursa AS tutup, edit tanggal ini lalu pilih <strong class="text-[#D1D5DB]">Mode 2</strong> untuk mengisi saldo penutupan broker.';
-        } else {
-          el.btnModeMarketClose.className = 'w-full p-2.5 rounded-xl text-left border border-[#22C55E] bg-[#22C55E]/10 transition';
-          el.btnModeMarketClose.querySelector('span').className = 'text-xs font-semibold text-[#22C55E]';
-          el.btnModeTopupOnly.className = 'w-full p-2.5 rounded-xl text-left border border-[#2F3532] bg-[#181B19] hover:border-[#3E4642] transition';
-          el.btnModeTopupOnly.querySelector('span').className = 'text-xs font-semibold text-[#D1D5DB]';
-          el.cashflowModeHint.innerHTML = '<strong class="text-[#22C55E]">Mode 2 Aktif:</strong> Ketik <strong class="text-[#D1D5DB]">Total Equity Penutupan</strong> sesuai aplikasi broker Anda di kolom atas, lalu isi nominal Top-Up di sini agar P&amp;L dihitung akurat.';
-        }
-
-        updateLivePnlPreview();
-      }
-
       function updateLivePnlPreview() {
         const targetDate = el.inputDate.value;
-        const rawFlowInput = Math.abs(parseFloat(el.inputCashflowAmount.value)) || 0;
-        const signedFlowUSD = fromInputAmountToUSD(state.cashflowDirection === 'DEPOSIT' ? rawFlowInput : -rawFlowInput);
+        const existingForDate = state.entries.find((e) => e.date === targetDate);
+        const signedFlowUSD = existingForDate ? (Number(existingForDate.netFlow) || 0) : 0;
+
+        if (signedFlowUSD !== 0) {
+          el.existingTopupDayInfo.classList.remove('hidden');
+          el.existingTopupDayInfo.textContent = `• Tanggal ini memiliki catatan ${signedFlowUSD > 0 ? 'Top-Up' : 'Tarik Dana'} ${formatNumber(signedFlowUSD, true)} (otomatis diperhitungkan dalam P&L).`;
+        } else {
+          el.existingTopupDayInfo.classList.add('hidden');
+        }
 
         const priorEntries = state.entries
           .filter((e) => e.date < targetDate)
@@ -3015,12 +2920,6 @@ function doPost(e) {
         } else {
           const prevEq = priorEntries[priorEntries.length - 1].equity;
           el.prevEquityHint.textContent = `Sebelumnya: ${formatNumber(prevEq)}`;
-        }
-
-        if (rawFlowInput > 0 && state.topupInputMode === 'TOPUP_ONLY' && !el.cashflowInputContainer.classList.contains('hidden')) {
-          const basePrevEq = priorEntries.length > 0 ? priorEntries[priorEntries.length - 1].equity : 0;
-          const autoEquityUSD = Math.max(0, basePrevEq + signedFlowUSD);
-          el.inputEquity.value = fromUSDToInputAmount(autoEquityUSD);
         }
 
         const rawEquityInput = parseFloat(el.inputEquity.value);
@@ -3046,18 +2945,6 @@ function doPost(e) {
         const color = pnl > 0.0001 ? 'text-[#22C55E]' : pnl < -0.0001 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
         el.livePnlPreview.textContent = `${formatNumber(pnl, true)} ${formatSignedPercent(pct)}`;
         el.livePnlPreview.className = `text-sm font-semibold ${color} [font-variant-numeric:tabular-nums]`;
-      }
-
-      function setCashflowDirection(dir) {
-        state.cashflowDirection = dir;
-        if (dir === 'DEPOSIT') {
-          el.btnFlowDeposit.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition';
-          el.btnFlowWithdraw.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#181B19] text-[#8E9591] border border-[#2F3532] transition';
-        } else {
-          el.btnFlowWithdraw.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#E05252]/15 text-[#E05252] border border-[#E05252]/40 transition';
-          el.btnFlowDeposit.className = 'py-1.5 rounded-lg text-xs font-medium bg-[#181B19] text-[#8E9591] border border-[#2F3532] transition';
-        }
-        updateLivePnlPreview();
       }
 
       function updateQuickTopupPreview() {
@@ -3155,13 +3042,12 @@ function doPost(e) {
         el.topupOnlyModalBackdrop.classList.add('hidden');
       }
 
-      function openEntryModal(editDate = null, openCashflowImmediately = false) {
+      function openEntryModal(editDate = null) {
         el.inlineDeleteConfirm.classList.add('hidden');
         toggleCustomCalendar(false);
         el.entryEquityCurrLabel.textContent = state.currency;
         el.equityInputPrefix.textContent = state.currency === 'USD' ? '$' : 'Rp';
         el.inputEquity.placeholder = state.currency === 'USD' ? 'Contoh: 105.50' : 'Contoh: 1750000';
-        el.inputCashflowAmount.placeholder = state.currency === 'USD' ? 'Nominal Top-Up (Contoh: 50)' : 'Nominal Top-Up (Contoh: 825000)';
 
         if (editDate) {
           const found = state.entries.find((e) => e.date === editDate);
@@ -3172,20 +3058,6 @@ function doPost(e) {
           el.inputEquity.value = fromUSDToInputAmount(found.equity);
           el.inputNote.value = found.note || '';
           el.btnDeleteEntry.classList.remove('hidden');
-
-          if (found.netFlow && found.netFlow !== 0) {
-            el.cashflowInputContainer.classList.remove('hidden');
-            el.cashflowChevron.classList.add('rotate-180');
-            setCashflowDirection(found.netFlow > 0 ? 'DEPOSIT' : 'WITHDRAW');
-            el.inputCashflowAmount.value = fromUSDToInputAmount(Math.abs(found.netFlow));
-            setTopupInputMode('MARKET_CLOSE');
-          } else {
-            el.cashflowInputContainer.classList.add('hidden');
-            el.cashflowChevron.classList.remove('rotate-180');
-            setCashflowDirection('DEPOSIT');
-            el.inputCashflowAmount.value = '';
-            setTopupInputMode('TOPUP_ONLY');
-          }
         } else {
           el.entryModalTitle.textContent = 'Update Equity Harian';
           el.editingOriginalDate.value = '';
@@ -3199,17 +3071,6 @@ function doPost(e) {
           el.inputDate.value = suggestedDate;
           el.inputEquity.value = '';
           el.inputNote.value = '';
-          el.inputCashflowAmount.value = '';
-          setCashflowDirection('DEPOSIT');
-          setTopupInputMode('TOPUP_ONLY');
-
-          if (openCashflowImmediately) {
-            el.cashflowInputContainer.classList.remove('hidden');
-            el.cashflowChevron.classList.add('rotate-180');
-          } else {
-            el.cashflowInputContainer.classList.add('hidden');
-            el.cashflowChevron.classList.remove('rotate-180');
-          }
         }
 
         updateDateHelperUI(el.inputDate.value);
@@ -3511,7 +3372,7 @@ function doPost(e) {
         el.performanceTableBody.addEventListener('click', (e) => {
           const row = e.target.closest('[data-edit-date]');
           if (row) {
-            openEntryModal(row.dataset.editDate, false);
+            openEntryModal(row.dataset.editDate);
           }
         });
 
@@ -3541,9 +3402,9 @@ function doPost(e) {
 
         // Quick Open Modals
         el.btnSyncStatusHeader.addEventListener('click', openSettingsModal);
-        el.btnQuickAddHeader.addEventListener('click', () => openEntryModal(null, false));
-        el.btnFloatingUpdate.addEventListener('click', () => openEntryModal(null, false));
-        el.btnEmptyAddFirst.addEventListener('click', () => openEntryModal(null, false));
+        el.btnQuickAddHeader.addEventListener('click', () => openEntryModal(null));
+        el.btnFloatingUpdate.addEventListener('click', () => openEntryModal(null));
+        el.btnEmptyAddFirst.addEventListener('click', () => openEntryModal(null));
         el.btnFloatingTopup.addEventListener('click', openTopupOnlyModal);
         el.btnAddCashflowShortcut.addEventListener('click', openTopupOnlyModal);
 
@@ -3660,26 +3521,9 @@ function doPost(e) {
           updateDateHelperUI(el.inputDate.value);
         });
 
-        // Cashflow Accordion & Mode Switcher
-        el.btnToggleCashflowSection.addEventListener('click', () => {
-          el.cashflowInputContainer.classList.toggle('hidden');
-          el.cashflowChevron.classList.toggle('rotate-180');
-          updateLivePnlPreview();
-        });
-        el.btnModeTopupOnly.addEventListener('click', () => setTopupInputMode('TOPUP_ONLY'));
-        el.btnModeMarketClose.addEventListener('click', () => setTopupInputMode('MARKET_CLOSE'));
-        el.btnFlowDeposit.addEventListener('click', () => setCashflowDirection('DEPOSIT'));
-        el.btnFlowWithdraw.addEventListener('click', () => setCashflowDirection('WITHDRAW'));
+        el.inputEquity.addEventListener('input', updateLivePnlPreview);
 
-        el.inputEquity.addEventListener('input', () => {
-          if (state.topupInputMode === 'TOPUP_ONLY' && !el.cashflowInputContainer.classList.contains('hidden')) {
-            setTopupInputMode('MARKET_CLOSE');
-          }
-          updateLivePnlPreview();
-        });
-        el.inputCashflowAmount.addEventListener('input', updateLivePnlPreview);
-
-        // Save Form Entry
+        // Save Form Entry (Preserves any existing netFlow on that date)
         el.entryForm.addEventListener('submit', (e) => {
           e.preventDefault();
           const dateVal = el.inputDate.value;
@@ -3692,8 +3536,13 @@ function doPost(e) {
             return;
           }
 
-          const rawFlowInput = Math.abs(parseFloat(el.inputCashflowAmount.value)) || 0;
-          const signedFlowUSD = fromInputAmountToUSD(state.cashflowDirection === 'DEPOSIT' ? rawFlowInput : -rawFlowInput);
+          const existingSameDate = state.entries.find((item) => item.date === dateVal);
+          const existingOrigDate = originalDate ? state.entries.find((item) => item.date === originalDate) : null;
+          const preservedFlowUSD = existingSameDate
+            ? (Number(existingSameDate.netFlow) || 0)
+            : existingOrigDate
+            ? (Number(existingOrigDate.netFlow) || 0)
+            : 0;
           const noteVal = (el.inputNote.value || '').trim().slice(0, 60);
 
           if (originalDate && originalDate !== dateVal) {
@@ -3704,7 +3553,7 @@ function doPost(e) {
           const newRecord = {
             date: dateVal,
             equity: equityValUSD,
-            netFlow: signedFlowUSD,
+            netFlow: preservedFlowUSD,
             note: noteVal
           };
 
