@@ -1416,10 +1416,10 @@ function doPost(e) {
                 </svg>
                 <span class="text-xs font-semibold text-[#F3F4F6]">PIN Keamanan (Anti-Hapus)</span>
               </div>
-              <span id="pinStatusBadge" class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#222724] text-[#8E9591]">Belum Aktif</span>
+              <span id="pinStatusBadge" class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30">Aktif (Semua Device)</span>
             </div>
             <p class="text-[11px] text-[#8E9591] leading-relaxed">
-              Lindungi penghapusan tanggal, riwayat Top-Up, import backup, dan penimpaan Google Sheets dengan PIN 4 digit.
+              PIN keamanan aktif otomatis di semua perangkat untuk melindungi penghapusan data, riwayat Top-Up, import backup, dan penimpaan Google Sheets.
             </p>
             <div class="flex items-center gap-2">
               <input
@@ -1428,7 +1428,7 @@ function doPost(e) {
                 inputmode="numeric"
                 pattern="[0-9]*"
                 maxlength="4"
-                placeholder="PIN 4 digit"
+                placeholder="Ganti PIN 4 digit"
                 class="flex-1 px-3 py-2 rounded-xl bg-[#181B19] border border-[#2F3532] text-xs font-semibold tracking-widest text-center text-[#F3F4F6] focus:outline-none focus:border-[#22C55E]"
               />
               <button
@@ -1436,14 +1436,14 @@ function doPost(e) {
                 id="btnSaveSecurityPin"
                 class="px-3.5 py-2 rounded-xl bg-[#22C55E] hover:bg-[#1EB054] text-[#090D0B] text-xs font-semibold transition"
               >
-                Simpan PIN
+                Ubah PIN
               </button>
               <button
                 type="button"
                 id="btnRemoveSecurityPin"
-                class="hidden px-3 py-2 rounded-xl bg-[#E05252]/15 hover:bg-[#E05252]/25 border border-[#E05252]/30 text-xs font-medium text-[#E05252] transition"
+                class="px-3 py-2 rounded-xl bg-[#222724] hover:bg-[#2B312E] border border-[#2F3532] text-xs font-medium text-[#D1D5DB] transition"
               >
-                Nonaktifkan
+                Reset PIN
               </button>
             </div>
           </div>
@@ -1515,6 +1515,7 @@ function doPost(e) {
       const USD_IDR_RATE_KEY = 'etf_portfolio_usd_idr_rate_v1';
       const DISPLAY_CURR_KEY = 'etf_portfolio_display_curr_v1';
       const SECURITY_PIN_KEY = 'etf_portfolio_security_pin_v1';
+      const DEFAULT_SECURITY_PIN = '1991';
       const DEFAULT_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxTKWdE0QaysCZkFFzO6gjLz50Zxllud8_P80ltoUiqAWz7_MYqZaIkc9uIbvkwjxMn/exec';
       const DEFAULT_USD_IDR_RATE = 16500;
 
@@ -1763,26 +1764,21 @@ function doPost(e) {
 
       function getSecurityPin() {
         try {
-          return (localStorage.getItem(SECURITY_PIN_KEY) || '').trim();
+          const saved = (localStorage.getItem(SECURITY_PIN_KEY) || '').trim();
+          return /^\d{4}$/.test(saved) ? saved : DEFAULT_SECURITY_PIN;
         } catch (e) {
-          return '';
+          return DEFAULT_SECURITY_PIN;
         }
       }
 
       function updateSecurityPinUI() {
         const pin = getSecurityPin();
         if (!el.pinStatusBadge) return;
-        if (pin) {
-          el.pinStatusBadge.textContent = 'Aktif (Terkunci)';
-          el.pinStatusBadge.className = 'text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30';
-          el.btnRemoveSecurityPin.classList.remove('hidden');
-          el.inputSetupPin.placeholder = 'Ganti PIN';
-        } else {
-          el.pinStatusBadge.textContent = 'Belum Aktif';
-          el.pinStatusBadge.className = 'text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#222724] text-[#8E9591]';
-          el.btnRemoveSecurityPin.classList.add('hidden');
-          el.inputSetupPin.placeholder = 'PIN 4 digit';
-        }
+        const isDefault = pin === DEFAULT_SECURITY_PIN;
+        el.pinStatusBadge.textContent = isDefault ? 'Aktif (Semua Device)' : 'Aktif (Custom)';
+        el.pinStatusBadge.className = 'text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30';
+        el.btnRemoveSecurityPin.classList.toggle('hidden', isDefault);
+        el.inputSetupPin.placeholder = 'Ganti PIN 4 digit';
       }
 
       function requirePinVerification(actionLabel, callback) {
@@ -3772,12 +3768,12 @@ function doPost(e) {
         });
 
         el.btnRemoveSecurityPin.addEventListener('click', () => {
-          requirePinVerification('Masukkan PIN untuk menonaktifkan kunci keamanan', () => {
+          requirePinVerification('Masukkan PIN untuk mereset kembali ke PIN default', () => {
             try {
               localStorage.removeItem(SECURITY_PIN_KEY);
             } catch (e) {}
             updateSecurityPinUI();
-            showToast('PIN Keamanan dinonaktifkan');
+            showToast('PIN Keamanan dikembalikan ke PIN default');
           });
         });
 
