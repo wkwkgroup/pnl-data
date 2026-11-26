@@ -146,6 +146,15 @@
     html.light-theme .hover\:bg-\[\#222724\]:hover {
       background-color: #EDF2EF !important;
     }
+    /* Prevent iOS Safari auto-zoom when focusing inputs */
+    @supports (-webkit-touch-callout: none) {
+      input[type="text"],
+      input[type="number"],
+      input[type="url"],
+      input[type="date"] {
+        font-size: 16px !important;
+      }
+    }
   </style>
 </head>
 <body class="bg-[#0B0D0C] text-[#F3F4F6] font-sans antialiased selection:bg-[#22C55E]/20 selection:text-[#22C55E] overflow-x-hidden">
@@ -1998,6 +2007,9 @@ function doPost(e) {
                 }))
                 .filter((item) => item.date && !isNaN(item.equity));
               state.entries.sort((a, b) => a.date.localeCompare(b.date));
+              const latestLoadedDt = parseISODate(state.entries[state.entries.length - 1].date);
+              state.heatmapYear = latestLoadedDt.getFullYear();
+              state.heatmapMonth = latestLoadedDt.getMonth();
               try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify({
                   currency: state.currency,
@@ -2675,6 +2687,7 @@ function doPost(e) {
       // ==================== MONTHLY P&L HEATMAP CALENDAR (SENIN - JUMAT) ====================
       function renderHeatmapCalendar() {
         const allEnriched = computeAllEnrichedEntries();
+        const firstEntryDate = allEnriched.length > 0 ? allEnriched[0].date : '';
         const entryMap = new Map();
         allEnriched.forEach((item) => entryMap.set(item.date, item));
 
@@ -2713,16 +2726,21 @@ function doPost(e) {
           let pctLabel = '-';
 
           if (item) {
-            if (item.pnlNominal > 0.0001) {
+            if (iso === firstEntryDate) {
+              cellClass = 'bg-[#222724] border-[#2F3532] text-[#D1D5DB]';
+              pctLabel = 'Awal';
+            } else if (item.pnlNominal > 0.0001) {
               greenDays++;
               cellClass = 'bg-[#22C55E]/25 border-[#22C55E]/60 text-[#F3F4F6]';
+              pctLabel = `+${item.pnlPercent.toFixed(2)}%`;
             } else if (item.pnlNominal < -0.0001) {
               redDays++;
               cellClass = 'bg-[#E05252]/25 border-[#E05252]/60 text-[#F3F4F6]';
+              pctLabel = `${item.pnlPercent.toFixed(2)}%`;
             } else {
               cellClass = 'bg-[#222724] border-[#2F3532] text-[#D1D5DB]';
+              pctLabel = '0.00%';
             }
-            pctLabel = `${item.pnlPercent > 0.0001 ? '+' : ''}${item.pnlPercent.toFixed(2)}%`;
           }
 
           html += `
