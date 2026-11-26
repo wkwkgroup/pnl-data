@@ -1450,57 +1450,58 @@ function doPost(e) {
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- ==================== SECURITY PIN VERIFICATION MODAL ==================== -->
-    <div id="pinVerifyModalBackdrop" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-      <div class="w-full max-w-[340px] bg-[#181B19] border border-[#2F3532] rounded-3xl p-5 shadow-2xl space-y-4 text-center">
-        <div class="w-11 h-11 rounded-2xl bg-[#22C55E]/10 border border-[#22C55E]/30 text-[#22C55E] flex items-center justify-center mx-auto">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-        </div>
-        <div>
-          <h4 class="text-sm font-semibold text-[#F3F4F6]">Verifikasi PIN Keamanan</h4>
-          <p id="pinVerifyActionDesc" class="text-[11px] text-[#8E9591] mt-1">Masukkan PIN 4 digit untuk melanjutkan</p>
-        </div>
-        <form id="pinVerifyForm" class="space-y-3">
-          <input
-            type="password"
-            id="inputVerifyPin"
-            inputmode="numeric"
-            pattern="[0-9]*"
-            maxlength="4"
-            required
-            placeholder="••••"
-            class="w-full py-2.5 px-4 rounded-xl bg-[#111312] border border-[#2F3532] text-lg font-bold tracking-[0.5em] text-center text-[#F3F4F6] focus:outline-none focus:border-[#22C55E]"
-          />
-          <p id="pinVerifyErrorMsg" class="hidden text-[11px] text-[#E05252] font-medium">PIN salah. Silakan coba lagi.</p>
-          <div class="grid grid-cols-2 gap-2 pt-1">
-            <button
-              type="button"
-              id="btnCancelVerifyPin"
-              class="py-2.5 px-3 rounded-xl bg-[#222724] text-xs font-medium text-[#D1D5DB] transition"
-            >
-              Batal
-            </button>
-            <button
-              type="submit"
-              class="py-2.5 px-3 rounded-xl bg-[#22C55E] hover:bg-[#1EB054] text-xs font-semibold text-[#090D0B] transition"
-            >
-              Buka Kunci
-            </button>
-          </div>
-        </form>
+  <!-- ==================== SECURITY PIN VERIFICATION MODAL (ROOT LEVEL) ==================== -->
+  <div id="pinVerifyModalBackdrop" class="hidden fixed inset-0 z-[9999] bg-black/85 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="w-full max-w-[340px] bg-[#181B19] border-2 border-[#22C55E]/60 rounded-3xl p-5 shadow-2xl space-y-4 text-center">
+      <div class="w-11 h-11 rounded-2xl bg-[#22C55E]/15 border border-[#22C55E]/40 text-[#22C55E] flex items-center justify-center mx-auto">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
       </div>
+      <div>
+        <span class="inline-block px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 text-[10px] font-semibold mb-1.5">Notifikasi Keamanan</span>
+        <h4 class="text-sm font-semibold text-[#F3F4F6]">Masukkan PIN untuk Melanjutkan</h4>
+        <p id="pinVerifyActionDesc" class="text-[11px] text-[#8E9591] mt-1">Masukkan PIN 4 digit untuk melanjutkan</p>
+      </div>
+      <form id="pinVerifyForm" class="space-y-3">
+        <input
+          type="password"
+          id="inputVerifyPin"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          maxlength="4"
+          required
+          placeholder="••••"
+          class="w-full py-2.5 px-4 rounded-xl bg-[#111312] border border-[#2F3532] text-lg font-bold tracking-[0.5em] text-center text-[#F3F4F6] focus:outline-none focus:border-[#22C55E]"
+        />
+        <p id="pinVerifyErrorMsg" class="hidden text-[11px] text-[#E05252] font-medium">PIN salah. Silakan coba lagi.</p>
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button
+            type="button"
+            id="btnCancelVerifyPin"
+            class="py-2.5 px-3 rounded-xl bg-[#222724] text-xs font-medium text-[#D1D5DB] transition"
+          >
+            Batal
+          </button>
+          <button
+            type="submit"
+            class="py-2.5 px-3 rounded-xl bg-[#22C55E] hover:bg-[#1EB054] text-xs font-semibold text-[#090D0B] transition"
+          >
+            Buka Kunci
+          </button>
+        </div>
+      </form>
     </div>
+  </div>
 
-    <!-- Non-blocking Toast Banner -->
-    <div
-      id="toastBanner"
-      class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-[#1F2421] border border-[#2F3532] text-xs font-medium text-[#F3F4F6] shadow-xl whitespace-nowrap"
-    >
-      Data tersimpan
-    </div>
+  <!-- Non-blocking Toast Banner (ROOT LEVEL) -->
+  <div
+    id="toastBanner"
+    class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-[10000] px-4 py-2 rounded-full bg-[#1F2421] border border-[#22C55E]/50 text-xs font-medium text-[#F3F4F6] shadow-xl whitespace-nowrap"
+  >
+    Data tersimpan
   </div>
 
   <!-- Application Logic -->
@@ -1791,12 +1792,18 @@ function doPost(e) {
         el.pinVerifyActionDesc.textContent = actionLabel || 'Masukkan PIN 4 digit untuk melanjutkan';
         el.inputVerifyPin.value = '';
         el.pinVerifyErrorMsg.classList.add('hidden');
+        el.pinVerifyModalBackdrop.style.display = 'flex';
         el.pinVerifyModalBackdrop.classList.remove('hidden');
-        setTimeout(() => el.inputVerifyPin.focus(), 80);
+        showToast('Notifikasi: Masukkan PIN 4 digit Anda');
+        setTimeout(() => {
+          el.inputVerifyPin.focus();
+          el.inputVerifyPin.select();
+        }, 60);
       }
 
       function closePinVerifyModal() {
         pendingProtectedAction = null;
+        el.pinVerifyModalBackdrop.style.display = '';
         el.pinVerifyModalBackdrop.classList.add('hidden');
       }
 
