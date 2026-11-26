@@ -146,6 +146,12 @@
     html.light-theme .hover\:bg-\[\#222724\]:hover {
       background-color: #EDF2EF !important;
     }
+    /* Interactive Toast Light Theme */
+    html.light-theme #toastBanner {
+      background-color: rgba(255, 255, 255, 0.96) !important;
+      border-color: rgba(34, 197, 94, 0.45) !important;
+      box-shadow: 0 12px 32px rgba(15, 23, 20, 0.14) !important;
+    }
     /* Prevent iOS Safari auto-zoom when focusing inputs */
     @supports (-webkit-touch-callout: none) {
       input[type="text"],
@@ -1195,7 +1201,7 @@
     status: 'ok',
     currency: currency,
     entries: entries
-  })).setMimeType(ContentService.MimeType.JSON);
+  })).setMimeType(ContentService.JSON);
 }
 
 function doPost(e) {
@@ -1424,12 +1430,40 @@ function doPost(e) {
     </div>
   </div>
 
-  <!-- Non-blocking Toast Banner (ROOT LEVEL) -->
+  <!-- Interactive Dynamic Island Toast Banner (ROOT LEVEL) -->
   <div
     id="toastBanner"
-    class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-[10000] px-4 py-2 rounded-full bg-[#1F2421] border border-[#22C55E]/50 text-xs font-medium text-[#F3F4F6] shadow-xl whitespace-nowrap"
+    role="status"
+    aria-live="polite"
+    class="hidden fixed top-[calc(3.85rem+env(safe-area-inset-top))] left-1/2 -translate-x-1/2 z-[10000] w-[calc(100%-2rem)] max-w-[380px] rounded-2xl bg-[#181B19]/95 backdrop-blur-md border border-[#22C55E]/40 p-3 shadow-2xl shadow-black/70 transition-all duration-300 ease-out opacity-0 -translate-y-3 cursor-pointer select-none overflow-hidden"
   >
-    Data tersimpan
+    <div class="flex items-center gap-3">
+      <!-- Animated Status Icon Container -->
+      <div id="toastIconWrap" class="w-9 h-9 rounded-xl bg-[#22C55E]/15 border border-[#22C55E]/30 text-[#22C55E] flex items-center justify-center shrink-0">
+        <svg id="toastSvgIcon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+
+      <!-- Main Title & Interactive Subtitle -->
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-1.5">
+          <span id="toastTitle" class="text-xs font-semibold text-[#F3F4F6] truncate">Data Tersinkron</span>
+          <span id="toastBadge" class="hidden px-1.5 py-0.5 rounded-full bg-[#22C55E]/15 text-[9px] font-bold text-[#22C55E] shrink-0 [font-variant-numeric:tabular-nums]">0 baris</span>
+        </div>
+        <p id="toastSubtitle" class="text-[11px] text-[#8E9591] truncate mt-0.5 [font-variant-numeric:tabular-nums]">Semua perubahan aman di cloud</p>
+      </div>
+
+      <!-- Dismiss / Action Chip -->
+      <span id="toastActionChip" class="shrink-0 text-[10px] font-medium text-[#8E9591] bg-[#111312] border border-[#262B28] px-2 py-1 rounded-lg">
+        Tutup
+      </span>
+    </div>
+
+    <!-- Smooth Shrinking Progress Bar -->
+    <div class="mt-2.5 h-0.5 w-full bg-[#262B28] rounded-full overflow-hidden">
+      <div id="toastProgressBar" class="h-full bg-[#22C55E] w-full origin-left transition-transform ease-linear"></div>
+    </div>
   </div>
 
   <!-- Application Logic -->
@@ -1675,7 +1709,14 @@ function doPost(e) {
         inputVerifyPin: document.getElementById('inputVerifyPin'),
         pinVerifyErrorMsg: document.getElementById('pinVerifyErrorMsg'),
         btnCancelVerifyPin: document.getElementById('btnCancelVerifyPin'),
-        toastBanner: document.getElementById('toastBanner')
+        toastBanner: document.getElementById('toastBanner'),
+        toastIconWrap: document.getElementById('toastIconWrap'),
+        toastSvgIcon: document.getElementById('toastSvgIcon'),
+        toastTitle: document.getElementById('toastTitle'),
+        toastBadge: document.getElementById('toastBadge'),
+        toastSubtitle: document.getElementById('toastSubtitle'),
+        toastActionChip: document.getElementById('toastActionChip'),
+        toastProgressBar: document.getElementById('toastProgressBar')
       };
 
       // ==================== SECURITY PIN & ANTI-DELETE GUARD ====================
@@ -1712,7 +1753,12 @@ function doPost(e) {
         el.pinVerifyErrorMsg.classList.add('hidden');
         el.pinVerifyModalBackdrop.style.display = 'flex';
         el.pinVerifyModalBackdrop.classList.remove('hidden');
-        showToast('Notifikasi: Masukkan PIN 4 digit Anda');
+        showToast({
+          type: 'warning',
+          title: 'Verifikasi Keamanan',
+          subtitle: 'Masukkan PIN 4 digit Anda untuk melanjutkan',
+          duration: 2400
+        });
         setTimeout(() => {
           el.inputVerifyPin.focus();
           el.inputVerifyPin.select();
@@ -1911,15 +1957,117 @@ function doPost(e) {
         showToast(state.theme === 'LIGHT' ? 'Mode Siang (Light) aktif' : 'Mode Malam (Dark) aktif');
       }
 
+      // ==================== INTERACTIVE DYNAMIC ISLAND TOAST ====================
       let toastTimer = null;
-      function showToast(message) {
-        el.toastBanner.textContent = message;
-        el.toastBanner.classList.remove('hidden');
+      let toastHideTransitionTimer = null;
+      let toastOnClickAction = null;
+
+      function hideToast() {
         clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => {
+        el.toastBanner.classList.remove('opacity-100', 'translate-y-0');
+        el.toastBanner.classList.add('opacity-0', '-translate-y-3');
+        clearTimeout(toastHideTransitionTimer);
+        toastHideTransitionTimer = setTimeout(() => {
           el.toastBanner.classList.add('hidden');
-        }, 2500);
+          toastOnClickAction = null;
+        }, 280);
       }
+
+      function showToast(payload) {
+        const opts = typeof payload === 'string'
+          ? { title: payload, subtitle: '', type: 'success', duration: 2600 }
+          : {
+              type: 'success',
+              title: 'Notifikasi',
+              subtitle: '',
+              badge: '',
+              actionLabel: 'Tutup',
+              duration: 3200,
+              onClick: null,
+              ...payload
+            };
+
+        clearTimeout(toastTimer);
+        clearTimeout(toastHideTransitionTimer);
+        toastOnClickAction = typeof opts.onClick === 'function' ? opts.onClick : null;
+
+        el.toastTitle.textContent = opts.title;
+
+        if (opts.badge) {
+          el.toastBadge.textContent = opts.badge;
+          el.toastBadge.classList.remove('hidden');
+        } else {
+          el.toastBadge.classList.add('hidden');
+        }
+
+        if (opts.subtitle) {
+          el.toastSubtitle.textContent = opts.subtitle;
+          el.toastSubtitle.classList.remove('hidden');
+        } else {
+          el.toastSubtitle.classList.add('hidden');
+        }
+
+        el.toastActionChip.textContent = opts.actionLabel || 'Tutup';
+
+        if (opts.type === 'loading') {
+          el.toastBanner.style.borderColor = 'rgba(245, 158, 11, 0.45)';
+          el.toastIconWrap.className = 'w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center shrink-0';
+          el.toastSvgIcon.setAttribute('class', 'w-4 h-4 animate-spin');
+          el.toastSvgIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />';
+          el.toastBadge.className = 'px-1.5 py-0.5 rounded-full bg-amber-500/15 text-[9px] font-bold text-amber-400 shrink-0 [font-variant-numeric:tabular-nums]' + (opts.badge ? '' : ' hidden');
+          el.toastProgressBar.className = 'h-full bg-amber-400 w-full origin-left';
+        } else if (opts.type === 'warning') {
+          el.toastBanner.style.borderColor = 'rgba(245, 158, 11, 0.55)';
+          el.toastIconWrap.className = 'w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/35 text-amber-400 flex items-center justify-center shrink-0';
+          el.toastSvgIcon.setAttribute('class', 'w-4 h-4');
+          el.toastSvgIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />';
+          el.toastBadge.className = 'px-1.5 py-0.5 rounded-full bg-amber-500/15 text-[9px] font-bold text-amber-400 shrink-0' + (opts.badge ? '' : ' hidden');
+          el.toastProgressBar.className = 'h-full bg-amber-400 w-full origin-left';
+        } else if (opts.type === 'error') {
+          el.toastBanner.style.borderColor = 'rgba(224, 82, 82, 0.55)';
+          el.toastIconWrap.className = 'w-9 h-9 rounded-xl bg-[#E05252]/15 border border-[#E05252]/35 text-[#E05252] flex items-center justify-center shrink-0';
+          el.toastSvgIcon.setAttribute('class', 'w-4 h-4');
+          el.toastSvgIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />';
+          el.toastBadge.className = 'px-1.5 py-0.5 rounded-full bg-[#E05252]/15 text-[9px] font-bold text-[#E05252] shrink-0' + (opts.badge ? '' : ' hidden');
+          el.toastProgressBar.className = 'h-full bg-[#E05252] w-full origin-left';
+        } else {
+          el.toastBanner.style.borderColor = 'rgba(34, 197, 94, 0.45)';
+          el.toastIconWrap.className = 'w-9 h-9 rounded-xl bg-[#22C55E]/15 border border-[#22C55E]/30 text-[#22C55E] flex items-center justify-center shrink-0';
+          el.toastSvgIcon.setAttribute('class', 'w-4 h-4');
+          el.toastSvgIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />';
+          el.toastBadge.className = 'px-1.5 py-0.5 rounded-full bg-[#22C55E]/15 text-[9px] font-bold text-[#22C55E] shrink-0 [font-variant-numeric:tabular-nums]' + (opts.badge ? '' : ' hidden');
+          el.toastProgressBar.className = 'h-full bg-[#22C55E] w-full origin-left';
+        }
+
+        // Reset and trigger smooth entrance + shrinking progress bar
+        el.toastBanner.classList.remove('hidden');
+        el.toastProgressBar.style.transition = 'none';
+        el.toastProgressBar.style.transform = 'scaleX(1)';
+
+        requestAnimationFrame(() => {
+          el.toastBanner.classList.remove('opacity-0', '-translate-y-3');
+          el.toastBanner.classList.add('opacity-100', 'translate-y-0');
+
+          if (opts.duration && opts.duration > 0) {
+            requestAnimationFrame(() => {
+              el.toastProgressBar.style.transition = `transform ${opts.duration}ms linear`;
+              el.toastProgressBar.style.transform = 'scaleX(0)';
+            });
+          }
+        });
+
+        if (opts.duration && opts.duration > 0) {
+          toastTimer = setTimeout(() => {
+            hideToast();
+          }, opts.duration);
+        }
+      }
+
+      el.toastBanner.addEventListener('click', () => {
+        const fn = toastOnClickAction;
+        hideToast();
+        if (typeof fn === 'function') fn();
+      });
 
       // ==================== GOOGLE SHEETS CLOUD SYNC & LOCAL STORAGE ====================
       function getAppsScriptUrl() {
@@ -1987,6 +2135,15 @@ function doPost(e) {
         if (!url) return;
 
         updateCloudStatusUI('syncing', 'Mengirim ke Sheets...');
+        if (!silent) {
+          showToast({
+            type: 'loading',
+            title: 'Mengirim ke Google Sheets...',
+            subtitle: `Menyinkronkan ${state.entries.length} baris portofolio`,
+            actionLabel: 'Proses',
+            duration: 0
+          });
+        }
         try {
           await fetch(url, {
             method: 'POST',
@@ -1998,10 +2155,25 @@ function doPost(e) {
             })
           });
           updateCloudStatusUI('synced', `Tersimpan (${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })})`);
-          if (!silent) showToast('Semua data berhasil dikirim ke Google Sheets');
+          if (!silent) {
+            showToast({
+              type: 'success',
+              title: 'Tersimpan di Google Sheets',
+              badge: `${state.entries.length} baris`,
+              subtitle: 'Cadangan cloud berhasil diperbarui',
+              duration: 3200
+            });
+          }
         } catch (err) {
           updateCloudStatusUI('error', 'Gagal mengirim (cek koneksi)');
-          if (!silent) showToast('Gagal mengirim ke Google Sheets');
+          if (!silent) {
+            showToast({
+              type: 'error',
+              title: 'Gagal Mengirim ke Cloud',
+              subtitle: 'Periksa koneksi internet Anda lalu coba lagi',
+              duration: 3500
+            });
+          }
         }
       }
 
@@ -2013,6 +2185,16 @@ function doPost(e) {
         }
 
         updateCloudStatusUI('syncing', 'Memuat dari Sheets...');
+        if (!silent) {
+          showToast({
+            type: 'loading',
+            title: 'Menyinkronkan Google Sheets...',
+            subtitle: 'Mengambil riwayat portofolio terbaru',
+            actionLabel: 'Memuat',
+            duration: 0
+          });
+        }
+
         try {
           const cacheBusterUrl = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
           const resp = await fetch(cacheBusterUrl, {
@@ -2044,17 +2226,50 @@ function doPost(e) {
               } catch (e) {}
               renderAll();
               updateCloudStatusUI('synced', `${state.entries.length} baris termuat`);
-              if (!silent) showToast(`Google Sheets: ${state.entries.length} baris berhasil dimuat`);
+              if (!silent) {
+                const enriched = computeAllEnrichedEntries();
+                const latest = enriched[enriched.length - 1];
+                const netReturn = latest.equity - latest.cumulativeInvested;
+                const equityStr = maskIfPrivate(formatNumber(latest.equity));
+                const pnlStr = maskIfPrivate(formatNumber(netReturn, true));
+                showToast({
+                  type: 'success',
+                  title: 'Data Berhasil Dimuat',
+                  badge: `${state.entries.length} baris`,
+                  subtitle: `${formatDisplayDate(latest.date)} • Saldo ${equityStr} (${pnlStr})`,
+                  actionLabel: 'Grafik',
+                  duration: 3800,
+                  onClick: () => switchTab('TRADE')
+                });
+              }
             } else {
               updateCloudStatusUI('synced', '0 baris (Sheet kosong)');
-              if (!silent) showToast('Sheet masih kosong, klik "Kirim Semua ke Sheet"');
+              if (!silent) {
+                showToast({
+                  type: 'warning',
+                  title: 'Spreadsheet Masih Kosong',
+                  subtitle: 'Ketuk untuk mengirim data lokal ke Google Sheets',
+                  actionLabel: 'Kirim',
+                  duration: 4000,
+                  onClick: () => openSettingsModal()
+                });
+              }
             }
           } else {
             throw new Error('Format JSON tidak sesuai');
           }
         } catch (err) {
           updateCloudStatusUI('error', 'Mode Lokal (Sheet tidak terjangkau)');
-          if (!silent) showToast('Gagal memuat Google Sheets (pastikan akses Apps Script: Anyone)');
+          if (!silent) {
+            showToast({
+              type: 'error',
+              title: 'Mode Offline Aktif',
+              subtitle: 'Menampilkan data lokal • Ketuk untuk cek pengaturan',
+              actionLabel: 'Cek',
+              duration: 3800,
+              onClick: () => openSettingsModal()
+            });
+          }
         }
       }
 
@@ -3203,7 +3418,7 @@ function doPost(e) {
             renderAll();
             showToast(`Kurs diperbarui: $1 = Rp ${Math.round(state.usdIdrRate).toLocaleString('en-US')}`);
           } else {
-            showToast('Masukkan angka kurs Rupiah yang valid');
+            showToast({ type: 'error', title: 'Kurs Tidak Valid', subtitle: 'Masukkan angka kurs Rupiah yang benar' });
           }
         });
         el.inputSettingsUsdIdrRate.addEventListener('change', () => {
@@ -3236,7 +3451,12 @@ function doPost(e) {
           } else {
             loadState();
             renderAll();
-            showToast('Tampilan diperbarui');
+            showToast({
+              type: 'success',
+              title: 'Tampilan Diperbarui',
+              badge: `${state.entries.length} baris`,
+              subtitle: 'Data lokal dimuat ulang'
+            });
           }
           setTimeout(() => {
             el.refreshIconSvg.classList.remove('animate-spin');
@@ -3446,7 +3666,7 @@ function doPost(e) {
           const dateVal = el.inputQuickTopupDate.value;
           const rawAmt = Math.abs(parseFloat(el.inputQuickTopupAmount.value)) || 0;
           if (!dateVal || rawAmt <= 0) {
-            showToast('Masukkan nominal Top-Up / Tarik yang valid');
+            showToast({ type: 'error', title: 'Nominal Tidak Valid', subtitle: 'Masukkan jumlah Top-Up atau penarikan dana' });
             return;
           }
 
@@ -3473,7 +3693,12 @@ function doPost(e) {
           saveState();
           renderAll();
           closeTopupOnlyModal();
-          showToast(signedAmtUSD > 0 ? `Top-Up +${formatNumber(signedAmtUSD)} tersimpan (P&L tetap 0)` : `Tarik saldo ${formatNumber(signedAmtUSD)} tersimpan`);
+          showToast({
+            type: 'success',
+            title: signedAmtUSD > 0 ? 'Top-Up Saldo Berhasil' : 'Penarikan Saldo Dicatat',
+            badge: formatDisplayDate(dateVal),
+            subtitle: `${formatNumber(signedAmtUSD, true)} • P&L harian tetap netral`
+          });
         });
 
         // Entry Modal Close
@@ -3532,7 +3757,7 @@ function doPost(e) {
           const originalDate = el.editingOriginalDate.value;
 
           if (!dateVal || isNaN(equityValUSD) || equityValUSD < 0) {
-            showToast('Masukkan nilai equity yang valid');
+            showToast({ type: 'error', title: 'Nominal Equity Salah', subtitle: 'Masukkan angka equity penutupan yang valid' });
             return;
           }
 
@@ -3570,7 +3795,19 @@ function doPost(e) {
           saveState();
           renderAll();
           closeEntryModal();
-          showToast(originalDate ? 'Data berhasil diperbarui' : 'Equity harian tersimpan');
+
+          const enrichedAfter = computeAllEnrichedEntries();
+          const savedEnriched = enrichedAfter.find((item) => item.date === dateVal);
+          const dailyPnlText = savedEnriched
+            ? `${formatNumber(savedEnriched.pnlNominal, true)} ${formatSignedPercent(savedEnriched.pnlPercent)}`
+            : formatNumber(equityValUSD);
+
+          showToast({
+            type: 'success',
+            title: originalDate ? 'Equity Harian Diperbarui' : 'Equity Harian Tersimpan',
+            badge: formatDisplayDate(dateVal),
+            subtitle: `Saldo ${maskIfPrivate(formatNumber(equityValUSD))} • P&L ${maskIfPrivate(dailyPnlText)}`
+          });
         });
 
         // Delete Entry Inline Confirmation (Protected by PIN)
@@ -3588,7 +3825,12 @@ function doPost(e) {
             saveState();
             renderAll();
             closeEntryModal();
-            showToast('Data tanggal dihapus');
+            showToast({
+              type: 'success',
+              title: 'Data Tanggal Dihapus',
+              badge: formatDisplayDate(targetDate),
+              subtitle: 'Riwayat portofolio telah diperbarui'
+            });
           });
         });
 
@@ -3603,7 +3845,7 @@ function doPost(e) {
         el.btnSaveSecurityPin.addEventListener('click', () => {
           const newPin = (el.inputSetupPin.value || '').trim();
           if (!/^\d{4}$/.test(newPin)) {
-            showToast('PIN harus berupa 4 digit angka (contoh: 1234)');
+            showToast({ type: 'error', title: 'Format PIN Salah', subtitle: 'PIN harus berupa 4 digit angka (contoh: 1234)' });
             return;
           }
           const existingPin = getSecurityPin();
@@ -3675,7 +3917,7 @@ function doPost(e) {
             await navigator.clipboard.writeText(codeText);
             showToast('Kode Google Apps Script disalin');
           } catch (err) {
-            showToast('Gagal menyalin otomatis, silakan blok & salin manual');
+            showToast({ type: 'error', title: 'Gagal Menyalin', subtitle: 'Silakan blok & salin kode secara manual' });
           }
         });
 
@@ -3709,7 +3951,12 @@ function doPost(e) {
           link.download = `etf-pnl-report-${formatISODate(new Date())}.csv`;
           link.click();
           URL.revokeObjectURL(url);
-          showToast('File CSV berhasil diunduh');
+          showToast({
+            type: 'success',
+            title: 'Ekspor CSV Selesai',
+            badge: `${enriched.length} baris`,
+            subtitle: 'Laporan siap dibuka di Excel / Numbers'
+          });
         });
 
         // Backup JSON
@@ -3726,7 +3973,12 @@ function doPost(e) {
           link.download = `etf-pnl-backup-${formatISODate(new Date())}.json`;
           link.click();
           URL.revokeObjectURL(url);
-          showToast('Backup JSON berhasil diunduh');
+          showToast({
+            type: 'success',
+            title: 'Backup JSON Diunduh',
+            badge: `${state.entries.length} baris`,
+            subtitle: 'Simpan file cadangan ini di tempat aman'
+          });
         });
 
         // Import JSON (Protected by PIN)
@@ -3751,13 +4003,18 @@ function doPost(e) {
                   saveState();
                   renderAll();
                   closeSettingsModal();
-                  showToast('Backup JSON berhasil dipulihkan');
+                  showToast({
+                    type: 'success',
+                    title: 'Backup JSON Dipulihkan',
+                    badge: `${state.entries.length} baris`,
+                    subtitle: 'Data berhasil dipulihkan & disinkronkan ke cloud'
+                  });
                 });
               } else {
-                showToast('Format file JSON tidak valid');
+                showToast({ type: 'error', title: 'Format JSON Salah', subtitle: 'Struktur file backup tidak dikenali' });
               }
             } catch (err) {
-              showToast('Gagal membaca file JSON');
+              showToast({ type: 'error', title: 'Gagal Membaca File', subtitle: 'Pastikan file berformat .json yang valid' });
             }
           };
           reader.readAsText(file);
