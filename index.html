@@ -883,13 +883,36 @@
         <!-- Heatmap Cells Grid -->
         <div id="pnlHeatmapGrid" class="grid grid-cols-5 gap-1.5"></div>
 
-        <!-- Selected Heatmap Day Detail & Color Legend -->
-        <div class="pt-2 border-t border-[#222624] flex items-center justify-between gap-2 text-[10px]">
-          <span id="heatmapSelectedInfo" class="text-[#8E9591] truncate">Ketuk tanggal untuk melihat P&amp;L</span>
-          <div class="flex items-center gap-2 shrink-0 text-[#8E9591]">
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-[#E05252]/30 border border-[#E05252]/60"></span>Merah</span>
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-[#222724] border border-[#2F3532]"></span>Abu</span>
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-[#22C55E]/30 border border-[#22C55E]/60"></span>Hijau</span>
+        <!-- Selected Heatmap Day Detail Card & Color Legend -->
+        <div class="pt-2.5 border-t border-[#222624] space-y-2.5">
+          <!-- Dedicated Selected Day Detail Pill Card (Zero Truncation on Mobile) -->
+          <div id="heatmapDetailCard" class="p-3 rounded-xl bg-[#111312] border border-[#222624] flex flex-col gap-1.5 transition-all">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span id="heatmapDetailDot" class="w-2 h-2 rounded-full bg-[#8E9591] shrink-0"></span>
+                <span id="heatmapDetailDate" class="text-[11px] font-semibold text-[#F3F4F6]">Ketuk tanggal pada kalender</span>
+              </div>
+              <span id="heatmapDetailBadge" class="hidden px-2 py-0.5 rounded-full text-[10px] font-semibold [font-variant-numeric:tabular-nums] shrink-0">0.00%</span>
+            </div>
+
+            <div id="heatmapDetailStatsRow" class="hidden flex items-center justify-between gap-2 pt-1.5 border-t border-[#1E2220] text-[11px] [font-variant-numeric:tabular-nums]">
+              <span class="text-[#8E9591]">Saldo: <strong id="heatmapDetailEquity" class="font-semibold text-[#E5E7EB]">$0.00</strong></span>
+              <span id="heatmapDetailPnl" class="font-semibold text-[#22C55E]">+$0.00</span>
+            </div>
+
+            <p id="heatmapDetailSubtext" class="text-[10.5px] text-[#8E9591] leading-snug">
+              Pilih kotak tanggal di atas untuk melihat rincian Saldo &amp; P&amp;L harian secara lengkap.
+            </p>
+          </div>
+
+          <!-- Clean Color Legend Row -->
+          <div class="flex items-center justify-between px-0.5 text-[10px] text-[#8E9591]">
+            <span>Keterangan warna:</span>
+            <div class="flex items-center gap-3">
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-[#E05252]/30 border border-[#E05252]/60"></span>Merah (Rugi)</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-[#222724] border border-[#2F3532]"></span>Abu (Impas)</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-[#22C55E]/30 border border-[#22C55E]/60"></span>Hijau (Profit)</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1750,11 +1773,18 @@
         heatmapMonthLabel: $('heatmapMonthLabel'),
         heatmapMonthSummary: $('heatmapMonthSummary'),
         pnlHeatmapGrid: $('pnlHeatmapGrid'),
-        heatmapSelectedInfo: $('heatmapSelectedInfo'),
+        heatmapDetailCard: $('heatmapDetailCard'),
+        heatmapDetailDot: $('heatmapDetailDot'),
+        heatmapDetailDate: $('heatmapDetailDate'),
+        heatmapDetailBadge: $('heatmapDetailBadge'),
+        heatmapDetailStatsRow: $('heatmapDetailStatsRow'),
+        heatmapDetailEquity: $('heatmapDetailEquity'),
+        heatmapDetailPnl: $('heatmapDetailPnl'),
+        heatmapDetailSubtext: $('heatmapDetailSubtext'),
         cashflowListContainer: $('cashflowListContainer'),
         btnAddCashflowShortcut: $('btnAddCashflowShortcut'),
 
-        // Entry Modal
+        // Entry Modal & Custom Calendar
         entryModalBackdrop: $('entryModalBackdrop'),
         entryModalTitle: $('entryModalTitle'),
         btnCloseEntryModal: $('btnCloseEntryModal'),
@@ -1782,7 +1812,7 @@
         livePnlPreview: $('livePnlPreview'),
         btnDeleteEntry: $('btnDeleteEntry'),
 
-        // Settings & PIN Modals
+        // Settings & Security PIN Modals
         settingsModalBackdrop: $('settingsModalBackdrop'),
         btnCloseSettingsModal: $('btnCloseSettingsModal'),
         modalCloudDot: $('modalCloudDot'),
@@ -1807,7 +1837,7 @@
         pinVerifyErrorMsg: $('pinVerifyErrorMsg'),
         btnCancelVerifyPin: $('btnCancelVerifyPin'),
 
-        // Toast Banner
+        // Dynamic Island Toast
         toastBanner: $('toastBanner'),
         toastIconWrap: $('toastIconWrap'),
         toastSvgIcon: $('toastSvgIcon'),
@@ -1819,12 +1849,12 @@
       };
 
       /* ========================================================================
-         MODULE 3: DATE, CURRENCY & FORMATTING UTILITIES
+         MODULE 3: DATE & FORMATTING UTILITIES
          ======================================================================== */
       const DateUtils = {
         parseISO(isoStr) {
-          const [y, m, d] = String(isoStr).split('-').map(Number);
-          return new Date(y, m - 1, d);
+          const parts = String(isoStr).split('-').map(Number);
+          return new Date(parts[0], parts[1] - 1, parts[2]);
         },
 
         formatISO(dateObj) {
@@ -1840,9 +1870,14 @@
             return this.formatISO(rawVal);
           }
           const str = String(rawVal).trim();
-          if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.slice(0, 10);
+          if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+            return str.slice(0, 10);
+          }
           const parsed = new Date(str);
-          return !isNaN(parsed.getTime()) ? this.formatISO(parsed) : '';
+          if (!isNaN(parsed.getTime())) {
+            return this.formatISO(parsed);
+          }
+          return '';
         },
 
         formatDisplay(isoStr) {
@@ -1924,12 +1959,22 @@
       };
 
       /* ========================================================================
-         MODULE 4: SECURITY PIN GUARD & NOTIFICATIONS (TOAST)
+         MODULE 4: SECURITY PIN GUARD & DYNAMIC ISLAND TOAST
          ======================================================================== */
       const SecurityGuard = {
         pendingAction: null,
 
+        updateBadgeUI() {
+          if (!DOM.pinStatusBadge) return;
+          DOM.pinStatusBadge.textContent = 'Aktif (Terkunci)';
+          DOM.pinStatusBadge.className = 'text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30';
+        },
+
         requirePin(actionLabel, callback) {
+          if (!CONFIG.DEFAULT_SECURITY_PIN) {
+            callback();
+            return;
+          }
           this.pendingAction = callback;
           DOM.pinVerifyActionDesc.textContent = actionLabel || 'Masukkan PIN 4 digit untuk melanjutkan';
           DOM.inputVerifyPin.value = '';
@@ -1943,37 +1988,37 @@
           }, 60);
         },
 
-        closeModal() {
-          this.pendingAction = null;
-          DOM.pinVerifyModalBackdrop.style.display = '';
-          DOM.pinVerifyModalBackdrop.classList.add('hidden');
-        },
-
         verify(enteredPin) {
           if (enteredPin === CONFIG.DEFAULT_SECURITY_PIN) {
-            const action = this.pendingAction;
+            const actionToRun = this.pendingAction;
             this.closeModal();
-            if (typeof action === 'function') action();
+            if (typeof actionToRun === 'function') actionToRun();
             return true;
           }
           DOM.pinVerifyErrorMsg.classList.remove('hidden');
           DOM.inputVerifyPin.value = '';
           DOM.inputVerifyPin.focus();
           return false;
+        },
+
+        closeModal() {
+          this.pendingAction = null;
+          DOM.pinVerifyModalBackdrop.style.display = '';
+          DOM.pinVerifyModalBackdrop.classList.add('hidden');
         }
       };
 
       const Toast = {
         timer: null,
-        hideTimer: null,
+        hideTransitionTimer: null,
         onClickAction: null,
 
         hide() {
           clearTimeout(this.timer);
           DOM.toastBanner.classList.remove('opacity-100', 'translate-y-0');
           DOM.toastBanner.classList.add('opacity-0', '-translate-y-3');
-          clearTimeout(this.hideTimer);
-          this.hideTimer = setTimeout(() => {
+          clearTimeout(this.hideTransitionTimer);
+          this.hideTransitionTimer = setTimeout(() => {
             DOM.toastBanner.classList.add('hidden');
             this.onClickAction = null;
           }, 280);
@@ -1994,63 +2039,58 @@
               };
 
           clearTimeout(this.timer);
-          clearTimeout(this.hideTimer);
+          clearTimeout(this.hideTransitionTimer);
           this.onClickAction = typeof opts.onClick === 'function' ? opts.onClick : null;
 
           DOM.toastTitle.textContent = opts.title;
+          DOM.toastBadge.textContent = opts.badge || '';
+          DOM.toastBadge.classList.toggle('hidden', !opts.badge);
+          DOM.toastSubtitle.textContent = opts.subtitle || '';
+          DOM.toastSubtitle.classList.toggle('hidden', !opts.subtitle);
           DOM.toastActionChip.textContent = opts.actionLabel || 'Tutup';
 
-          if (opts.badge) {
-            DOM.toastBadge.textContent = opts.badge;
-            DOM.toastBadge.classList.remove('hidden');
-          } else {
-            DOM.toastBadge.classList.add('hidden');
-          }
-
-          if (opts.subtitle) {
-            DOM.toastSubtitle.textContent = opts.subtitle;
-            DOM.toastSubtitle.classList.remove('hidden');
-          } else {
-            DOM.toastSubtitle.classList.add('hidden');
-          }
-
-          const styles = {
+          const themes = {
             loading: {
               border: 'rgba(245, 158, 11, 0.45)',
-              iconWrap: 'w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center shrink-0',
+              wrap: 'w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center shrink-0',
               svgClass: 'w-4 h-4 animate-spin',
               svgPath: '<path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />',
+              badge: 'px-1.5 py-0.5 rounded-full bg-amber-500/15 text-[9px] font-bold text-amber-400 shrink-0 [font-variant-numeric:tabular-nums]',
               bar: 'h-full bg-amber-400 w-full origin-left'
             },
             warning: {
               border: 'rgba(245, 158, 11, 0.55)',
-              iconWrap: 'w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/35 text-amber-400 flex items-center justify-center shrink-0',
+              wrap: 'w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/35 text-amber-400 flex items-center justify-center shrink-0',
               svgClass: 'w-4 h-4',
               svgPath: '<path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />',
+              badge: 'px-1.5 py-0.5 rounded-full bg-amber-500/15 text-[9px] font-bold text-amber-400 shrink-0',
               bar: 'h-full bg-amber-400 w-full origin-left'
             },
             error: {
               border: 'rgba(224, 82, 82, 0.55)',
-              iconWrap: 'w-9 h-9 rounded-xl bg-[#E05252]/15 border border-[#E05252]/35 text-[#E05252] flex items-center justify-center shrink-0',
+              wrap: 'w-9 h-9 rounded-xl bg-[#E05252]/15 border border-[#E05252]/35 text-[#E05252] flex items-center justify-center shrink-0',
               svgClass: 'w-4 h-4',
               svgPath: '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />',
+              badge: 'px-1.5 py-0.5 rounded-full bg-[#E05252]/15 text-[9px] font-bold text-[#E05252] shrink-0',
               bar: 'h-full bg-[#E05252] w-full origin-left'
             },
             success: {
               border: 'rgba(34, 197, 94, 0.45)',
-              iconWrap: 'w-9 h-9 rounded-xl bg-[#22C55E]/15 border border-[#22C55E]/30 text-[#22C55E] flex items-center justify-center shrink-0',
+              wrap: 'w-9 h-9 rounded-xl bg-[#22C55E]/15 border border-[#22C55E]/30 text-[#22C55E] flex items-center justify-center shrink-0',
               svgClass: 'w-4 h-4',
               svgPath: '<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />',
+              badge: 'px-1.5 py-0.5 rounded-full bg-[#22C55E]/15 text-[9px] font-bold text-[#22C55E] shrink-0 [font-variant-numeric:tabular-nums]',
               bar: 'h-full bg-[#22C55E] w-full origin-left'
             }
           };
 
-          const theme = styles[opts.type] || styles.success;
-          DOM.toastBanner.style.borderColor = theme.border;
-          DOM.toastIconWrap.className = theme.iconWrap;
-          DOM.toastSvgIcon.setAttribute('class', theme.svgClass);
-          DOM.toastSvgIcon.innerHTML = theme.svgPath;
-          DOM.toastProgressBar.className = theme.bar;
+          const activeTheme = themes[opts.type] || themes.success;
+          DOM.toastBanner.style.borderColor = activeTheme.border;
+          DOM.toastIconWrap.className = activeTheme.wrap;
+          DOM.toastSvgIcon.setAttribute('class', activeTheme.svgClass);
+          DOM.toastSvgIcon.innerHTML = activeTheme.svgPath;
+          DOM.toastBadge.className = activeTheme.badge + (opts.badge ? '' : ' hidden');
+          DOM.toastProgressBar.className = activeTheme.bar;
 
           DOM.toastBanner.classList.remove('hidden');
           DOM.toastProgressBar.style.transition = 'none';
@@ -2060,7 +2100,7 @@
             DOM.toastBanner.classList.remove('opacity-0', '-translate-y-3');
             DOM.toastBanner.classList.add('opacity-100', 'translate-y-0');
 
-            if (opts.duration > 0) {
+            if (opts.duration && opts.duration > 0) {
               requestAnimationFrame(() => {
                 DOM.toastProgressBar.style.transition = `transform ${opts.duration}ms linear`;
                 DOM.toastProgressBar.style.transform = 'scaleX(0)';
@@ -2068,7 +2108,7 @@
             }
           });
 
-          if (opts.duration > 0) {
+          if (opts.duration && opts.duration > 0) {
             this.timer = setTimeout(() => this.hide(), opts.duration);
           }
         }
@@ -2104,9 +2144,7 @@
             ? `${DateUtils.formatDisplay(sortedDates[0].date)} – ${DateUtils.formatDisplay(sortedDates[sortedDates.length - 1].date)}`
             : 'Belum ada entri';
 
-          if (DOM.loadedRowsBadge) {
-            DOM.loadedRowsBadge.textContent = `Total ${rowCount} baris data termuat`;
-          }
+          if (DOM.loadedRowsBadge) DOM.loadedRowsBadge.textContent = `Total ${rowCount} baris data termuat`;
           if (DOM.loadedSyncMetaText) {
             DOM.loadedSyncMetaText.textContent = status === 'syncing'
               ? 'Sedang mengambil data terbaru dari Google Sheets...'
@@ -2116,45 +2154,21 @@
             DOM.permanentScriptEndpointLabel.textContent = url.length > 42 ? `${url.slice(0, 32)}...${url.slice(-10)}` : url;
           }
 
-          if (!url) {
-            DOM.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#8E9591]';
-            DOM.headerCloudLabel.textContent = 'Local';
-            DOM.modalCloudDot.className = 'w-2 h-2 rounded-full bg-[#8E9591]';
-            DOM.modalCloudStatusText.textContent = 'Belum terhubung';
-            DOM.modalCloudStatusText.className = 'text-[10px] text-[#8E9591]';
-            return;
-          }
-
           const statusMap = {
-            syncing: {
-              dot: 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse',
-              modalDot: 'w-2 h-2 rounded-full bg-amber-400 animate-pulse',
-              headerText: 'Syncing',
-              modalText: customLabel || 'Menyinkronkan...',
-              modalTextClass: 'text-[10px] text-amber-400'
-            },
-            error: {
-              dot: 'w-1.5 h-1.5 rounded-full bg-[#E05252]',
-              modalDot: 'w-2 h-2 rounded-full bg-[#E05252]',
-              headerText: 'Offline',
-              modalText: customLabel || 'Gagal terhubung',
-              modalTextClass: 'text-[10px] text-[#E05252]'
-            },
-            synced: {
-              dot: 'w-1.5 h-1.5 rounded-full bg-[#22C55E]',
-              modalDot: 'w-2 h-2 rounded-full bg-[#22C55E]',
-              headerText: 'Synced',
-              modalText: customLabel || 'Terhubung',
-              modalTextClass: 'text-[10px] font-medium text-[#22C55E]'
-            }
+            noUrl: { dot: 'bg-[#8E9591]', header: 'Local', modalDot: 'bg-[#8E9591]', modalText: customLabel || 'Belum terhubung', modalClass: 'text-[10px] text-[#8E9591]' },
+            syncing: { dot: 'bg-amber-400 animate-pulse', header: 'Syncing', modalDot: 'bg-amber-400 animate-pulse', modalText: customLabel || 'Menyinkronkan...', modalClass: 'text-[10px] text-amber-400' },
+            error: { dot: 'bg-[#E05252]', header: 'Offline', modalDot: 'bg-[#E05252]', modalText: customLabel || 'Gagal terhubung', modalClass: 'text-[10px] text-[#E05252]' },
+            synced: { dot: 'bg-[#22C55E]', header: 'Synced', modalDot: 'bg-[#22C55E]', modalText: customLabel || 'Terhubung', modalClass: 'text-[10px] font-medium text-[#22C55E]' }
           };
 
-          const cfg = statusMap[status] || statusMap.synced;
-          DOM.headerCloudDot.className = cfg.dot;
-          DOM.headerCloudLabel.textContent = cfg.headerText;
-          DOM.modalCloudDot.className = cfg.modalDot;
-          DOM.modalCloudStatusText.textContent = cfg.modalText;
-          DOM.modalCloudStatusText.className = cfg.modalTextClass;
+          const cfg = !url ? statusMap.noUrl : (statusMap[status] || statusMap.synced);
+          if (DOM.headerCloudDot) DOM.headerCloudDot.className = `w-1.5 h-1.5 rounded-full ${cfg.dot}`;
+          if (DOM.headerCloudLabel) DOM.headerCloudLabel.textContent = cfg.header;
+          if (DOM.modalCloudDot) DOM.modalCloudDot.className = `w-2 h-2 rounded-full ${cfg.modalDot}`;
+          if (DOM.modalCloudStatusText) {
+            DOM.modalCloudStatusText.textContent = cfg.modalText;
+            DOM.modalCloudStatusText.className = cfg.modalClass;
+          }
         },
 
         async pushToCloud(silent = true) {
@@ -2188,9 +2202,7 @@
           } catch (err) {
             this.updateCloudStatusUI('error', 'Gagal kirim cloud');
           } finally {
-            setTimeout(() => {
-              this.isSyncingWrite = false;
-            }, 1500);
+            setTimeout(() => { this.isSyncingWrite = false; }, 1500);
           }
         },
 
@@ -2208,7 +2220,7 @@
           try {
             const cacheBusterUrl = `${url}${url.includes('?') ? '&' : '?'}t=${Date.now()}`;
             const resp = await fetch(cacheBusterUrl, { method: 'GET', cache: 'no-store' });
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
             const data = await resp.json();
 
             if (this.lastLocalMutationTs > requestStartedAt) {
@@ -2232,10 +2244,12 @@
                 state.heatmapYear = latestLoadedDt.getFullYear();
                 state.heatmapMonth = latestLoadedDt.getMonth();
 
-                localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify({
-                  currency: state.currency,
-                  entries: state.entries
-                }));
+                try {
+                  localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify({
+                    currency: state.currency,
+                    entries: state.entries
+                  }));
+                } catch (e) {}
 
                 Renderer.renderAll(true);
                 this.updateCloudStatusUI('synced', 'Tersinkron');
@@ -2340,7 +2354,7 @@
       };
 
       /* ========================================================================
-         MODULE 6: FINANCIAL & P&L ANALYTICS ENGINE
+         MODULE 6: PORTFOLIO ANALYTICS & P&L ENGINE
          ======================================================================== */
       const AnalyticsEngine = {
         computeEnrichedEntries() {
@@ -2351,13 +2365,7 @@
             const netFlow = Number(entry.netFlow) || 0;
             if (idx === 0) {
               cumulativeInvested = entry.equity;
-              return {
-                ...entry,
-                netFlow,
-                pnlNominal: 0,
-                pnlPercent: 0,
-                cumulativeInvested
-              };
+              return { ...entry, netFlow, pnlNominal: 0, pnlPercent: 0, cumulativeInvested };
             }
 
             const prevEquity = sorted[idx - 1].equity;
@@ -2366,13 +2374,7 @@
             const capitalBase = prevEquity + netFlow;
             const pnlPercent = capitalBase > 0 ? (pnlNominal / capitalBase) * 100 : 0;
 
-            return {
-              ...entry,
-              netFlow,
-              pnlNominal,
-              pnlPercent,
-              cumulativeInvested
-            };
+            return { ...entry, netFlow, pnlNominal, pnlPercent, cumulativeInvested };
           });
         },
 
@@ -2384,17 +2386,15 @@
           const latestDate = DateUtils.parseISO(enrichedList[enrichedList.length - 1].date);
           let cutoff = new Date(latestDate);
 
-          switch (state.periodFilter) {
-            case '1W': cutoff.setDate(cutoff.getDate() - 7); break;
-            case '1M': cutoff.setMonth(cutoff.getMonth() - 1); break;
-            case '3M': cutoff.setMonth(cutoff.getMonth() - 3); break;
-            case 'YTD': cutoff = new Date(latestDate.getFullYear(), 0, 1); break;
-            case '1Y': cutoff.setFullYear(cutoff.getFullYear() - 1); break;
-            case 'CUSTOM': {
-              const startStr = state.customStartDate || enrichedList[0].date;
-              const endStr = state.customEndDate || enrichedList[enrichedList.length - 1].date;
-              return enrichedList.filter((item) => item.date >= startStr && item.date <= endStr);
-            }
+          if (state.periodFilter === '1W') cutoff.setDate(cutoff.getDate() - 7);
+          else if (state.periodFilter === '1M') cutoff.setMonth(cutoff.getMonth() - 1);
+          else if (state.periodFilter === '3M') cutoff.setMonth(cutoff.getMonth() - 3);
+          else if (state.periodFilter === 'YTD') cutoff = new Date(latestDate.getFullYear(), 0, 1);
+          else if (state.periodFilter === '1Y') cutoff.setFullYear(cutoff.getFullYear() - 1);
+          else if (state.periodFilter === 'CUSTOM') {
+            const startStr = state.customStartDate || enrichedList[0].date;
+            const endStr = state.customEndDate || enrichedList[enrichedList.length - 1].date;
+            return enrichedList.filter((item) => item.date >= startStr && item.date <= endStr);
           }
 
           const cutoffStr = DateUtils.formatISO(cutoff);
@@ -2402,11 +2402,11 @@
           return filtered.length > 0 ? filtered : enrichedList;
         },
 
-        aggregateByKey(enrichedList, keyExtractor, labelFormatter) {
+        aggregateByPeriodKey(enrichedList, keyLen, labelFormatter) {
           const map = new Map();
 
           enrichedList.forEach((item) => {
-            const key = keyExtractor(item.date);
+            const key = item.date.slice(0, keyLen);
             if (!map.has(key)) {
               map.set(key, {
                 key,
@@ -2430,39 +2430,21 @@
             const pnlPercent = base > 0 ? (g.totalPnlNominal / base) * 100 : 0;
             return { ...g, pnlPercent };
           });
-        },
-
-        computeMonthlyAggregates(enrichedList) {
-          return this.aggregateByKey(
-            enrichedList,
-            (date) => date.slice(0, 7),
-            (ym) => DateUtils.formatMonthLabel(ym)
-          );
-        },
-
-        computeYearlyAggregates(enrichedList) {
-          return this.aggregateByKey(
-            enrichedList,
-            (date) => date.slice(0, 4),
-            (yr) => yr
-          );
         }
       };
 
       /* ========================================================================
-         MODULE 7: UI CONTROLLER & INTERACTION HELPERS
+         MODULE 7: UI STATE CONTROLLERS (CURRENCY, THEME, PRIVACY, TABS)
          ======================================================================== */
       const UIController = {
-        activeAnimFrames: new WeakMap(),
+        activeNumberAnimFrames: new WeakMap(),
 
         setUsdIdrRate(newRate, persist = true) {
           const parsed = Number(newRate);
           if (isNaN(parsed) || parsed <= 0) return false;
           state.usdIdrRate = parsed;
           if (persist) {
-            try {
-              localStorage.setItem(CONFIG.USD_IDR_RATE_KEY, String(state.usdIdrRate));
-            } catch (e) {}
+            try { localStorage.setItem(CONFIG.USD_IDR_RATE_KEY, String(state.usdIdrRate)); } catch (e) {}
           }
           if (DOM.headerRateDisplay) DOM.headerRateDisplay.textContent = Math.round(state.usdIdrRate).toLocaleString('en-US');
           if (DOM.inputQuickUsdIdrRate) DOM.inputQuickUsdIdrRate.value = state.usdIdrRate;
@@ -2477,7 +2459,7 @@
             return;
           }
 
-          const prevFrame = this.activeAnimFrames.get(targetEl);
+          const prevFrame = this.activeNumberAnimFrames.get(targetEl);
           if (prevFrame) cancelAnimationFrame(prevFrame);
 
           const prevUsd = parseFloat(targetEl.dataset.currentUsd);
@@ -2517,16 +2499,18 @@
             }
 
             if (progress < 1) {
-              this.activeAnimFrames.set(targetEl, requestAnimationFrame(step));
+              const id = requestAnimationFrame(step);
+              this.activeNumberAnimFrames.set(targetEl, id);
             } else {
               targetEl.textContent = FormatUtils.currency(usdVal, includeSign);
               targetEl.dataset.currentUsd = String(usdVal);
               targetEl.dataset.currentCurr = state.currency;
-              this.activeAnimFrames.delete(targetEl);
+              this.activeNumberAnimFrames.delete(targetEl);
             }
           };
 
-          this.activeAnimFrames.set(targetEl, requestAnimationFrame(step));
+          const id = requestAnimationFrame(step);
+          this.activeNumberAnimFrames.set(targetEl, id);
         },
 
         triggerCurrencyMorph() {
@@ -2540,24 +2524,20 @@
           const nextCurr = curr === 'IDR' ? 'IDR' : 'USD';
           const changed = state.currency !== nextCurr;
           state.currency = nextCurr;
-          try {
-            localStorage.setItem(CONFIG.DISPLAY_CURR_KEY, state.currency);
-          } catch (e) {}
+          try { localStorage.setItem(CONFIG.DISPLAY_CURR_KEY, state.currency); } catch (e) {}
           Renderer.renderAll(animate && changed);
           if (animate && changed) this.triggerCurrencyMorph();
         },
 
-        updatePrivacyUI() {
+        updatePrivacyIcons() {
           document.querySelectorAll('.privacy-eye-open').forEach((icon) => icon.classList.toggle('hidden', state.privacyHidden));
           document.querySelectorAll('.privacy-eye-closed').forEach((icon) => icon.classList.toggle('hidden', !state.privacyHidden));
         },
 
-        togglePrivacy() {
+        togglePrivacyMode() {
           state.privacyHidden = !state.privacyHidden;
-          try {
-            localStorage.setItem(CONFIG.PRIVACY_MODE_KEY, String(state.privacyHidden));
-          } catch (e) {}
-          this.updatePrivacyUI();
+          try { localStorage.setItem(CONFIG.PRIVACY_MODE_KEY, String(state.privacyHidden)); } catch (e) {}
+          this.updatePrivacyIcons();
           Renderer.renderAll();
         },
 
@@ -2579,53 +2559,45 @@
           }
         },
 
-        setTheme(mode) {
+        setThemeMode(mode) {
           state.theme = mode === 'LIGHT' ? 'LIGHT' : 'DARK';
-          try {
-            localStorage.setItem(CONFIG.THEME_MODE_KEY, state.theme);
-          } catch (e) {}
+          try { localStorage.setItem(CONFIG.THEME_MODE_KEY, state.theme); } catch (e) {}
           this.applyTheme();
           Renderer.renderAll();
         },
 
         switchTab(tabName) {
           state.activeTab = tabName;
-          const isPortfolio = tabName === 'PORTFOLIO';
-          if (DOM.iosSegmentedThumb) {
-            DOM.iosSegmentedThumb.style.transform = isPortfolio ? 'translateX(0%)' : 'translateX(100%)';
-          }
-
           const activeTabCls = 'relative z-10 py-1.5 text-[12px] font-semibold tracking-wide uppercase text-center text-[#22C55E] transition-colors duration-200';
           const inactiveTabCls = 'relative z-10 py-1.5 text-[12px] font-semibold tracking-wide uppercase text-center text-[#8E9591] hover:text-[#D1D5DB] transition-colors duration-200';
 
-          DOM.tabPortfolio.className = isPortfolio ? activeTabCls : inactiveTabCls;
-          DOM.tabPortfolio.setAttribute('aria-selected', String(isPortfolio));
-          DOM.tabTrade.className = !isPortfolio ? activeTabCls : inactiveTabCls;
-          DOM.tabTrade.setAttribute('aria-selected', String(!isPortfolio));
-
-          DOM.viewPortfolio.classList.toggle('hidden', !isPortfolio);
-          DOM.viewTrade.classList.toggle('hidden', isPortfolio);
-          if (!isPortfolio) Renderer.renderTradeAnalytics();
+          if (tabName === 'PORTFOLIO') {
+            if (DOM.iosSegmentedThumb) DOM.iosSegmentedThumb.style.transform = 'translateX(0%)';
+            DOM.tabPortfolio.className = activeTabCls;
+            DOM.tabPortfolio.setAttribute('aria-selected', 'true');
+            DOM.tabTrade.className = inactiveTabCls;
+            DOM.tabTrade.setAttribute('aria-selected', 'false');
+            DOM.viewPortfolio.classList.remove('hidden');
+            DOM.viewTrade.classList.add('hidden');
+          } else {
+            if (DOM.iosSegmentedThumb) DOM.iosSegmentedThumb.style.transform = 'translateX(100%)';
+            DOM.tabTrade.className = activeTabCls;
+            DOM.tabTrade.setAttribute('aria-selected', 'true');
+            DOM.tabPortfolio.className = inactiveTabCls;
+            DOM.tabPortfolio.setAttribute('aria-selected', 'false');
+            DOM.viewTrade.classList.remove('hidden');
+            DOM.viewPortfolio.classList.add('hidden');
+            Renderer.renderTradeAnalytics();
+          }
         }
       };
 
       /* ========================================================================
-         MODULE 8: MODAL CONTROLLERS (ENTRY, TOP-UP, SETTINGS)
+         MODULE 8: MODAL & CALENDAR CONTROLLERS
          ======================================================================== */
       const ModalController = {
-        toggleCustomCalendar(forceState) {
-          const shouldOpen = typeof forceState === 'boolean'
-            ? forceState
-            : DOM.customCalendarBox.classList.contains('hidden');
-
-          DOM.customCalendarBox.classList.toggle('hidden', !shouldOpen);
-          DOM.calendarChevron.classList.toggle('rotate-180', shouldOpen);
-          if (shouldOpen) this.renderCustomCalendar();
-        },
-
         renderCustomCalendar() {
-          const year = state.calYear;
-          const month = state.calMonth;
+          const { calYear: year, calMonth: month } = state;
           DOM.calMonthYearTitle.textContent = `${LOCALE.MONTHS_FULL[month]} ${year}`;
 
           const firstDayOfWeek = new Date(year, month, 1).getDay();
@@ -2668,6 +2640,16 @@
           DOM.customCalendarDays.innerHTML = html;
         },
 
+        toggleCustomCalendar(forceState) {
+          const shouldOpen = typeof forceState === 'boolean'
+            ? forceState
+            : DOM.customCalendarBox.classList.contains('hidden');
+
+          DOM.customCalendarBox.classList.toggle('hidden', !shouldOpen);
+          DOM.calendarChevron.classList.toggle('rotate-180', shouldOpen);
+          if (shouldOpen) this.renderCustomCalendar();
+        },
+
         updateDateHelperUI(isoStr) {
           if (!isoStr) return;
           const dt = DateUtils.parseISO(isoStr);
@@ -2679,14 +2661,15 @@
           DOM.dayNameBadge.textContent = LOCALE.DAYS_ID[dayIdx];
 
           const isWeekend = dayIdx === 0 || dayIdx === 6;
-          DOM.dayNameBadge.className = isWeekend
-            ? 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400'
-            : 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]';
-          DOM.weekendWarning.classList.toggle('hidden', !isWeekend);
-
-          if (!DOM.customCalendarBox.classList.contains('hidden')) {
-            this.renderCustomCalendar();
+          if (isWeekend) {
+            DOM.dayNameBadge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400';
+            DOM.weekendWarning.classList.remove('hidden');
+          } else {
+            DOM.dayNameBadge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]';
+            DOM.weekendWarning.classList.add('hidden');
           }
+
+          if (!DOM.customCalendarBox.classList.contains('hidden')) this.renderCustomCalendar();
           this.updateLivePnlPreview();
         },
 
@@ -2728,45 +2711,6 @@
           DOM.livePnlPreview.className = `text-sm font-semibold ${color} [font-variant-numeric:tabular-nums]`;
         },
 
-        openEntryModal(editDate = null) {
-          this.toggleCustomCalendar(false);
-          DOM.entryEquityCurrLabel.textContent = state.currency;
-          DOM.equityInputPrefix.textContent = state.currency === 'USD' ? '$' : 'Rp';
-          DOM.inputEquity.placeholder = state.currency === 'USD' ? 'Contoh: 105.50' : 'Contoh: 1750000';
-
-          if (editDate) {
-            const found = state.entries.find((e) => e.date === editDate);
-            if (!found) return;
-            DOM.entryModalTitle.textContent = 'Edit Equity Harian';
-            DOM.editingOriginalDate.value = found.date;
-            DOM.inputDate.value = found.date;
-            DOM.inputEquity.value = FormatUtils.fromUSDToInput(found.equity);
-            DOM.inputNote.value = found.note || '';
-            DOM.btnDeleteEntry.classList.remove('hidden');
-          } else {
-            DOM.entryModalTitle.textContent = 'Update Equity Harian';
-            DOM.editingOriginalDate.value = '';
-            DOM.btnDeleteEntry.classList.add('hidden');
-
-            const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
-            const suggestedDate = sorted.length > 0
-              ? DateUtils.getNextUSTradingDay(sorted[sorted.length - 1].date)
-              : DateUtils.formatISO(new Date());
-
-            DOM.inputDate.value = suggestedDate;
-            DOM.inputEquity.value = '';
-            DOM.inputNote.value = '';
-          }
-
-          this.updateDateHelperUI(DOM.inputDate.value);
-          DOM.entryModalBackdrop.classList.remove('hidden');
-        },
-
-        closeEntryModal() {
-          this.toggleCustomCalendar(false);
-          DOM.entryModalBackdrop.classList.add('hidden');
-        },
-
         updateQuickTopupPreview() {
           const dateVal = DOM.inputQuickTopupDate.value;
           const rawAmt = Math.abs(parseFloat(DOM.inputQuickTopupAmount.value)) || 0;
@@ -2791,12 +2735,13 @@
 
         setQuickTopupDirection(dir) {
           state.quickTopupDirection = dir;
+          const inactiveCls = 'py-2 rounded-[12px] text-xs font-semibold bg-transparent text-[#8E9591] hover:text-[#D1D5DB] border border-transparent transition';
           if (dir === 'DEPOSIT') {
             DOM.btnQuickTopupSign.className = 'py-2 rounded-[12px] text-xs font-semibold bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition';
-            DOM.btnQuickWithdrawSign.className = 'py-2 rounded-[12px] text-xs font-semibold bg-transparent text-[#8E9591] hover:text-[#D1D5DB] border border-transparent transition';
+            DOM.btnQuickWithdrawSign.className = inactiveCls;
           } else {
             DOM.btnQuickWithdrawSign.className = 'py-2 rounded-[12px] text-xs font-semibold bg-[#E05252]/15 text-[#E05252] border border-[#E05252]/40 transition';
-            DOM.btnQuickTopupSign.className = 'py-2 rounded-[12px] text-xs font-semibold bg-transparent text-[#8E9591] hover:text-[#D1D5DB] border border-transparent transition';
+            DOM.btnQuickTopupSign.className = inactiveCls;
           }
           this.updateQuickTopupPreview();
         },
@@ -2862,12 +2807,46 @@
           DOM.topupOnlyModalBackdrop.classList.add('hidden');
         },
 
+        openEntryModal(editDate = null) {
+          this.toggleCustomCalendar(false);
+          DOM.entryEquityCurrLabel.textContent = state.currency;
+          DOM.equityInputPrefix.textContent = state.currency === 'USD' ? '$' : 'Rp';
+          DOM.inputEquity.placeholder = state.currency === 'USD' ? 'Contoh: 105.50' : 'Contoh: 1750000';
+
+          if (editDate) {
+            const found = state.entries.find((e) => e.date === editDate);
+            if (!found) return;
+            DOM.entryModalTitle.textContent = 'Edit Equity Harian';
+            DOM.editingOriginalDate.value = found.date;
+            DOM.inputDate.value = found.date;
+            DOM.inputEquity.value = FormatUtils.fromUSDToInput(found.equity);
+            DOM.inputNote.value = found.note || '';
+            DOM.btnDeleteEntry.classList.remove('hidden');
+          } else {
+            DOM.entryModalTitle.textContent = 'Update Equity Harian';
+            DOM.editingOriginalDate.value = '';
+            DOM.btnDeleteEntry.classList.add('hidden');
+
+            const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
+            DOM.inputDate.value = sorted.length > 0
+              ? DateUtils.getNextUSTradingDay(sorted[sorted.length - 1].date)
+              : DateUtils.formatISO(new Date());
+            DOM.inputEquity.value = '';
+            DOM.inputNote.value = '';
+          }
+
+          this.updateDateHelperUI(DOM.inputDate.value);
+          DOM.entryModalBackdrop.classList.remove('hidden');
+        },
+
+        closeEntryModal() {
+          this.toggleCustomCalendar(false);
+          DOM.entryModalBackdrop.classList.add('hidden');
+        },
+
         openSettingsModal() {
           DOM.inputSettingsUsdIdrRate.value = state.usdIdrRate;
-          if (DOM.pinStatusBadge) {
-            DOM.pinStatusBadge.textContent = 'Aktif (Terkunci)';
-            DOM.pinStatusBadge.className = 'text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30';
-          }
+          SecurityGuard.updateBadgeUI();
           StorageService.updateCloudStatusUI('idle');
           DOM.settingsModalBackdrop.classList.remove('hidden');
         },
@@ -2878,20 +2857,14 @@
       };
 
       /* ========================================================================
-         MODULE 9: VIEW RENDERER (PORTFOLIO TABLE, SPARKLINE CHART, HEATMAP)
+         MODULE 9: VIEW RENDERERS (PORTFOLIO TABLE, SPARKLINE CHART, HEATMAP)
          ======================================================================== */
       const Renderer = {
-        getPnlColorClass(val) {
-          if (val > 0.0001) return 'text-[#22C55E]';
-          if (val < -0.0001) return 'text-[#E05252]';
-          return 'text-[#D1D5DB]';
-        },
-
         renderPerformanceTable(animateNumbers = false) {
           const allEnriched = AnalyticsEngine.computeEnrichedEntries();
           const filtered = AnalyticsEngine.filterByPeriod(allEnriched);
 
-          UIController.updatePrivacyUI();
+          UIController.updatePrivacyIcons();
 
           if (allEnriched.length === 0) {
             DOM.heroTotalPortfolio.textContent = FormatUtils.maskIfPrivate(FormatUtils.currency(0));
@@ -2911,7 +2884,11 @@
           const totalOverallPct = latestOverall.cumulativeInvested > 0
             ? (totalOverallPnl / latestOverall.cumulativeInvested) * 100
             : 0;
-          const heroColorClass = this.getPnlColorClass(totalOverallPnl);
+          const heroColorClass = totalOverallPnl > 0.0001
+            ? 'text-[#22C55E]'
+            : totalOverallPnl < -0.0001
+            ? 'text-[#E05252]'
+            : 'text-[#D1D5DB]';
 
           if (animateNumbers) {
             UIController.animateRollingAmount(DOM.heroTotalPortfolio, latestOverall.equity, false);
@@ -2936,11 +2913,10 @@
           DOM.heroTotalPnlPct.className = `text-xs font-medium ${heroColorClass} block [font-variant-numeric:tabular-nums]`;
           DOM.emptyStateContainer.classList.add('hidden');
 
-          // Yearly View
           if (state.viewMode === 'YEARLY') {
             DOM.loadMoreContainer.classList.add('hidden');
             if (DOM.tableColDateHeader) DOM.tableColDateHeader.textContent = 'Year';
-            const yearlyRows = AnalyticsEngine.computeYearlyAggregates(filtered).reverse();
+            const yearlyRows = AnalyticsEngine.aggregateByPeriodKey(filtered, 4, (yr) => yr).reverse();
             const rangeBannerHtml = filtered.length > 0
               ? `<div class="py-2 px-3 mb-1 rounded-xl bg-[#181B19] border border-[#262B28] flex items-center justify-between text-[11px]">
                   <span class="text-[#8E9591]">Ringkasan Tahunan (${LOCALE.PERIOD_LABELS[state.periodFilter] || 'All'})</span>
@@ -2948,60 +2924,34 @@
                 </div>`
               : '';
 
-            DOM.performanceTableBody.innerHTML = rangeBannerHtml + yearlyRows.map((row) => `
-              <div class="grid grid-cols-12 items-center py-3.5 text-[13px] transition-colors hover:bg-[#161918]">
-                <div class="col-span-3 text-left pr-1">
-                  <span class="font-semibold text-[#E5E7EB] block">${row.label}</span>
-                  <span class="text-[10px] text-[#8E9591]">${row.daysCount} hari bursa</span>
-                </div>
-                <div class="col-span-4 text-left pl-1 font-normal text-[#E5E7EB] [font-variant-numeric:tabular-nums]">
-                  ${FormatUtils.maskIfPrivate(FormatUtils.currency(row.endingEquity))}
-                </div>
-                <div class="col-span-5 text-right font-medium ${this.getPnlColorClass(row.totalPnlNominal)} [font-variant-numeric:tabular-nums]">
-                  ${FormatUtils.currency(row.totalPnlNominal, true)} ${FormatUtils.signedPercent(row.pnlPercent)}
-                </div>
-              </div>
-            `).join('');
+            DOM.performanceTableBody.innerHTML = rangeBannerHtml + yearlyRows.map((row) => this.buildAggregateRowHtml(row, true)).join('');
             return;
           }
 
-          // Monthly View
           if (state.viewMode === 'MONTHLY') {
             DOM.loadMoreContainer.classList.add('hidden');
             if (DOM.tableColDateHeader) DOM.tableColDateHeader.textContent = 'Month';
-            const monthlyRows = AnalyticsEngine.computeMonthlyAggregates(filtered).reverse();
-
-            DOM.performanceTableBody.innerHTML = monthlyRows.map((row) => `
-              <div class="grid grid-cols-12 items-center py-3.5 text-[13px] transition-colors hover:bg-[#161918]">
-                <div class="col-span-3 text-left pr-1">
-                  <span class="font-normal text-[#E5E7EB] block">${row.label}</span>
-                  <span class="text-[10px] text-[#8E9591]">${row.daysCount} hari bursa</span>
-                </div>
-                <div class="col-span-4 text-left pl-1 font-normal text-[#E5E7EB] [font-variant-numeric:tabular-nums]">
-                  ${FormatUtils.maskIfPrivate(FormatUtils.currency(row.endingEquity))}
-                </div>
-                <div class="col-span-5 text-right font-medium ${this.getPnlColorClass(row.totalPnlNominal)} [font-variant-numeric:tabular-nums]">
-                  ${FormatUtils.currency(row.totalPnlNominal, true)} ${FormatUtils.signedPercent(row.pnlPercent)}
-                </div>
-              </div>
-            `).join('');
+            const monthlyRows = AnalyticsEngine.aggregateByPeriodKey(filtered, 7, DateUtils.formatMonthLabel).reverse();
+            DOM.performanceTableBody.innerHTML = monthlyRows.map((row) => this.buildAggregateRowHtml(row, false)).join('');
             return;
           }
 
-          // Daily View
+          // Daily Mode
           if (DOM.tableColDateHeader) DOM.tableColDateHeader.textContent = 'Date';
           const reversedDaily = [...filtered].reverse();
           const displayedRows = reversedDaily.slice(0, state.visibleRowLimit);
           const remainingCount = reversedDaily.length - displayedRows.length;
 
-          if (remainingCount > 0) {
-            DOM.remainingRowsCount.textContent = remainingCount;
-            DOM.loadMoreContainer.classList.remove('hidden');
-          } else {
-            DOM.loadMoreContainer.classList.add('hidden');
-          }
+          DOM.loadMoreContainer.classList.toggle('hidden', remainingCount <= 0);
+          if (remainingCount > 0) DOM.remainingRowsCount.textContent = remainingCount;
 
           DOM.performanceTableBody.innerHTML = displayedRows.map((row) => {
+            const colorClass = row.pnlNominal > 0.0001
+              ? 'text-[#22C55E]'
+              : row.pnlNominal < -0.0001
+              ? 'text-[#E05252]'
+              : 'text-[#D1D5DB]';
+
             const pnlText = `${FormatUtils.currency(row.pnlNominal, true)} ${FormatUtils.signedPercent(row.pnlPercent)}`;
             const flowBadge = row.netFlow !== 0
               ? `<span class="inline-block mt-0.5 text-[10px] px-1.5 py-0.2 rounded bg-[#22C55E]/10 text-[#22C55E]">${row.netFlow > 0 ? 'Top-Up +' : 'Tarik '}${FormatUtils.maskIfPrivate(FormatUtils.currency(row.netFlow))}</span>`
@@ -3025,12 +2975,36 @@
                 <div class="col-span-4 text-left pl-1 font-normal text-[#E5E7EB] [font-variant-numeric:tabular-nums]">
                   ${FormatUtils.maskIfPrivate(FormatUtils.currency(row.equity))}
                 </div>
-                <div class="col-span-5 text-right font-medium ${this.getPnlColorClass(row.pnlNominal)} [font-variant-numeric:tabular-nums]">
+                <div class="col-span-5 text-right font-medium ${colorClass} [font-variant-numeric:tabular-nums]">
                   ${pnlText}
                 </div>
               </div>
             `;
           }).join('');
+        },
+
+        buildAggregateRowHtml(row, boldLabel) {
+          const colorClass = row.totalPnlNominal > 0.0001
+            ? 'text-[#22C55E]'
+            : row.totalPnlNominal < -0.0001
+            ? 'text-[#E05252]'
+            : 'text-[#D1D5DB]';
+          const pnlText = `${FormatUtils.currency(row.totalPnlNominal, true)} ${FormatUtils.signedPercent(row.pnlPercent)}`;
+
+          return `
+            <div class="grid grid-cols-12 items-center py-3.5 text-[13px] transition-colors hover:bg-[#161918]">
+              <div class="col-span-3 text-left pr-1">
+                <span class="${boldLabel ? 'font-semibold' : 'font-normal'} text-[#E5E7EB] block">${row.label}</span>
+                <span class="text-[10px] text-[#8E9591]">${row.daysCount} hari bursa</span>
+              </div>
+              <div class="col-span-4 text-left pl-1 font-normal text-[#E5E7EB] [font-variant-numeric:tabular-nums]">
+                ${FormatUtils.maskIfPrivate(FormatUtils.currency(row.endingEquity))}
+              </div>
+              <div class="col-span-5 text-right font-medium ${colorClass} [font-variant-numeric:tabular-nums]">
+                ${pnlText}
+              </div>
+            </div>
+          `;
         },
 
         renderSparklineChart(filtered) {
@@ -3089,17 +3063,21 @@
             DOM.chartActiveDate.textContent = DateUtils.formatDisplay(pointData.date);
             DOM.chartActiveEquity.textContent = FormatUtils.maskIfPrivate(FormatUtils.currency(pointData.equity));
 
-            const val = isDefaultPeriodSummary ? periodPnlSum : pointData.pnlNominal;
-            const pct = isDefaultPeriodSummary ? periodPct : pointData.pnlPercent;
-            const color = this.getPnlColorClass(val);
-
-            DOM.chartTrendArrow.textContent = val < -0.0001 ? '↘' : '↗';
-            DOM.chartTrendArrow.className = `text-xs font-bold ${color}`;
-            DOM.chartActivePnl.textContent = `${FormatUtils.maskIfPrivate(FormatUtils.currency(val, true))} ${FormatUtils.signedPercent(pct)}`;
-            DOM.chartActivePnl.className = `text-xs font-semibold ${color} [font-variant-numeric:tabular-nums]`;
-            DOM.chartPeriodSubLabel.textContent = isDefaultPeriodSummary
-              ? (LOCALE.CHART_PERIOD_SUBLABELS[state.periodFilter] || 'periode terpilih')
-              : 'P&L harian';
+            if (isDefaultPeriodSummary) {
+              const pColor = periodPnlSum > 0.0001 ? 'text-[#22C55E]' : periodPnlSum < -0.0001 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
+              DOM.chartTrendArrow.textContent = periodPnlSum < -0.0001 ? '↘' : '↗';
+              DOM.chartTrendArrow.className = `text-xs font-bold ${pColor}`;
+              DOM.chartActivePnl.textContent = `${FormatUtils.maskIfPrivate(FormatUtils.currency(periodPnlSum, true))} ${FormatUtils.signedPercent(periodPct)}`;
+              DOM.chartActivePnl.className = `text-xs font-semibold ${pColor} [font-variant-numeric:tabular-nums]`;
+              DOM.chartPeriodSubLabel.textContent = LOCALE.CHART_PERIOD_SUBLABELS[state.periodFilter] || 'periode terpilih';
+            } else {
+              const dColor = pointData.pnlNominal > 0.0001 ? 'text-[#22C55E]' : pointData.pnlNominal < -0.0001 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
+              DOM.chartTrendArrow.textContent = pointData.pnlNominal < -0.0001 ? '↘' : '↗';
+              DOM.chartTrendArrow.className = `text-xs font-bold ${dColor}`;
+              DOM.chartActivePnl.textContent = `${FormatUtils.maskIfPrivate(FormatUtils.currency(pointData.pnlNominal, true))} ${FormatUtils.signedPercent(pointData.pnlPercent)}`;
+              DOM.chartActivePnl.className = `text-xs font-semibold ${dColor} [font-variant-numeric:tabular-nums]`;
+              DOM.chartPeriodSubLabel.textContent = 'P&L harian';
+            }
           };
 
           updateChartHeader(lastPt.data, true);
@@ -3166,8 +3144,7 @@
           const entryMap = new Map();
           allEnriched.forEach((item, idx) => entryMap.set(item.date, { ...item, isFirstEntry: idx === 0 }));
 
-          const year = state.heatmapYear;
-          const month = state.heatmapMonth;
+          const { heatmapYear: year, heatmapMonth: month } = state;
           DOM.heatmapMonthLabel.textContent = `${LOCALE.MONTHS_SHORT[month]} ${year}`;
 
           const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -3196,7 +3173,8 @@
           }
 
           const leadingBlanks = weekdayCells[0].dow - 1;
-          let cellsHtml = '<div class="h-12 rounded-xl bg-transparent"></div>'.repeat(leadingBlanks);
+          let cellsHtml = '';
+          for (let b = 0; b < leadingBlanks; b++) cellsHtml += '<div class="h-12 rounded-xl bg-transparent"></div>';
 
           weekdayCells.forEach((cell) => {
             const d = cell.data;
@@ -3252,11 +3230,7 @@
             btn.className = isMatch
               ? 'chart-tab-btn min-h-[42px] py-2.5 px-1 rounded-xl text-xs font-semibold text-[#F3F4F6] bg-[#222724]/70 active:bg-[#222724] flex flex-col items-center justify-center gap-1.5 cursor-pointer select-none transition'
               : 'chart-tab-btn min-h-[42px] py-2.5 px-1 rounded-xl text-xs font-medium text-[#8E9591] hover:text-[#F3F4F6] active:bg-[#222724] flex flex-col items-center justify-center gap-1.5 cursor-pointer select-none transition';
-            if (indicator) {
-              indicator.className = isMatch
-                ? 'tab-indicator w-5 h-0.5 rounded-full bg-[#22C55E]'
-                : 'tab-indicator w-5 h-0.5 rounded-full bg-transparent';
-            }
+            if (indicator) indicator.className = `tab-indicator w-5 h-0.5 rounded-full ${isMatch ? 'bg-[#22C55E]' : 'bg-transparent'}`;
           });
 
           if (filtered.length === 0) {
@@ -3289,15 +3263,20 @@
           const denom = startEquity + totalNetFlowInPeriod;
           const totalPct = denom > 0 ? (totalNetPnl / denom) * 100 : 0;
 
-          const pnlColor = this.getPnlColorClass(totalNetPnl);
+          const pnlColor = totalNetPnl > 0.0001 ? 'text-[#22C55E]' : totalNetPnl < -0.0001 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
           DOM.statTotalPnl.textContent = FormatUtils.maskIfPrivate(FormatUtils.currency(totalNetPnl, true));
           DOM.statTotalPnl.className = `text-sm font-semibold ${pnlColor} block [font-variant-numeric:tabular-nums]`;
           DOM.statTotalPnlPct.textContent = `${totalPct > 0.0001 ? '+' : ''}${totalPct.toFixed(2)}%`;
           DOM.statTotalPnlPct.className = `text-xs ${pnlColor} [font-variant-numeric:tabular-nums]`;
 
           const activeDays = filtered.length > 1 ? filtered.slice(1) : filtered;
-          let wins = 0, losses = 0, draws = 0;
-          let maxProfitItem = null, maxLossItem = null, maxProfitPctItem = null, maxLossPctItem = null;
+          let wins = 0;
+          let losses = 0;
+          let draws = 0;
+          let maxProfitItem = null;
+          let maxLossItem = null;
+          let maxProfitPctItem = null;
+          let maxLossPctItem = null;
 
           activeDays.forEach((d) => {
             if (d.pnlNominal > 0.0001) wins++;
@@ -3318,30 +3297,18 @@
           DOM.statMaxProfit.textContent = maxProfitItem && maxProfitItem.pnlNominal > 0.0001
             ? FormatUtils.maskIfPrivate(FormatUtils.currency(maxProfitItem.pnlNominal, true))
             : FormatUtils.maskIfPrivate(FormatUtils.currency(0, true));
-          DOM.statMaxProfitDate.textContent = maxProfitItem && maxProfitItem.pnlNominal > 0.0001
-            ? DateUtils.formatDisplay(maxProfitItem.date)
-            : '-';
+          DOM.statMaxProfitDate.textContent = maxProfitItem && maxProfitItem.pnlNominal > 0.0001 ? DateUtils.formatDisplay(maxProfitItem.date) : '-';
 
           DOM.statMaxLoss.textContent = maxLossItem && maxLossItem.pnlNominal < -0.0001
             ? FormatUtils.maskIfPrivate(FormatUtils.currency(maxLossItem.pnlNominal, true))
             : FormatUtils.maskIfPrivate(FormatUtils.currency(0, true));
-          DOM.statMaxLossDate.textContent = maxLossItem && maxLossItem.pnlNominal < -0.0001
-            ? DateUtils.formatDisplay(maxLossItem.date)
-            : '-';
+          DOM.statMaxLossDate.textContent = maxLossItem && maxLossItem.pnlNominal < -0.0001 ? DateUtils.formatDisplay(maxLossItem.date) : '-';
 
-          DOM.statMaxProfitPct.textContent = maxProfitPctItem && maxProfitPctItem.pnlPercent > 0.0001
-            ? `+${maxProfitPctItem.pnlPercent.toFixed(2)}%`
-            : '0.00%';
-          DOM.statMaxProfitPctDate.textContent = maxProfitPctItem && maxProfitPctItem.pnlPercent > 0.0001
-            ? DateUtils.formatDisplay(maxProfitPctItem.date)
-            : '-';
+          DOM.statMaxProfitPct.textContent = maxProfitPctItem && maxProfitPctItem.pnlPercent > 0.0001 ? `+${maxProfitPctItem.pnlPercent.toFixed(2)}%` : '0.00%';
+          DOM.statMaxProfitPctDate.textContent = maxProfitPctItem && maxProfitPctItem.pnlPercent > 0.0001 ? DateUtils.formatDisplay(maxProfitPctItem.date) : '-';
 
-          DOM.statMaxLossPct.textContent = maxLossPctItem && maxLossPctItem.pnlPercent < -0.0001
-            ? `${maxLossPctItem.pnlPercent.toFixed(2)}%`
-            : '0.00%';
-          DOM.statMaxLossPctDate.textContent = maxLossPctItem && maxLossPctItem.pnlPercent < -0.0001
-            ? DateUtils.formatDisplay(maxLossPctItem.date)
-            : '-';
+          DOM.statMaxLossPct.textContent = maxLossPctItem && maxLossPctItem.pnlPercent < -0.0001 ? `${maxLossPctItem.pnlPercent.toFixed(2)}%` : '0.00%';
+          DOM.statMaxLossPctDate.textContent = maxLossPctItem && maxLossPctItem.pnlPercent < -0.0001 ? DateUtils.formatDisplay(maxLossPctItem.date) : '-';
 
           const avgDaily = activeDays.length > 0 ? totalNetPnl / activeDays.length : 0;
           DOM.statAvgDaily.textContent = FormatUtils.maskIfPrivate(FormatUtils.currency(avgDaily, true));
@@ -3351,7 +3318,6 @@
           DOM.statNetCashflow.textContent = FormatUtils.maskIfPrivate(FormatUtils.currency(overallNetFlow, true));
           DOM.statInitialEquity.textContent = FormatUtils.maskIfPrivate(FormatUtils.currency(allEnriched[0].equity));
 
-          // Max Drawdown
           let peakEquity = filtered[0].equity;
           let peakDate = filtered[0].date;
           let maxDrawdownPct = 0;
@@ -3382,7 +3348,6 @@
             : 'Dari puncak tertinggi';
           DOM.statMaxDrawdownNominal.textContent = `Drop nominal: ${FormatUtils.maskIfPrivate(FormatUtils.currency(maxDrawdownNominal))}`;
 
-          // Cashflow History
           const flowEntries = allEnriched.filter((item) => item.netFlow !== 0).reverse();
           if (flowEntries.length === 0) {
             DOM.cashflowListContainer.innerHTML = `<p class="text-[#8E9591]">Belum ada Top-Up atau Tarik dana tambahan di luar modal awal (${FormatUtils.maskIfPrivate(FormatUtils.currency(allEnriched[0].equity))}).</p>`;
@@ -3419,29 +3384,22 @@
           DOM.headerRateDisplay.textContent = Math.round(state.usdIdrRate).toLocaleString('en-US');
 
           const isUSD = state.currency === 'USD';
-          if (DOM.quickCurrPillIndicator) DOM.quickCurrPillIndicator.style.transform = isUSD ? 'translateX(0%)' : 'translateX(100%)';
-          if (DOM.tradeCurrPillIndicator) DOM.tradeCurrPillIndicator.style.transform = isUSD ? 'translateX(0%)' : 'translateX(100%)';
+          const pillShift = isUSD ? 'translateX(0%)' : 'translateX(100%)';
+          if (DOM.quickCurrPillIndicator) DOM.quickCurrPillIndicator.style.transform = pillShift;
+          if (DOM.tradeCurrPillIndicator) DOM.tradeCurrPillIndicator.style.transform = pillShift;
 
-          DOM.btnQuickCurrUSD.className = isUSD
-            ? 'relative z-10 px-2.5 py-1 rounded-full text-[#090D0B] whitespace-nowrap transition-colors duration-200'
-            : 'relative z-10 px-2.5 py-1 rounded-full text-[#8E9591] hover:text-[#F3F4F6] whitespace-nowrap transition-colors duration-200';
-          DOM.btnQuickCurrIDR.className = !isUSD
-            ? 'relative z-10 px-2.5 py-1 rounded-full text-[#090D0B] whitespace-nowrap transition-colors duration-200'
-            : 'relative z-10 px-2.5 py-1 rounded-full text-[#8E9591] hover:text-[#F3F4F6] whitespace-nowrap transition-colors duration-200';
+          DOM.btnQuickCurrUSD.className = `relative z-10 px-2.5 py-1 rounded-full ${isUSD ? 'text-[#090D0B]' : 'text-[#8E9591] hover:text-[#F3F4F6]'} whitespace-nowrap transition-colors duration-200`;
+          DOM.btnQuickCurrIDR.className = `relative z-10 px-2.5 py-1 rounded-full ${!isUSD ? 'text-[#090D0B]' : 'text-[#8E9591] hover:text-[#F3F4F6]'} whitespace-nowrap transition-colors duration-200`;
 
           if (DOM.btnTradeCurrUSD && DOM.btnTradeCurrIDR) {
-            DOM.btnTradeCurrUSD.className = isUSD
-              ? 'relative z-10 px-2 py-1 rounded-full text-[#090D0B] whitespace-nowrap transition-colors duration-200'
-              : 'relative z-10 px-2 py-1 rounded-full text-[#8E9591] hover:text-[#F3F4F6] whitespace-nowrap transition-colors duration-200';
-            DOM.btnTradeCurrIDR.className = !isUSD
-              ? 'relative z-10 px-2 py-1 rounded-full text-[#090D0B] whitespace-nowrap transition-colors duration-200'
-              : 'relative z-10 px-2 py-1 rounded-full text-[#8E9591] hover:text-[#F3F4F6] whitespace-nowrap transition-colors duration-200';
+            DOM.btnTradeCurrUSD.className = `relative z-10 px-2 py-1 rounded-full ${isUSD ? 'text-[#090D0B]' : 'text-[#8E9591] hover:text-[#F3F4F6]'} whitespace-nowrap transition-colors duration-200`;
+            DOM.btnTradeCurrIDR.className = `relative z-10 px-2 py-1 rounded-full ${!isUSD ? 'text-[#090D0B]' : 'text-[#8E9591] hover:text-[#F3F4F6]'} whitespace-nowrap transition-colors duration-200`;
           }
 
-          const activeCurrCardCls = 'py-2.5 px-3 rounded-[14px] border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left transition';
-          const inactiveCurrCardCls = 'py-2.5 px-3 rounded-[14px] border border-[#2F3532] bg-[#111312] text-xs font-medium text-[#8E9591] text-left transition';
-          DOM.btnCurrUSD.className = isUSD ? activeCurrCardCls : inactiveCurrCardCls;
-          DOM.btnCurrIDR.className = !isUSD ? activeCurrCardCls : inactiveCurrCardCls;
+          const activeCurrCls = 'py-2.5 px-3 rounded-[14px] border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left transition';
+          const inactiveCurrCls = 'py-2.5 px-3 rounded-[14px] border border-[#2F3532] bg-[#111312] text-xs font-medium text-[#8E9591] text-left transition';
+          DOM.btnCurrUSD.className = isUSD ? activeCurrCls : inactiveCurrCls;
+          DOM.btnCurrIDR.className = !isUSD ? activeCurrCls : inactiveCurrCls;
 
           const activeModeCls = 'px-3.5 py-1.5 rounded-full text-xs font-medium border border-[#22C55E] bg-[#22C55E]/10 text-[#22C55E] transition';
           const inactiveModeCls = 'px-3.5 py-1.5 rounded-full text-xs font-medium border border-[#2F3532] bg-transparent text-[#8E9591] hover:text-[#D1D5DB] transition';
@@ -3450,13 +3408,15 @@
           DOM.btnModeYearly.className = state.viewMode === 'YEARLY' ? activeModeCls : inactiveModeCls;
 
           document.querySelectorAll('.period-option').forEach((opt) => {
-            opt.className = opt.dataset.period === state.periodFilter
+            const isMatch = opt.dataset.period === state.periodFilter;
+            opt.className = isMatch
               ? 'period-option w-full text-left px-3.5 py-2 text-xs text-[#22C55E] font-medium bg-[#222724]/60'
               : 'period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]';
           });
 
           document.querySelectorAll('.trade-period-option').forEach((opt) => {
-            opt.className = opt.dataset.period === state.periodFilter
+            const isMatch = opt.dataset.period === state.periodFilter;
+            opt.className = isMatch
               ? 'trade-period-option w-full text-left px-3.5 py-2 text-xs text-[#22C55E] font-medium bg-[#222724]/60'
               : 'trade-period-option w-full text-left px-3.5 py-2 text-xs text-[#D1D5DB] hover:bg-[#222724]';
           });
@@ -3483,18 +3443,18 @@
          MODULE 10: EVENT BINDINGS & APPLICATION BOOTSTRAP
          ======================================================================== */
       function bindEventListeners() {
-        // Toast dismiss / click
+        // Primary Tab Navigation
+        DOM.tabPortfolio.addEventListener('click', () => UIController.switchTab('PORTFOLIO'));
+        DOM.tabTrade.addEventListener('click', () => UIController.switchTab('TRADE'));
+
+        // Toast Dismiss / Click Action
         DOM.toastBanner.addEventListener('click', () => {
           const fn = Toast.onClickAction;
           Toast.hide();
           if (typeof fn === 'function') fn();
         });
 
-        // Tab Switching
-        DOM.tabPortfolio.addEventListener('click', () => UIController.switchTab('PORTFOLIO'));
-        DOM.tabTrade.addEventListener('click', () => UIController.switchTab('TRADE'));
-
-        // Currency Switch & Rate Editor
+        // Currency Switchers & Quick Rate Editor
         DOM.btnQuickCurrUSD.addEventListener('click', () => UIController.setDisplayCurrency('USD', true));
         DOM.btnQuickCurrIDR.addEventListener('click', () => UIController.setDisplayCurrency('IDR', true));
         if (DOM.btnTradeCurrUSD && DOM.btnTradeCurrIDR) {
@@ -3528,38 +3488,40 @@
           }
         });
 
-        // Privacy Mode Eye Triggers
+        // Privacy Mode Triggers
         document.querySelectorAll('[data-privacy-trigger="true"]').forEach((btn) => {
           btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            UIController.togglePrivacy();
+            UIController.togglePrivacyMode();
           });
         });
 
-        // Theme Mode Toggles
-        DOM.btnToggleThemeHeader.addEventListener('click', () => UIController.setTheme(state.theme === 'DARK' ? 'LIGHT' : 'DARK'));
-        DOM.btnThemeDark.addEventListener('click', () => UIController.setTheme('DARK'));
-        DOM.btnThemeLight.addEventListener('click', () => UIController.setTheme('LIGHT'));
+        // Theme Switchers
+        DOM.btnToggleThemeHeader.addEventListener('click', () => {
+          UIController.setThemeMode(state.theme === 'DARK' ? 'LIGHT' : 'DARK');
+        });
+        DOM.btnThemeDark.addEventListener('click', () => UIController.setThemeMode('DARK'));
+        DOM.btnThemeLight.addEventListener('click', () => UIController.setThemeMode('LIGHT'));
 
-        // Info Card Toggle
+        // Info Tooltip
         DOM.btnToggleInfo.addEventListener('click', () => DOM.infoTooltipCard.classList.toggle('hidden'));
         DOM.btnCloseInfo.addEventListener('click', () => DOM.infoTooltipCard.classList.add('hidden'));
 
-        // View Mode Toggles (Daily / Monthly / Yearly)
+        // View Mode Switchers (Daily / Monthly / Yearly)
         DOM.btnModeDaily.addEventListener('click', () => {
           state.viewMode = 'DAILY';
           state.visibleRowLimit = CONFIG.DEFAULT_ROW_LIMIT;
           Renderer.renderAll();
         });
-
         DOM.btnModeMonthly.addEventListener('click', () => {
           state.viewMode = 'MONTHLY';
           Renderer.renderAll();
         });
-
         DOM.btnModeYearly.addEventListener('click', () => {
           state.viewMode = 'YEARLY';
-          if (['1W', '1M', '1D'].includes(state.periodFilter)) state.periodFilter = 'ALL';
+          if (state.periodFilter === '1W' || state.periodFilter === '1M' || state.periodFilter === '1D') {
+            state.periodFilter = 'ALL';
+          }
           Renderer.renderAll();
           if (state.entries.length > 0) {
             const sorted = [...state.entries].sort((a, b) => a.date.localeCompare(b.date));
@@ -3579,7 +3541,6 @@
           DOM.tradePeriodDropdownMenu.classList.add('hidden');
           DOM.periodDropdownMenu.classList.toggle('hidden');
         });
-
         document.querySelectorAll('.period-option').forEach((opt) => {
           opt.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -3595,7 +3556,6 @@
           DOM.periodDropdownMenu.classList.add('hidden');
           DOM.tradePeriodDropdownMenu.classList.toggle('hidden');
         });
-
         document.querySelectorAll('.trade-period-option').forEach((opt) => {
           opt.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -3605,7 +3565,6 @@
             Renderer.renderAll();
           });
         });
-
         document.querySelectorAll('.chart-tab-btn').forEach((btn) => {
           btn.addEventListener('click', () => {
             state.periodFilter = btn.dataset.chartPeriod;
@@ -3615,7 +3574,7 @@
         });
 
         // Custom Date Range Sync
-        const syncCustomDates = (startVal, endVal) => {
+        const handleCustomDateChange = (startVal, endVal) => {
           state.customStartDate = startVal;
           state.customEndDate = endVal;
           DOM.customStartPort.value = startVal;
@@ -3624,11 +3583,10 @@
           DOM.customEndTrade.value = endVal;
           Renderer.renderAll();
         };
-
-        DOM.customStartPort.addEventListener('change', () => syncCustomDates(DOM.customStartPort.value, DOM.customEndPort.value));
-        DOM.customEndPort.addEventListener('change', () => syncCustomDates(DOM.customStartPort.value, DOM.customEndPort.value));
-        DOM.customStartTrade.addEventListener('change', () => syncCustomDates(DOM.customStartTrade.value, DOM.customEndTrade.value));
-        DOM.customEndTrade.addEventListener('change', () => syncCustomDates(DOM.customStartTrade.value, DOM.customEndTrade.value));
+        DOM.customStartPort.addEventListener('change', () => handleCustomDateChange(DOM.customStartPort.value, DOM.customEndPort.value));
+        DOM.customEndPort.addEventListener('change', () => handleCustomDateChange(DOM.customStartPort.value, DOM.customEndPort.value));
+        DOM.customStartTrade.addEventListener('change', () => handleCustomDateChange(DOM.customStartTrade.value, DOM.customEndTrade.value));
+        DOM.customEndTrade.addEventListener('change', () => handleCustomDateChange(DOM.customStartTrade.value, DOM.customEndTrade.value));
 
         // Load More Pagination
         DOM.btnLoadMoreRows.addEventListener('click', () => {
@@ -3636,7 +3594,7 @@
           Renderer.renderPerformanceTable();
         });
 
-        // Heatmap Navigation & Cell Inspection
+        // Heatmap Month Navigation & Interactive Detail Card
         DOM.btnHeatmapPrevMonth.addEventListener('click', () => {
           state.heatmapMonth -= 1;
           if (state.heatmapMonth < 0) {
@@ -3645,7 +3603,6 @@
           }
           Renderer.renderMonthlyHeatmap();
         });
-
         DOM.btnHeatmapNextMonth.addEventListener('click', () => {
           state.heatmapMonth += 1;
           if (state.heatmapMonth > 11) {
@@ -3654,24 +3611,85 @@
           }
           Renderer.renderMonthlyHeatmap();
         });
-
         DOM.pnlHeatmapGrid.addEventListener('click', (e) => {
           const cellBtn = e.target.closest('[data-heatmap-date]');
           if (!cellBtn) return;
+
+          // Highlight active selected cell visually
+          DOM.pnlHeatmapGrid.querySelectorAll('.heatmap-cell').forEach((c) => {
+            c.classList.remove('ring-2', 'ring-[#F3F4F6]/80', 'ring-offset-1', 'ring-offset-[#181B19]');
+          });
+          cellBtn.classList.add('ring-2', 'ring-[#F3F4F6]/80', 'ring-offset-1', 'ring-offset-[#181B19]');
+
           const iso = cellBtn.dataset.heatmapDate;
           const allEnriched = AnalyticsEngine.computeEnrichedEntries();
           const idx = allEnriched.findIndex((item) => item.date === iso);
+
           if (idx === -1) {
-            DOM.heatmapSelectedInfo.textContent = `${DateUtils.formatDisplay(iso)}: Tidak ada transaksi`;
+            DOM.heatmapDetailCard.className = 'p-3 rounded-xl bg-[#111312] border border-[#222624] flex flex-col gap-1 transition-all';
+            DOM.heatmapDetailDot.className = 'w-2 h-2 rounded-full bg-[#8E9591] shrink-0';
+            DOM.heatmapDetailDate.textContent = DateUtils.formatDisplay(iso);
+            DOM.heatmapDetailBadge.classList.add('hidden');
+            DOM.heatmapDetailStatsRow.classList.add('hidden');
+            DOM.heatmapDetailSubtext.classList.remove('hidden');
+            DOM.heatmapDetailSubtext.textContent = 'Tidak ada catatan transaksi bursa pada tanggal ini.';
             return;
           }
+
           const found = allEnriched[idx];
-          const pnlTxt = idx === 0
-            ? 'Modal Awal'
-            : `${FormatUtils.maskIfPrivate(FormatUtils.currency(found.pnlNominal, true))} ${FormatUtils.signedPercent(found.pnlPercent)}`;
-          DOM.heatmapSelectedInfo.textContent = idx === 0
-            ? `${DateUtils.formatDisplay(iso)} • Saldo ${FormatUtils.maskIfPrivate(FormatUtils.currency(found.equity))} (${pnlTxt})`
-            : `${DateUtils.formatDisplay(iso)} • Saldo ${FormatUtils.maskIfPrivate(FormatUtils.currency(found.equity))} • ${pnlTxt}`;
+          const isInitial = idx === 0;
+          const isGain = !isInitial && found.pnlNominal > 0.0001;
+          const isLoss = !isInitial && found.pnlNominal < -0.0001;
+
+          DOM.heatmapDetailDate.textContent = DateUtils.formatDisplay(iso);
+          DOM.heatmapDetailStatsRow.classList.remove('hidden');
+          DOM.heatmapDetailEquity.textContent = FormatUtils.maskIfPrivate(FormatUtils.currency(found.equity));
+          DOM.heatmapDetailBadge.classList.remove('hidden');
+
+          if (isInitial) {
+            DOM.heatmapDetailCard.className = 'p-3 rounded-xl bg-[#111312] border border-[#2F3532] flex flex-col gap-1.5 transition-all';
+            DOM.heatmapDetailDot.className = 'w-2 h-2 rounded-full bg-[#D1D5DB] shrink-0';
+            DOM.heatmapDetailBadge.textContent = 'Modal Awal';
+            DOM.heatmapDetailBadge.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#222724] text-[#D1D5DB] shrink-0';
+            DOM.heatmapDetailPnl.textContent = FormatUtils.maskIfPrivate(FormatUtils.currency(0, true));
+            DOM.heatmapDetailPnl.className = 'font-semibold text-[#D1D5DB]';
+          } else if (isGain) {
+            DOM.heatmapDetailCard.className = 'p-3 rounded-xl bg-[#22C55E]/[0.06] border border-[#22C55E]/35 flex flex-col gap-1.5 transition-all';
+            DOM.heatmapDetailDot.className = 'w-2 h-2 rounded-full bg-[#22C55E] shrink-0';
+            DOM.heatmapDetailBadge.textContent = `+${found.pnlPercent.toFixed(2)}%`;
+            DOM.heatmapDetailBadge.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#22C55E]/15 text-[#22C55E] [font-variant-numeric:tabular-nums] shrink-0';
+            DOM.heatmapDetailPnl.textContent = FormatUtils.maskIfPrivate(FormatUtils.currency(found.pnlNominal, true));
+            DOM.heatmapDetailPnl.className = 'font-semibold text-[#22C55E]';
+          } else if (isLoss) {
+            DOM.heatmapDetailCard.className = 'p-3 rounded-xl bg-[#E05252]/[0.06] border border-[#E05252]/35 flex flex-col gap-1.5 transition-all';
+            DOM.heatmapDetailDot.className = 'w-2 h-2 rounded-full bg-[#E05252] shrink-0';
+            DOM.heatmapDetailBadge.textContent = `${found.pnlPercent.toFixed(2)}%`;
+            DOM.heatmapDetailBadge.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#E05252]/15 text-[#E05252] [font-variant-numeric:tabular-nums] shrink-0';
+            DOM.heatmapDetailPnl.textContent = FormatUtils.maskIfPrivate(FormatUtils.currency(found.pnlNominal, true));
+            DOM.heatmapDetailPnl.className = 'font-semibold text-[#E05252]';
+          } else {
+            DOM.heatmapDetailCard.className = 'p-3 rounded-xl bg-[#111312] border border-[#2F3532] flex flex-col gap-1.5 transition-all';
+            DOM.heatmapDetailDot.className = 'w-2 h-2 rounded-full bg-[#8E9591] shrink-0';
+            DOM.heatmapDetailBadge.textContent = '0.00%';
+            DOM.heatmapDetailBadge.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#222724] text-[#D1D5DB] [font-variant-numeric:tabular-nums] shrink-0';
+            DOM.heatmapDetailPnl.textContent = FormatUtils.maskIfPrivate(FormatUtils.currency(0, true));
+            DOM.heatmapDetailPnl.className = 'font-semibold text-[#D1D5DB]';
+          }
+
+          const extraNotes = [];
+          if (found.netFlow !== 0) {
+            extraNotes.push(`${found.netFlow > 0 ? 'Top-Up' : 'Tarik Dana'} ${FormatUtils.maskIfPrivate(FormatUtils.currency(found.netFlow, true))}`);
+          }
+          if (found.note) {
+            extraNotes.push(found.note);
+          }
+
+          if (extraNotes.length > 0) {
+            DOM.heatmapDetailSubtext.classList.remove('hidden');
+            DOM.heatmapDetailSubtext.textContent = extraNotes.join(' • ');
+          } else {
+            DOM.heatmapDetailSubtext.classList.add('hidden');
+          }
         });
 
         // Close Dropdowns on Outside Click
