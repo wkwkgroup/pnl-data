@@ -142,10 +142,10 @@
     }
     /* Bottom Floating Bar Gradient */
     html.light-theme .from-\[\#111312\] {
-      --tw-gradient-from: #F7FAF8 var(--tw-gradient-from-position) !important;
+      --tw-gradient-from: transparent var(--tw-gradient-from-position) !important;
     }
     html.light-theme .via-\[\#111312\]\/95 {
-      --tw-gradient-via: rgba(247, 250, 248, 0.95) var(--tw-gradient-via-position) !important;
+      --tw-gradient-via: transparent var(--tw-gradient-via-position) !important;
     }
     /* Hover states */
     html.light-theme .hover\:bg-\[\#161918\]:hover,
@@ -893,10 +893,10 @@
     </main>
 
     <!-- iOS Modern Floating Frosted Glass Dock -->
-    <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] px-4 pb-[calc(1.05rem+env(safe-area-inset-bottom))] pt-4 bg-gradient-to-t from-[#111312] via-[#111312]/80 to-transparent z-20 pointer-events-none">
+    <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] px-4 pb-[calc(1.05rem+env(safe-area-inset-bottom))] pt-2 z-20 pointer-events-none">
       <div
         id="iosFloatingDock"
-        class="pointer-events-auto p-1.5 rounded-[28px] bg-[#181B19]/80 backdrop-blur-2xl border border-white/[0.09] shadow-[0_20px_44px_-8px_rgba(0,0,0,0.85),inset_0_1px_0_0_rgba(255,255,255,0.08)] grid grid-cols-12 gap-1.5"
+        class="pointer-events-auto p-1.5 rounded-[28px] bg-[#181B19]/85 backdrop-blur-2xl border border-white/[0.09] shadow-[0_12px_32px_-8px_rgba(0,0,0,0.65),inset_0_1px_0_0_rgba(255,255,255,0.08)] grid grid-cols-12 gap-1.5"
       >
         <!-- Secondary iOS Tinted Pill: Top-Up Saldo -->
         <button
@@ -2860,14 +2860,14 @@
             const pColor = periodPnlSum > 0.0001 ? 'text-[#22C55E]' : periodPnlSum < -0.0001 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
             el.chartTrendArrow.textContent = periodPnlSum < -0.0001 ? '↘' : '↗';
             el.chartTrendArrow.className = `text-xs font-bold ${pColor}`;
-            el.chartActivePnl.textContent = maskIfPrivate(`${formatNumber(periodPnlSum, true)} ${formatSignedPercent(periodPct)}`);
+            el.chartActivePnl.textContent = `${maskIfPrivate(formatNumber(periodPnlSum, true))} ${formatSignedPercent(periodPct)}`;
             el.chartActivePnl.className = `text-xs font-semibold ${pColor} [font-variant-numeric:tabular-nums]`;
             el.chartPeriodSubLabel.textContent = CHART_PERIOD_SUBLABELS[state.periodFilter] || 'periode terpilih';
           } else {
             const dColor = pointData.pnlNominal > 0.0001 ? 'text-[#22C55E]' : pointData.pnlNominal < -0.0001 ? 'text-[#E05252]' : 'text-[#D1D5DB]';
             el.chartTrendArrow.textContent = pointData.pnlNominal < -0.0001 ? '↘' : '↗';
             el.chartTrendArrow.className = `text-xs font-bold ${dColor}`;
-            el.chartActivePnl.textContent = maskIfPrivate(`${formatNumber(pointData.pnlNominal, true)} ${formatSignedPercent(pointData.pnlPercent)}`);
+            el.chartActivePnl.textContent = `${maskIfPrivate(formatNumber(pointData.pnlNominal, true))} ${formatSignedPercent(pointData.pnlPercent)}`;
             el.chartActivePnl.className = `text-xs font-semibold ${dColor} [font-variant-numeric:tabular-nums]`;
             el.chartPeriodSubLabel.textContent = 'P&L harian';
           }
@@ -3780,7 +3780,9 @@
           const pnlTxt = idx === 0
             ? 'Modal Awal'
             : `${maskIfPrivate(formatNumber(found.pnlNominal, true))} ${formatSignedPercent(found.pnlPercent)}`;
-          el.heatmapSelectedInfo.textContent = `${formatDisplayDate(iso)} • Saldo ${maskIfPrivate(formatNumber(found.equity))} (${pnlTxt})`;
+          el.heatmapSelectedInfo.textContent = idx === 0
+            ? `${formatDisplayDate(iso)} • Saldo ${maskIfPrivate(formatNumber(found.equity))} (${pnlTxt})`
+            : `${formatDisplayDate(iso)} • Saldo ${maskIfPrivate(formatNumber(found.equity))} • ${pnlTxt}`;
         });
 
         // Close Dropdowns on Outside Click
