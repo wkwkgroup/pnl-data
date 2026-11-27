@@ -99,8 +99,15 @@
       border-color: #E2E8E5 !important;
     }
     /* Surfaces & Cards */
-    html.light-theme .bg-\[\#181B19\] {
+    html.light-theme .bg-\[\#181B19\],
+    html.light-theme .bg-\[\#181B19\]\/95,
+    html.light-theme .bg-\[\#181B19\]\/90 {
       background-color: #FFFFFF !important;
+    }
+    html.light-theme #totalPortfolioCard {
+      background-color: #FFFFFF !important;
+      border-color: #DCE3DF !important;
+      box-shadow: 0 10px 26px -8px rgba(15, 23, 20, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.9) !important;
     }
     html.light-theme .bg-\[\#111312\],
     html.light-theme .bg-\[\#0B0D0C\] {
@@ -157,6 +164,14 @@
       background-color: rgba(255, 255, 255, 0.82) !important;
       border-color: rgba(209, 217, 213, 0.85) !important;
       box-shadow: 0 18px 38px -8px rgba(15, 23, 20, 0.14), inset 0 1px 0 0 rgba(255, 255, 255, 0.9) !important;
+    }
+    html.light-theme #iosSegmentedNav {
+      background-color: rgba(230, 236, 233, 0.85) !important;
+      border-color: rgba(209, 217, 213, 0.7) !important;
+    }
+    html.light-theme #iosSegmentedThumb {
+      background-color: #FFFFFF !important;
+      box-shadow: 0 2px 8px rgba(15, 23, 20, 0.08) !important;
     }
     html.light-theme #btnFloatingTopup {
       background-color: rgba(241, 245, 243, 0.92) !important;
@@ -249,27 +264,33 @@
         </div>
       </div>
 
-      <!-- Primary Navigation Tabs: PORTFOLIO | TRADE -->
-      <nav class="grid grid-cols-2 border-b border-[#222624]" role="tablist">
-        <button
-          id="tabPortfolio"
-          type="button"
-          role="tab"
-          aria-selected="true"
-          class="py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors"
-        >
-          PORTFOLIO
-        </button>
-        <button
-          id="tabTrade"
-          type="button"
-          role="tab"
-          aria-selected="false"
-          class="py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] hover:text-[#D1D5DB] border-b-2 border-transparent transition-colors"
-        >
-          TRADE
-        </button>
-      </nav>
+      <!-- Primary Navigation Tabs: iOS Modern Segmented Control -->
+      <div class="px-4 pb-2.5 border-b border-[#222624]/80">
+        <nav id="iosSegmentedNav" class="relative grid grid-cols-2 p-1 rounded-[14px] bg-[#181B19]/90 border border-white/[0.06] shadow-inner" role="tablist">
+          <span
+            id="iosSegmentedThumb"
+            class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-[10px] bg-[#242A27] border border-white/[0.08] shadow-[0_2px_8px_rgba(0,0,0,0.35)] transition-transform duration-300 ease-out pointer-events-none"
+          ></span>
+          <button
+            id="tabPortfolio"
+            type="button"
+            role="tab"
+            aria-selected="true"
+            class="relative z-10 py-1.5 text-[12px] font-semibold tracking-wide uppercase text-center text-[#22C55E] transition-colors duration-200"
+          >
+            PORTFOLIO
+          </button>
+          <button
+            id="tabTrade"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            class="relative z-10 py-1.5 text-[12px] font-semibold tracking-wide uppercase text-center text-[#8E9591] hover:text-[#D1D5DB] transition-colors duration-200"
+          >
+            TRADE
+          </button>
+        </nav>
+      </div>
     </header>
 
     <!-- ==================== VIEW 1: PORTFOLIO TAB ==================== -->
@@ -321,7 +342,7 @@
             title="Ketuk untuk ubah kurs USD/IDR"
             class="text-[11px] font-medium text-[#8E9591] hover:text-[#F3F4F6] bg-[#181B19] border border-[#262B28] hover:border-[#22C55E]/50 px-2.5 py-1 rounded-full flex items-center gap-1 active:scale-95 transition [font-variant-numeric:tabular-nums]"
           >
-            <span>Rp <strong id="headerRateDisplay" class="text-[#22C55E] font-semibold">16,500</strong></span>
+            <span>Rp <strong id="headerRateDisplay" class="text-[#22C55E] font-semibold">18,334</strong></span>
             <svg class="w-2.5 h-2.5 opacity-80" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
@@ -329,10 +350,10 @@
         </div>
       </div>
 
-      <!-- Inline Quick USD/IDR Exchange Rate Editor Bar -->
+      <!-- Inline Quick USD/IDR Rate Editor Bar (Hidden by default) -->
       <div id="quickRateEditorBar" class="hidden mb-4 p-3 rounded-2xl bg-[#181B19] border border-[#22C55E]/40 flex items-center justify-between gap-2">
-        <div class="flex-1">
-          <label for="inputQuickUsdIdrRate" class="text-[10px] font-medium text-[#22C55E] block mb-1">Kurs Konversi ($1 USD ke Rupiah)</label>
+        <div class="flex-1 min-w-0">
+          <label for="inputQuickUsdIdrRate" class="text-[11px] font-medium text-[#22C55E] block mb-1">Kurs $1 USD ke Rupiah (IDR)</label>
           <div class="flex items-center gap-1.5">
             <span class="text-xs text-[#8E9591]">Rp</span>
             <input
@@ -340,7 +361,7 @@
               id="inputQuickUsdIdrRate"
               step="1"
               min="1"
-              placeholder="16500"
+              placeholder="18334"
               class="w-full px-2.5 py-1.5 rounded-xl bg-[#111312] border border-[#2F3532] text-xs font-semibold text-[#F3F4F6] [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E]"
             />
           </div>
@@ -354,10 +375,10 @@
         </button>
       </div>
 
-      <!-- Total Portfolio Summary Card -->
-      <div class="mb-4 p-4 rounded-2xl bg-[#181B19] border border-[#262B28] flex items-center justify-between gap-3">
+      <!-- Total Portfolio Summary Card (iOS Modern Glass Card) -->
+      <div id="totalPortfolioCard" class="mb-4 p-4 rounded-[22px] bg-[#181B19]/95 border border-white/[0.07] shadow-[0_10px_28px_-10px_rgba(0,0,0,0.55),inset_0_1px_0_0_rgba(255,255,255,0.06)] flex items-center justify-between gap-3">
         <div>
-          <span class="text-[11px] text-[#8E9591] block mb-0.5">Total Portfolio</span>
+          <span class="text-[11px] font-medium text-[#8E9591] block mb-0.5">Total Portfolio</span>
           <div class="flex items-center gap-1.5">
             <span id="heroTotalPortfolio" class="text-xl font-bold text-[#F3F4F6] [font-variant-numeric:tabular-nums] inline-block">$99.75</span>
             <button
@@ -827,28 +848,28 @@
     </div>
 
     <!-- ==================== MODAL KHUSUS: TOP-UP / TARIK SALDO (TANPA GANGGU P&L) ==================== -->
-    <div id="topupOnlyModalBackdrop" class="hidden fixed inset-0 z-40 bg-black/75 backdrop-blur-xs flex items-end justify-center">
-      <div class="w-full max-w-[480px] bg-[#181B19] border-t border-[#2A302D] rounded-t-3xl p-5 pb-8 shadow-2xl space-y-4">
-        <div class="w-10 h-1 bg-[#343B37] rounded-full mx-auto"></div>
+    <div id="topupOnlyModalBackdrop" class="hidden fixed inset-0 z-40 bg-black/75 backdrop-blur-md flex items-end justify-center">
+      <div class="w-full max-w-[480px] bg-[#161918]/95 backdrop-blur-2xl border-t border-white/[0.1] rounded-t-[32px] p-5 pb-[calc(1.75rem+env(safe-area-inset-bottom))] shadow-[0_-12px_40px_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(255,255,255,0.08)] space-y-4">
+        <div class="w-10 h-1 bg-white/20 rounded-full mx-auto"></div>
 
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between px-0.5">
           <div>
-            <h3 class="text-base font-semibold text-[#F3F4F6]">Top-Up / Tarik Saldo</h3>
+            <h3 class="text-[17px] font-semibold tracking-tight text-[#F3F4F6]">Top-Up / Tarik Saldo</h3>
             <p class="text-[11px] text-[#8E9591]">Hanya mengubah saldo &amp; modal bersih (P&amp;L tidak berubah)</p>
           </div>
           <button
             id="btnCloseTopupOnlyModal"
             type="button"
-            class="w-8 h-8 rounded-full bg-[#222724] text-[#8E9591] hover:text-white flex items-center justify-center"
+            class="w-8 h-8 rounded-full bg-white/[0.08] hover:bg-white/[0.14] text-[#9CA3AF] hover:text-white flex items-center justify-center active:scale-90 transition"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         <!-- Quick Undo Latest Top-Up Banner (Shown when a Top-Up exists) -->
-        <div id="latestTopupUndoCard" class="hidden p-3 rounded-2xl bg-[#111312] border border-[#E05252]/30 flex items-center justify-between gap-2">
+        <div id="latestTopupUndoCard" class="hidden p-3.5 rounded-[20px] bg-[#1E2320]/90 border border-[#E05252]/30 flex items-center justify-between gap-2">
           <div class="min-w-0">
             <span class="text-[10px] font-medium text-[#8E9591] block">Top-Up Terakhir Tercatat</span>
             <span id="latestTopupUndoSummary" class="text-xs font-semibold text-[#F3F4F6] truncate block [font-variant-numeric:tabular-nums]">24 Nov 26 • +$50.00</span>
@@ -856,64 +877,67 @@
           <button
             type="button"
             id="btnUndoLatestTopup"
-            class="shrink-0 px-3 py-1.5 rounded-xl bg-[#E05252]/15 hover:bg-[#E05252]/25 border border-[#E05252]/40 text-[11px] font-semibold text-[#E05252] active:scale-95 transition"
+            class="shrink-0 px-3 py-1.5 rounded-full bg-[#E05252]/15 hover:bg-[#E05252]/25 border border-[#E05252]/40 text-[11px] font-semibold text-[#E05252] active:scale-95 transition"
           >
             Hapus &amp; Kurangi Saldo
           </button>
         </div>
 
         <form id="topupOnlyForm" class="space-y-4">
-          <div class="grid grid-cols-2 gap-2">
+          <div class="p-1 rounded-[16px] bg-[#1E2320]/90 border border-white/[0.06] grid grid-cols-2 gap-1">
             <button
               type="button"
               id="btnQuickTopupSign"
-              class="py-2 rounded-xl text-xs font-semibold bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition"
+              class="py-2 rounded-[12px] text-xs font-semibold bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition"
             >
               + Tambah Saldo (Top-Up)
             </button>
             <button
               type="button"
               id="btnQuickWithdrawSign"
-              class="py-2 rounded-xl text-xs font-semibold bg-[#111312] text-[#8E9591] border border-[#2F3532] transition"
+              class="py-2 rounded-[12px] text-xs font-semibold bg-[#111312] text-[#8E9591] border border-[#2F3532] transition"
             >
               - Tarik Saldo (Withdraw)
             </button>
           </div>
 
-          <div>
-            <label for="inputQuickTopupDate" class="text-xs font-medium text-[#D1D5DB] block mb-1.5">Tanggal Transaksi</label>
-            <input
-              type="date"
-              id="inputQuickTopupDate"
-              required
-              class="w-full px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-sm text-[#F3F4F6] focus:outline-none focus:border-[#22C55E]"
-            />
-          </div>
-
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <label for="inputQuickTopupAmount" class="text-xs font-medium text-[#D1D5DB]">Nominal Top-Up / Tarik (<span id="quickTopupCurrLabel">USD</span>)</label>
-              <span id="quickTopupBaseHint" class="text-[11px] text-[#8E9591] [font-variant-numeric:tabular-nums]">Saldo saat ini: $0.00</span>
+          <!-- iOS Grouped Inset Form Card -->
+          <div class="rounded-[22px] bg-[#1E2320]/85 border border-white/[0.07] divide-y divide-white/[0.06] overflow-hidden">
+            <div class="px-4 py-3 flex items-center justify-between gap-3">
+              <label for="inputQuickTopupDate" class="text-[13px] font-medium text-[#D1D5DB] shrink-0">Tanggal</label>
+              <input
+                type="date"
+                id="inputQuickTopupDate"
+                required
+                class="bg-transparent text-right text-[13px] font-semibold text-[#22C55E] focus:outline-none"
+              />
             </div>
-            <input
-              type="number"
-              id="inputQuickTopupAmount"
-              step="any"
-              min="0.01"
-              required
-              placeholder="Contoh: 50"
-              class="w-full px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-base font-semibold text-[#F3F4F6] [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E]"
-            />
-          </div>
 
-          <div class="px-3.5 py-3 rounded-xl bg-[#111312] border border-[#262B28] flex items-center justify-between">
-            <span class="text-xs text-[#8E9591]">Saldo Baru Setelah Top-Up</span>
-            <span id="quickTopupResultPreview" class="text-sm font-semibold text-[#22C55E] [font-variant-numeric:tabular-nums]">$0.00</span>
+            <div class="px-4 py-3.5 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label for="inputQuickTopupAmount" class="text-[13px] font-medium text-[#D1D5DB]">Nominal (<span id="quickTopupCurrLabel">USD</span>)</label>
+                <span id="quickTopupBaseHint" class="text-[11px] text-[#8E9591] [font-variant-numeric:tabular-nums]">Saldo saat ini: $0.00</span>
+              </div>
+              <input
+                type="number"
+                id="inputQuickTopupAmount"
+                step="any"
+                min="0.01"
+                required
+                placeholder="Contoh: 50"
+                class="w-full bg-transparent text-2xl font-bold text-[#F3F4F6] placeholder-[#4B534F] [font-variant-numeric:tabular-nums] focus:outline-none"
+              />
+            </div>
+
+            <div class="px-4 py-3 bg-white/[0.02] flex items-center justify-between">
+              <span class="text-xs text-[#8E9591]">Saldo Baru Setelah Top-Up</span>
+              <span id="quickTopupResultPreview" class="text-sm font-semibold text-[#22C55E] [font-variant-numeric:tabular-nums]">$0.00</span>
+            </div>
           </div>
 
           <button
             type="submit"
-            class="w-full py-3 px-4 rounded-xl bg-[#22C55E] hover:bg-[#1EB054] text-[#090D0B] text-sm font-semibold shadow-md transition"
+            class="w-full h-12 px-4 rounded-full bg-gradient-to-b from-[#28D166] to-[#1EB856] hover:from-[#2EE070] hover:to-[#22C55E] active:scale-[0.98] text-[#06110A] text-sm font-semibold shadow-[0_8px_22px_-4px_rgba(34,197,94,0.45),inset_0_1px_0_0_rgba(255,255,255,0.35)] transition"
           >
             Simpan Top-Up (P&amp;L Tetap 0)
           </button>
@@ -921,25 +945,27 @@
       </div>
     </div>
 
-    <!-- ==================== BOTTOM SHEET MODAL: ADD / EDIT ENTRY ==================== -->
-    <div id="entryModalBackdrop" class="hidden fixed inset-0 z-40 bg-black/75 backdrop-blur-xs transition-opacity flex items-end justify-center">
+    <!-- ==================== BOTTOM SHEET MODAL: ADD / EDIT ENTRY (iOS MODERN STYLE) ==================== -->
+    <div id="entryModalBackdrop" class="hidden fixed inset-0 z-40 bg-black/75 backdrop-blur-md transition-opacity flex items-end justify-center">
       <div
         id="entryModalSheet"
-        class="w-full max-w-[480px] max-h-[92vh] overflow-y-auto bg-[#181B19] border-t border-[#2A302D] rounded-t-3xl p-5 pb-7 shadow-2xl transform transition-transform"
+        class="w-full max-w-[480px] max-h-[92vh] overflow-y-auto bg-[#161918]/95 backdrop-blur-2xl border-t border-white/[0.1] rounded-t-[32px] p-5 pb-[calc(1.75rem+env(safe-area-inset-bottom))] shadow-[0_-12px_40px_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(255,255,255,0.08)] transform transition-transform"
       >
-        <div class="w-10 h-1 bg-[#343B37] rounded-full mx-auto mb-4"></div>
+        <!-- iOS Grabber Handle -->
+        <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>
 
-        <div class="flex items-center justify-between mb-4">
+        <!-- iOS Modal Header -->
+        <div class="flex items-center justify-between mb-4 px-0.5">
           <div>
-            <h3 id="entryModalTitle" class="text-base font-semibold text-[#F3F4F6]">Update Equity Harian</h3>
+            <h3 id="entryModalTitle" class="text-[17px] font-semibold tracking-tight text-[#F3F4F6]">Update Equity Harian</h3>
             <p class="text-[11px] text-[#8E9591]">Bursa Saham AS buka Senin – Jumat</p>
           </div>
           <button
             id="btnCloseEntryModal"
             type="button"
-            class="w-8 h-8 rounded-full bg-[#222724] text-[#8E9591] hover:text-white flex items-center justify-center"
+            class="w-8 h-8 rounded-full bg-white/[0.08] hover:bg-white/[0.14] text-[#9CA3AF] hover:text-white flex items-center justify-center active:scale-90 transition"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -947,60 +973,73 @@
 
         <form id="entryForm" class="space-y-4">
           <input type="hidden" id="editingOriginalDate" value="" />
+          <input type="hidden" id="inputDate" required />
 
-          <!-- Date Input + Quick Next Trading Day Helper -->
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <label for="btnOpenCustomCalendar" class="text-xs font-medium text-[#D1D5DB]">Tanggal Bursa (Senin – Jumat)</label>
-              <span id="dayNameBadge" class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]">
-                Selasa
-              </span>
-            </div>
-            <input type="hidden" id="inputDate" required />
-            <div class="flex items-center gap-2">
+          <!-- iOS Grouped Inset Section 1: Tanggal Bursa -->
+          <div class="rounded-[22px] bg-[#1E2320]/85 border border-white/[0.07] overflow-hidden">
+            <div class="px-4 py-3 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="w-8 h-8 rounded-[10px] bg-[#22C55E]/15 text-[#22C55E] flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </span>
+                <div class="min-w-0">
+                  <span class="text-[11px] text-[#8E9591] block">Tanggal Bursa</span>
+                  <div class="flex items-center gap-1.5 mt-0.5">
+                    <span id="dayNameBadge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]">
+                      Selasa
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- iOS Tinted Date Pill Trigger -->
               <button
                 type="button"
                 id="btnOpenCustomCalendar"
-                class="flex-1 px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] hover:border-[#22C55E] text-sm text-[#F3F4F6] flex items-center justify-between transition"
+                class="px-3.5 py-2 rounded-full bg-white/[0.08] hover:bg-white/[0.13] border border-white/[0.08] text-[13px] font-semibold text-[#F3F4F6] flex items-center gap-1.5 active:scale-95 transition shrink-0"
               >
-                <span class="flex items-center gap-2">
-                  <svg class="w-4 h-4 text-[#22C55E]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span id="calendarSelectedText" class="font-medium">25 Nov 26</span>
-                </span>
-                <svg id="calendarChevron" class="w-4 h-4 text-[#8E9591] transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <span id="calendarSelectedText">25 Nov 26</span>
+                <svg id="calendarChevron" class="w-3.5 h-3.5 text-[#8E9591] transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              <button
-                type="button"
-                id="btnSuggestNextTradingDay"
-                title="Lompat ke hari bursa berikutnya (lewati Sabtu & Minggu)"
-                class="px-3 py-2.5 rounded-xl bg-[#222724] hover:bg-[#2C332F] text-xs font-medium text-[#22C55E] whitespace-nowrap transition"
-              >
-                +1 Hari Bursa
-              </button>
-              <button
-                type="button"
-                id="btnSuggestToday"
-                title="Gunakan tanggal hari ini"
-                class="px-2.5 py-2.5 rounded-xl bg-[#222724] hover:bg-[#2C332F] text-xs font-medium text-[#D1D5DB] whitespace-nowrap transition"
-              >
-                Hari Ini
-              </button>
             </div>
 
-            <!-- Interactive Custom Calendar Grid -->
-            <div id="customCalendarBox" class="hidden mt-2.5 p-3.5 rounded-2xl bg-[#111312] border border-[#2A302D] shadow-xl space-y-3">
+            <!-- Quick Day Shortcut Pills Row -->
+            <div class="px-4 py-2.5 bg-white/[0.02] border-t border-white/[0.06] flex items-center justify-between gap-2">
+              <span class="text-[11px] text-[#8E9591]">Pintasan Hari</span>
+              <div class="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  id="btnSuggestNextTradingDay"
+                  title="Lompat ke hari bursa berikutnya (lewati Sabtu & Minggu)"
+                  class="px-3 py-1 rounded-full bg-[#22C55E]/15 hover:bg-[#22C55E]/25 text-[11px] font-semibold text-[#22C55E] active:scale-95 transition"
+                >
+                  +1 Hari Bursa
+                </button>
+                <button
+                  type="button"
+                  id="btnSuggestToday"
+                  title="Gunakan tanggal hari ini"
+                  class="px-3 py-1 rounded-full bg-white/[0.07] hover:bg-white/[0.12] text-[11px] font-medium text-[#D1D5DB] active:scale-95 transition"
+                >
+                  Hari Ini
+                </button>
+              </div>
+            </div>
+
+            <!-- Interactive Custom Calendar Grid (Inside Grouped Card) -->
+            <div id="customCalendarBox" class="hidden p-3.5 border-t border-white/[0.06] bg-[#141716]/90 space-y-3">
               <div class="flex items-center justify-between">
                 <button
                   type="button"
                   id="btnCalPrevMonth"
                   aria-label="Bulan Sebelumnya"
-                  class="w-8 h-8 rounded-lg bg-[#181B19] hover:bg-[#222724] text-[#D1D5DB] flex items-center justify-center transition"
+                  class="w-8 h-8 rounded-full bg-white/[0.07] hover:bg-white/[0.13] text-[#D1D5DB] flex items-center justify-center active:scale-90 transition"
                 >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
@@ -1009,16 +1048,16 @@
                   type="button"
                   id="btnCalNextMonth"
                   aria-label="Bulan Berikutnya"
-                  class="w-8 h-8 rounded-lg bg-[#181B19] hover:bg-[#222724] text-[#D1D5DB] flex items-center justify-center transition"
+                  class="w-8 h-8 rounded-full bg-white/[0.07] hover:bg-white/[0.13] text-[#D1D5DB] flex items-center justify-center active:scale-90 transition"
                 >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
               </div>
 
               <!-- Weekday Headers -->
-              <div class="grid grid-cols-7 text-center text-[10px] font-medium text-[#8E9591]">
+              <div class="grid grid-cols-7 text-center text-[10px] font-semibold uppercase tracking-wider text-[#8E9591]">
                 <span>Min</span>
                 <span>Sen</span>
                 <span>Sel</span>
@@ -1032,88 +1071,90 @@
               <div id="customCalendarDays" class="grid grid-cols-7 gap-1 text-center"></div>
 
               <!-- Legend -->
-              <div class="pt-2 border-t border-[#1E2220] flex items-center justify-between text-[10px] text-[#8E9591]">
-                <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#22C55E]"></span> Sudah terisi</span>
+              <div class="pt-2 border-t border-white/[0.06] flex items-center justify-between text-[10px] text-[#8E9591]">
+                <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-[#22C55E]"></span> Sudah terisi</span>
                 <span>Min &amp; Sab: Bursa AS tutup</span>
               </div>
             </div>
 
-            <p id="weekendWarning" class="hidden text-[11px] text-amber-400 mt-1.5">
+            <p id="weekendWarning" class="hidden px-4 py-2 text-[11px] text-amber-400 bg-amber-500/10 border-t border-amber-500/20">
               Perhatian: Tanggal yang dipilih jatuh pada akhir pekan (bursa AS libur).
             </p>
           </div>
 
-          <!-- Equity Input -->
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <label for="inputEquity" class="text-xs font-medium text-[#D1D5DB]">Total Equity Penutupan (<span id="entryEquityCurrLabel">USD</span>)</label>
-              <span id="prevEquityHint" class="text-[11px] text-[#8E9591] [font-variant-numeric:tabular-nums]">
-                Sebelumnya: $99.75
+          <!-- iOS Grouped Inset Section 2: Nominal Equity Penutupan & Live P&L -->
+          <div class="rounded-[22px] bg-[#1E2320]/85 border border-white/[0.07] divide-y divide-white/[0.06] overflow-hidden">
+            <div class="px-4 py-3.5">
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="inputEquity" class="text-xs font-medium text-[#D1D5DB]">Total Equity Penutupan (<span id="entryEquityCurrLabel">USD</span>)</label>
+                <span id="prevEquityHint" class="text-[11px] text-[#8E9591] [font-variant-numeric:tabular-nums]">
+                  Sebelumnya: $99.75
+                </span>
+              </div>
+              <div class="relative flex items-baseline">
+                <span id="equityInputPrefix" class="text-xl font-semibold text-[#8E9591] mr-1.5 select-none">$</span>
+                <input
+                  type="number"
+                  id="inputEquity"
+                  step="any"
+                  min="0"
+                  required
+                  placeholder="Contoh: 105.50"
+                  class="w-full bg-transparent text-2xl font-bold tracking-tight text-[#F3F4F6] placeholder-[#4B534F] [font-variant-numeric:tabular-nums] focus:outline-none"
+                />
+              </div>
+              <p id="existingTopupDayInfo" class="hidden text-[11px] text-[#22C55E] mt-2 pt-2 border-t border-white/[0.05]">
+                • Tanggal ini memiliki catatan Top-Up/Tarik dana (otomatis diperhitungkan dalam P&amp;L).
+              </p>
+            </div>
+
+            <!-- Live Calculated P&L Preview Row -->
+            <div class="px-4 py-3 bg-white/[0.02] flex items-center justify-between">
+              <span class="text-xs font-medium text-[#8E9591]">Estimasi P&amp;L Hari Ini</span>
+              <span id="livePnlPreview" class="text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]">
+                $0.00 (0.00%)
               </span>
             </div>
-            <div class="relative">
-              <span id="equityInputPrefix" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-[#8E9591]">$</span>
-              <input
-                type="number"
-                id="inputEquity"
-                step="any"
-                min="0"
-                required
-                placeholder="Contoh: 105.50"
-                class="w-full pl-7 px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-base font-semibold text-[#F3F4F6] [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E] transition"
-              />
-            </div>
-            <p id="existingTopupDayInfo" class="hidden text-[11px] text-[#22C55E] mt-1.5">
-              • Tanggal ini memiliki catatan Top-Up/Tarik dana (otomatis diperhitungkan dalam P&amp;L).
-            </p>
           </div>
 
-          <!-- Live Calculated P&L Preview Box -->
-          <div class="px-3.5 py-3 rounded-xl bg-[#111312] border border-[#262B28] flex items-center justify-between">
-            <span class="text-xs text-[#8E9591]">Estimasi P&amp;L Hari Ini</span>
-            <span id="livePnlPreview" class="text-sm font-semibold text-[#D1D5DB] [font-variant-numeric:tabular-nums]">
-              $0.00 (0.00%)
-            </span>
-          </div>
-
-          <!-- Optional Short Journal / Note Field -->
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <label for="inputNote" class="text-xs font-medium text-[#D1D5DB]">Catatan / Jurnal Singkat (Opsional)</label>
-              <span class="text-[10px] text-[#8E9591]">Maks. 60 karakter</span>
+          <!-- iOS Grouped Inset Section 3: Catatan / Jurnal Singkat -->
+          <div class="rounded-[22px] bg-[#1E2320]/85 border border-white/[0.07] px-4 py-3 space-y-1">
+            <div class="flex items-center justify-between">
+              <label for="inputNote" class="text-[11px] font-medium text-[#8E9591]">Catatan / Jurnal Singkat (Opsional)</label>
+              <span class="text-[10px] text-[#6D7571]">Maks. 60 karakter</span>
             </div>
             <input
               type="text"
               id="inputNote"
               maxlength="60"
               placeholder="Contoh: DCA VOO, Dividen masuk, CPI AS turun"
-              class="w-full px-3.5 py-2.5 rounded-xl bg-[#111312] border border-[#2F3532] text-xs text-[#F3F4F6] placeholder-[#5B635F] focus:outline-none focus:border-[#22C55E] transition"
+              class="w-full bg-transparent text-[13px] text-[#F3F4F6] placeholder-[#525A56] focus:outline-none"
             />
           </div>
 
-          <!-- Action Buttons -->
+          <!-- iOS Pill Action Buttons -->
           <div class="flex items-center gap-2.5 pt-1">
             <button
               type="button"
               id="btnDeleteEntry"
-              class="hidden px-4 py-3 rounded-xl bg-[#E05252]/15 border border-[#E05252]/30 text-[#E05252] text-xs font-semibold hover:bg-[#E05252]/25 transition"
+              class="hidden h-12 px-5 rounded-full bg-[#E05252]/15 border border-[#E05252]/30 text-[#E05252] text-xs font-semibold hover:bg-[#E05252]/25 active:scale-95 transition"
             >
               Hapus
             </button>
             <button
               type="submit"
-              class="flex-1 py-3 px-4 rounded-xl bg-[#22C55E] hover:bg-[#1EB054] text-[#090D0B] text-sm font-semibold shadow-md transition"
+              class="flex-1 h-12 px-5 rounded-full bg-gradient-to-b from-[#28D166] to-[#1EB856] hover:from-[#2EE070] hover:to-[#22C55E] active:scale-[0.98] text-[#06110A] text-sm font-semibold shadow-[0_8px_22px_-4px_rgba(34,197,94,0.45),inset_0_1px_0_0_rgba(255,255,255,0.35)] transition"
             >
               Simpan Data
             </button>
           </div>
 
           <!-- Inline Delete Confirmation -->
-          <div id="inlineDeleteConfirm" class="hidden p-3 rounded-xl bg-[#E05252]/10 border border-[#E05252]/30 flex items-center justify-between gap-2">
-            <span class="text-xs text-[#F3F4F6]">Hapus tanggal ini?</span>
+          <div id="inlineDeleteConfirm" class="hidden p-3.5 rounded-[20px] bg-[#E05252]/10 border border-[#E05252]/30 flex items-center justify-between gap-2">
+            <span class="text-xs font-medium text-[#F3F4F6]">Hapus tanggal ini?</span>
             <div class="flex items-center gap-2">
-              <button type="button" id="btnCancelDelete" class="px-2.5 py-1 rounded-lg bg-[#222724] text-xs text-[#D1D5DB]">Batal</button>
-              <button type="button" id="btnConfirmDelete" class="px-2.5 py-1 rounded-lg bg-[#E05252] text-xs font-semibold text-white">Ya, Hapus</button>
+              <button type="button" id="btnCancelDelete" class="px-3 py-1.5 rounded-full bg-white/[0.08] text-xs text-[#D1D5DB] active:scale-95 transition">Batal</button>
+              <button type="button" id="btnConfirmDelete" class="px-3.5 py-1.5 rounded-full bg-[#E05252] text-xs font-semibold text-white active:scale-95 transition">Ya, Hapus</button>
             </div>
           </div>
         </form>
@@ -1121,196 +1162,261 @@
     </div>
 
     <!-- ==================== SETTINGS / GOOGLE SHEETS SYNC / BACKUP MODAL ==================== -->
-    <div id="settingsModalBackdrop" class="hidden fixed inset-0 z-40 bg-black/75 backdrop-blur-xs flex items-end justify-center">
-      <div class="w-full max-w-[480px] max-h-[90vh] overflow-y-auto bg-[#181B19] border-t border-[#2A302D] rounded-t-3xl p-5 pb-8 shadow-2xl space-y-5">
-        <div class="w-10 h-1 bg-[#343B37] rounded-full mx-auto"></div>
+    <div id="settingsModalBackdrop" class="hidden fixed inset-0 z-40 bg-black/75 backdrop-blur-md flex items-end justify-center">
+      <div class="w-full max-w-[480px] max-h-[90vh] overflow-y-auto bg-[#161918]/95 backdrop-blur-2xl border-t border-white/[0.1] rounded-t-[32px] p-5 pb-[calc(1.75rem+env(safe-area-inset-bottom))] shadow-[0_-12px_40px_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(255,255,255,0.08)] space-y-5">
+        <!-- iOS Grabber Handle -->
+        <div class="w-10 h-1 bg-white/20 rounded-full mx-auto"></div>
 
-        <div class="flex items-center justify-between">
+        <!-- iOS Header -->
+        <div class="flex items-center justify-between px-0.5">
           <div>
-            <h3 class="text-base font-semibold text-[#F3F4F6]">Pengaturan &amp; Google Sheets Sync</h3>
-            <p class="text-[11px] text-[#8E9591]">Simpan otomatis lintas HP/Laptop lewat Google Sheets</p>
+            <h3 class="text-[17px] font-semibold tracking-tight text-[#F3F4F6]">Pengaturan</h3>
+            <p class="text-[11px] text-[#8E9591]">Cloud Sync, tampilan, backup &amp; keamanan PIN</p>
           </div>
           <button
             id="btnCloseSettingsModal"
             type="button"
-            class="w-8 h-8 rounded-full bg-[#222724] text-[#8E9591] hover:text-white flex items-center justify-center"
+            class="w-8 h-8 rounded-full bg-white/[0.08] hover:bg-white/[0.14] text-[#9CA3AF] hover:text-white flex items-center justify-center active:scale-90 transition"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        <!-- Google Sheets Cloud Sync Section -->
-        <div class="p-3.5 rounded-2xl bg-[#111312] border border-[#262B28] space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span id="modalCloudDot" class="w-2 h-2 rounded-full bg-[#22C55E]"></span>
-              <span class="text-xs font-semibold text-[#F3F4F6]">Google Sheets Cloud Sync</span>
-              <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30">Permanen</span>
+        <!-- iOS Group 1: Google Sheets Cloud Sync -->
+        <div class="space-y-1.5">
+          <span class="px-1 text-[11px] font-semibold uppercase tracking-wider text-[#8E9591] block">Cloud &amp; Sinkronisasi</span>
+          <div class="rounded-[22px] bg-[#1E2320]/85 border border-white/[0.07] divide-y divide-white/[0.06] overflow-hidden">
+            <div class="px-4 py-3 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="w-8 h-8 rounded-[10px] bg-[#22C55E]/15 text-[#22C55E] flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                  </svg>
+                </span>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-[13px] font-semibold text-[#F3F4F6] truncate">Google Sheets</span>
+                    <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]">Permanen</span>
+                  </div>
+                  <span id="permanentScriptEndpointLabel" class="text-[10px] font-mono text-[#8E9591] truncate block">https://script.google.com/.../exec</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span id="modalCloudDot" class="w-2 h-2 rounded-full bg-[#22C55E]"></span>
+                <span id="modalCloudStatusText" class="text-[11px] font-semibold text-[#22C55E]">Terhubung</span>
+              </div>
             </div>
-            <span id="modalCloudStatusText" class="text-[10px] text-[#22C55E]">Siap</span>
-          </div>
 
-          <div class="p-2.5 rounded-xl bg-[#181B19] border border-[#262B28] flex items-center justify-between gap-2">
-            <div class="min-w-0">
-              <span class="text-[10px] text-[#8E9591] block">Endpoint Web App Terpasang</span>
-              <span id="permanentScriptEndpointLabel" class="text-[11px] font-mono text-[#D1D5DB] truncate block">https://script.google.com/.../exec</span>
+            <div class="px-4 py-2.5 bg-white/[0.02] flex items-center justify-between gap-2">
+              <span id="loadedRowsBadge" class="text-[11px] font-medium text-[#8E9591] [font-variant-numeric:tabular-nums]">0 baris termuat</span>
+              <button
+                id="btnSaveSyncUrl"
+                type="button"
+                class="px-3.5 py-1.5 rounded-full bg-[#22C55E] hover:bg-[#1EB054] active:scale-95 text-[#06110A] text-[11px] font-semibold transition flex items-center gap-1.5"
+              >
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span>Muat Ulang</span>
+              </button>
             </div>
-            <span id="loadedRowsBadge" class="shrink-0 px-2.5 py-1 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/30 text-[10px] font-semibold text-[#22C55E] [font-variant-numeric:tabular-nums]">0 baris termuat</span>
           </div>
-
-          <button
-            id="btnSaveSyncUrl"
-            type="button"
-            class="w-full py-2.5 px-3 rounded-xl bg-[#22C55E] hover:bg-[#1EB054] text-[#090D0B] text-xs font-semibold transition flex items-center justify-center gap-1.5"
-          >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            <span>Muat Ulang dari Sheet</span>
-          </button>
         </div>
 
-        <!-- Theme & Currency Display Mode -->
-        <div class="space-y-4">
-          <div>
-            <label class="text-xs font-medium text-[#D1D5DB] block mb-2">Tema Tampilan (Siang / Malam)</label>
-            <div class="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                id="btnThemeDark"
-                class="py-2.5 px-3 rounded-xl border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left flex items-center gap-2"
-              >
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-                <div>
-                  <span class="block font-semibold">Mode Malam</span>
-                  <span class="text-[10px] opacity-80">Gelap &amp; nyaman</span>
-                </div>
-              </button>
-              <button
-                type="button"
-                id="btnThemeLight"
-                class="py-2.5 px-3 rounded-xl border border-[#2F3532] bg-[#111312] text-xs font-medium text-[#8E9591] text-left flex items-center gap-2"
-              >
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <div>
-                  <span class="block font-semibold">Mode Siang</span>
-                  <span class="text-[10px] opacity-80">Terang &amp; bersih</span>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label class="text-xs font-medium text-[#D1D5DB] block mb-2">Format Mata Uang &amp; Kurs Dollar</label>
-            <div class="grid grid-cols-2 gap-2 mb-2.5">
-              <button
-                type="button"
-                id="btnCurrUSD"
-                class="py-2.5 px-3 rounded-xl border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left"
-              >
-                <span class="block font-semibold">USD ($) — Utama</span>
-                <span class="text-[10px] opacity-80">Contoh: $108.50</span>
-              </button>
-              <button
-                type="button"
-                id="btnCurrIDR"
-                class="py-2.5 px-3 rounded-xl border border-[#2F3532] bg-[#111312] text-xs font-medium text-[#8E9591] text-left"
-              >
-                <span class="block font-semibold">IDR (Rp) — Konversi</span>
-                <span class="text-[10px] opacity-80">Contoh: Rp 1,790,250</span>
-              </button>
-            </div>
-
-            <div class="p-3 rounded-xl bg-[#111312] border border-[#262B28] flex items-center justify-between gap-2">
-              <div>
-                <label for="inputSettingsUsdIdrRate" class="text-xs font-medium text-[#D1D5DB] block">Rate $1 USD ke Rupiah</label>
-                <span class="text-[10px] text-[#8E9591]">Bisa diubah sesuai kurs broker</span>
+        <!-- iOS Group 2: Tampilan & Mata Uang -->
+        <div class="space-y-1.5">
+          <span class="px-1 text-[11px] font-semibold uppercase tracking-wider text-[#8E9591] block">Tampilan &amp; Mata Uang</span>
+          <div class="rounded-[22px] bg-[#1E2320]/85 border border-white/[0.07] divide-y divide-white/[0.06] overflow-hidden">
+            <!-- Theme Segmented Row -->
+            <div class="p-3.5 space-y-2.5">
+              <span class="text-[12px] font-medium text-[#D1D5DB] block px-0.5">Tema Aplikasi</span>
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  id="btnThemeDark"
+                  class="py-2.5 px-3 rounded-[14px] border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left flex items-center gap-2 transition"
+                >
+                  <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                  <div>
+                    <span class="block font-semibold">Mode Malam</span>
+                    <span class="text-[10px] opacity-80">Gelap &amp; nyaman</span>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  id="btnThemeLight"
+                  class="py-2.5 px-3 rounded-[14px] border border-[#2F3532] bg-[#111312] text-xs font-medium text-[#8E9591] text-left flex items-center gap-2 transition"
+                >
+                  <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  <div>
+                    <span class="block font-semibold">Mode Siang</span>
+                    <span class="text-[10px] opacity-80">Terang &amp; bersih</span>
+                  </div>
+                </button>
               </div>
-              <div class="flex items-center gap-1.5 w-36">
+            </div>
+
+            <!-- Currency Format Row -->
+            <div class="p-3.5 space-y-2.5">
+              <span class="text-[12px] font-medium text-[#D1D5DB] block px-0.5">Mata Uang Utama</span>
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  id="btnCurrUSD"
+                  class="py-2.5 px-3 rounded-[14px] border border-[#22C55E] bg-[#22C55E]/10 text-xs font-medium text-[#22C55E] text-left transition"
+                >
+                  <span class="block font-semibold">USD ($)</span>
+                  <span class="text-[10px] opacity-80">Contoh: $108.50</span>
+                </button>
+                <button
+                  type="button"
+                  id="btnCurrIDR"
+                  class="py-2.5 px-3 rounded-[14px] border border-[#2F3532] bg-[#111312] text-xs font-medium text-[#8E9591] text-left transition"
+                >
+                  <span class="block font-semibold">IDR (Rp)</span>
+                  <span class="text-[10px] opacity-80">Contoh: Rp 1,790,250</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Exchange Rate Inset Row -->
+            <div class="px-4 py-3 flex items-center justify-between gap-3">
+              <div>
+                <label for="inputSettingsUsdIdrRate" class="text-[13px] font-medium text-[#F3F4F6] block">Kurs $1 USD</label>
+                <span class="text-[10px] text-[#8E9591]">Konversi ke Rupiah</span>
+              </div>
+              <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08] w-36">
                 <span class="text-xs text-[#8E9591]">Rp</span>
                 <input
                   type="number"
                   id="inputSettingsUsdIdrRate"
                   step="1"
                   min="1"
-                  placeholder="16500"
-                  class="w-full px-2.5 py-1.5 rounded-lg bg-[#181B19] border border-[#2F3532] text-xs font-semibold text-[#F3F4F6] text-right [font-variant-numeric:tabular-nums] focus:outline-none focus:border-[#22C55E]"
+                  placeholder="18334"
+                  class="w-full bg-transparent text-xs font-semibold text-[#F3F4F6] text-right [font-variant-numeric:tabular-nums] focus:outline-none"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Export / Backup Data -->
-        <div class="space-y-2">
-          <label class="text-xs font-medium text-[#D1D5DB] block">Backup &amp; Ekspor Data</label>
-          <div class="grid grid-cols-2 gap-2">
+        <!-- iOS Group 3: Backup & Ekspor Data -->
+        <div class="space-y-1.5">
+          <span class="px-1 text-[11px] font-semibold uppercase tracking-wider text-[#8E9591] block">Backup &amp; Ekspor</span>
+          <div class="rounded-[22px] bg-[#1E2320]/85 border border-white/[0.07] divide-y divide-white/[0.06] overflow-hidden">
             <button
               id="btnExportCsv"
               type="button"
-              class="py-2.5 px-3 rounded-xl bg-[#111312] hover:bg-[#222724] border border-[#2F3532] text-xs font-medium text-[#F3F4F6] transition"
+              class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-white/[0.03] active:bg-white/[0.05] transition"
             >
-              Ekspor CSV (Excel)
+              <div class="flex items-center gap-2.5">
+                <span class="w-7 h-7 rounded-[9px] bg-[#22C55E]/15 text-[#22C55E] flex items-center justify-center shrink-0">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </span>
+                <div>
+                  <span class="text-[13px] font-medium text-[#F3F4F6] block">Ekspor CSV (Excel)</span>
+                  <span class="text-[10px] text-[#8E9591]">Unduh laporan tabel harian</span>
+                </div>
+              </div>
+              <svg class="w-4 h-4 text-[#8E9591]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
             </button>
+
             <button
               id="btnExportJson"
               type="button"
-              class="py-2.5 px-3 rounded-xl bg-[#111312] hover:bg-[#222724] border border-[#2F3532] text-xs font-medium text-[#F3F4F6] transition"
+              class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-white/[0.03] active:bg-white/[0.05] transition"
             >
-              Backup JSON
+              <div class="flex items-center gap-2.5">
+                <span class="w-7 h-7 rounded-[9px] bg-sky-500/15 text-sky-400 flex items-center justify-center shrink-0">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                  </svg>
+                </span>
+                <div>
+                  <span class="text-[13px] font-medium text-[#F3F4F6] block">Backup JSON</span>
+                  <span class="text-[10px] text-[#8E9591]">Simpan file cadangan penuh</span>
+                </div>
+              </div>
+              <svg class="w-4 h-4 text-[#8E9591]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
             </button>
+
+            <label class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-white/[0.03] active:bg-white/[0.05] cursor-pointer transition">
+              <div class="flex items-center gap-2.5">
+                <span class="w-7 h-7 rounded-[9px] bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                </span>
+                <div>
+                  <span class="text-[13px] font-medium text-[#F3F4F6] block">Import Backup JSON</span>
+                  <span class="text-[10px] text-[#8E9591]">Pulihkan data dari file cadangan</span>
+                </div>
+              </div>
+              <svg class="w-4 h-4 text-[#8E9591]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+              <input type="file" id="inputImportJson" accept=".json" class="hidden" />
+            </label>
           </div>
-          <label class="block w-full py-2.5 px-3 rounded-xl bg-[#111312] hover:bg-[#222724] border border-dashed border-[#2F3532] text-xs font-medium text-[#8E9591] text-center cursor-pointer transition">
-            <span>Import Backup JSON</span>
-            <input type="file" id="inputImportJson" accept=".json" class="hidden" />
-          </label>
         </div>
 
-        <!-- PIN Security Section -->
-        <div class="pt-2 border-t border-[#242926]">
-          <div class="p-3.5 rounded-2xl bg-[#111312] border border-[#262B28] space-y-2.5">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <svg class="w-4 h-4 text-[#22C55E]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <span class="text-xs font-semibold text-[#F3F4F6]">PIN Keamanan (Anti-Hapus)</span>
+        <!-- iOS Group 4: PIN Security Section -->
+        <div class="space-y-1.5">
+          <span class="px-1 text-[11px] font-semibold uppercase tracking-wider text-[#8E9591] block">Keamanan &amp; Privasi</span>
+          <div class="rounded-[22px] bg-[#1E2320]/85 border border-white/[0.07] divide-y divide-white/[0.06] overflow-hidden">
+            <div class="px-4 py-3 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <span class="w-7 h-7 rounded-[9px] bg-[#22C55E]/15 text-[#22C55E] flex items-center justify-center shrink-0">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </span>
+                <span class="text-[13px] font-semibold text-[#F3F4F6]">PIN Anti-Hapus</span>
               </div>
-              <span id="pinStatusBadge" class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30">Aktif (Semua Device)</span>
+              <span id="pinStatusBadge" class="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E]">Aktif (Semua Device)</span>
             </div>
-            <p class="text-[11px] text-[#8E9591] leading-relaxed">
-              PIN keamanan aktif otomatis di semua perangkat untuk melindungi penghapusan data, riwayat Top-Up, import backup, dan penimpaan Google Sheets.
-            </p>
-            <div class="flex items-center gap-2">
-              <input
-                type="password"
-                id="inputSetupPin"
-                inputmode="numeric"
-                pattern="[0-9]*"
-                maxlength="4"
-                placeholder="Ganti PIN 4 digit"
-                class="flex-1 px-3 py-2 rounded-xl bg-[#181B19] border border-[#2F3532] text-xs font-semibold tracking-widest text-center text-[#F3F4F6] focus:outline-none focus:border-[#22C55E]"
-              />
-              <button
-                type="button"
-                id="btnSaveSecurityPin"
-                class="px-3.5 py-2 rounded-xl bg-[#22C55E] hover:bg-[#1EB054] text-[#090D0B] text-xs font-semibold transition"
-              >
-                Ubah PIN
-              </button>
-              <button
-                type="button"
-                id="btnRemoveSecurityPin"
-                class="px-3 py-2 rounded-xl bg-[#222724] hover:bg-[#2B312E] border border-[#2F3532] text-xs font-medium text-[#D1D5DB] transition"
-              >
-                Reset PIN
-              </button>
+
+            <div class="p-3.5 space-y-2.5">
+              <p class="text-[11px] text-[#8E9591] leading-relaxed">
+                Melindungi penghapusan data harian, riwayat Top-Up, serta pemulihan backup JSON.
+              </p>
+              <div class="flex items-center gap-2">
+                <input
+                  type="password"
+                  id="inputSetupPin"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  maxlength="4"
+                  placeholder="PIN 4 digit"
+                  class="flex-1 px-3 py-2 rounded-full bg-white/[0.06] border border-white/[0.08] text-xs font-semibold tracking-widest text-center text-[#F3F4F6] focus:outline-none focus:border-[#22C55E]"
+                />
+                <button
+                  type="button"
+                  id="btnSaveSecurityPin"
+                  class="px-4 py-2 rounded-full bg-[#22C55E] hover:bg-[#1EB054] active:scale-95 text-[#06110A] text-xs font-semibold transition"
+                >
+                  Ubah PIN
+                </button>
+                <button
+                  type="button"
+                  id="btnRemoveSecurityPin"
+                  class="px-3.5 py-2 rounded-full bg-white/[0.08] hover:bg-white/[0.14] active:scale-95 text-xs font-medium text-[#D1D5DB] transition"
+                >
+                  Reset
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1412,7 +1518,7 @@
       const SECURITY_PIN_KEY = 'etf_portfolio_security_pin_v1';
       const DEFAULT_SECURITY_PIN = '1991';
       const DEFAULT_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxTKWdE0QaysCZkFFzO6gjLz50Zxllud8_P80ltoUiqAWz7_MYqZaIkc9uIbvkwjxMn/exec';
-      const DEFAULT_USD_IDR_RATE = 16500;
+      const DEFAULT_USD_IDR_RATE = 18334;
 
       // Initial realistic ETF portfolio dataset in USD ($) (Senin - Jumat US Market days)
       const DEFAULT_SAMPLE_DATA = [
@@ -1478,6 +1584,7 @@
 
       // DOM Element References
       const el = {
+        iosSegmentedThumb: document.getElementById('iosSegmentedThumb'),
         tabPortfolio: document.getElementById('tabPortfolio'),
         tabTrade: document.getElementById('tabTrade'),
         viewPortfolio: document.getElementById('viewPortfolio'),
@@ -2114,8 +2221,8 @@
           el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#22C55E]';
           el.headerCloudLabel.textContent = 'Synced';
           el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-[#22C55E]';
-          el.modalCloudStatusText.textContent = customLabel || `${rowCount} baris termuat`;
-          el.modalCloudStatusText.className = 'text-[10px] text-[#22C55E]';
+          el.modalCloudStatusText.textContent = customLabel || 'Terhubung';
+          el.modalCloudStatusText.className = 'text-[10px] font-medium text-[#22C55E]';
         } else if (status === 'error') {
           el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#E05252]';
           el.headerCloudLabel.textContent = 'Offline';
@@ -2126,8 +2233,8 @@
           el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#22C55E]';
           el.headerCloudLabel.textContent = 'Synced';
           el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-[#22C55E]';
-          el.modalCloudStatusText.textContent = `${rowCount} baris termuat`;
-          el.modalCloudStatusText.className = 'text-[10px] text-[#22C55E]';
+          el.modalCloudStatusText.textContent = 'Terhubung';
+          el.modalCloudStatusText.className = 'text-[10px] font-medium text-[#22C55E]';
         }
       }
 
@@ -2217,7 +2324,7 @@
                 }));
               } catch (e) {}
               renderAll(true);
-              updateCloudStatusUI('synced', `${state.entries.length} baris termuat`);
+              updateCloudStatusUI('synced', 'Tersinkron');
               if (!silent) {
                 const enriched = computeAllEnrichedEntries();
                 const latest = enriched[enriched.length - 1];
@@ -3191,11 +3298,11 @@
       function setQuickTopupDirection(dir) {
         state.quickTopupDirection = dir;
         if (dir === 'DEPOSIT') {
-          el.btnQuickTopupSign.className = 'py-2 rounded-xl text-xs font-semibold bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition';
-          el.btnQuickWithdrawSign.className = 'py-2 rounded-xl text-xs font-semibold bg-[#111312] text-[#8E9591] border border-[#2F3532] transition';
+          el.btnQuickTopupSign.className = 'py-2 rounded-[12px] text-xs font-semibold bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40 transition';
+          el.btnQuickWithdrawSign.className = 'py-2 rounded-[12px] text-xs font-semibold bg-transparent text-[#8E9591] hover:text-[#D1D5DB] border border-transparent transition';
         } else {
-          el.btnQuickWithdrawSign.className = 'py-2 rounded-xl text-xs font-semibold bg-[#E05252]/15 text-[#E05252] border border-[#E05252]/40 transition';
-          el.btnQuickTopupSign.className = 'py-2 rounded-xl text-xs font-semibold bg-[#111312] text-[#8E9591] border border-[#2F3532] transition';
+          el.btnQuickWithdrawSign.className = 'py-2 rounded-[12px] text-xs font-semibold bg-[#E05252]/15 text-[#E05252] border border-[#E05252]/40 transition';
+          el.btnQuickTopupSign.className = 'py-2 rounded-[12px] text-xs font-semibold bg-transparent text-[#8E9591] hover:text-[#D1D5DB] border border-transparent transition';
         }
         updateQuickTopupPreview();
       }
@@ -3383,16 +3490,18 @@
       function switchTab(tabName) {
         state.activeTab = tabName;
         if (tabName === 'PORTFOLIO') {
-          el.tabPortfolio.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors';
+          if (el.iosSegmentedThumb) el.iosSegmentedThumb.style.transform = 'translateX(0%)';
+          el.tabPortfolio.className = 'relative z-10 py-1.5 text-[12px] font-semibold tracking-wide uppercase text-center text-[#22C55E] transition-colors duration-200';
           el.tabPortfolio.setAttribute('aria-selected', 'true');
-          el.tabTrade.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] hover:text-[#D1D5DB] border-b-2 border-transparent transition-colors';
+          el.tabTrade.className = 'relative z-10 py-1.5 text-[12px] font-semibold tracking-wide uppercase text-center text-[#8E9591] hover:text-[#D1D5DB] transition-colors duration-200';
           el.tabTrade.setAttribute('aria-selected', 'false');
           el.viewPortfolio.classList.remove('hidden');
           el.viewTrade.classList.add('hidden');
         } else {
-          el.tabTrade.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#22C55E] border-b-2 border-[#22C55E] transition-colors';
+          if (el.iosSegmentedThumb) el.iosSegmentedThumb.style.transform = 'translateX(100%)';
+          el.tabTrade.className = 'relative z-10 py-1.5 text-[12px] font-semibold tracking-wide uppercase text-center text-[#22C55E] transition-colors duration-200';
           el.tabTrade.setAttribute('aria-selected', 'true');
-          el.tabPortfolio.className = 'py-3 text-[13px] font-semibold tracking-wider uppercase text-center text-[#8E9591] hover:text-[#D1D5DB] border-b-2 border-transparent transition-colors';
+          el.tabPortfolio.className = 'relative z-10 py-1.5 text-[12px] font-semibold tracking-wide uppercase text-center text-[#8E9591] hover:text-[#D1D5DB] transition-colors duration-200';
           el.tabPortfolio.setAttribute('aria-selected', 'false');
           el.viewTrade.classList.remove('hidden');
           el.viewPortfolio.classList.add('hidden');
