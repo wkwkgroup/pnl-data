@@ -181,6 +181,19 @@
     html.light-theme #btnFloatingTopup:hover {
       background-color: rgba(230, 236, 233, 0.98) !important;
     }
+    /* iOS Header Action Buttons Light Theme Visibility */
+    html.light-theme #btnToggleThemeHeader,
+    html.light-theme #btnOpenSettingsRight {
+      background-color: #FFFFFF !important;
+      border-color: #D5DDD9 !important;
+      color: #111815 !important;
+      box-shadow: 0 2px 8px rgba(15, 23, 20, 0.08) !important;
+    }
+    html.light-theme #btnToggleThemeHeader:hover,
+    html.light-theme #btnOpenSettingsRight:hover {
+      background-color: #EAF0ED !important;
+      color: #16A34A !important;
+    }
     /* Smooth Currency Switch Morph Animation */
     @keyframes currencyMorphFade {
       0% {
@@ -225,40 +238,43 @@
             id="btnSyncStatusHeader"
             type="button"
             title="Status Cloud Sync Google Sheets"
-            class="px-2 py-1 rounded-full text-[10px] sm:text-[11px] font-medium bg-[#181B19] border border-[#262B28] text-[#8E9591] hover:text-[#F3F4F6] active:scale-95 transition flex items-center gap-1 whitespace-nowrap shrink-0"
+            class="px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium bg-[#181B19] border border-[#262B28] text-[#8E9591] hover:text-[#F3F4F6] active:scale-95 transition flex items-center gap-1.5 whitespace-nowrap shrink-0"
           >
             <span id="headerCloudDot" class="w-1.5 h-1.5 rounded-full bg-[#8E9591] shrink-0"></span>
-            <span id="headerCloudLabel">Local</span>
+            <span id="headerCloudLabel">Synced</span>
           </button>
         </div>
-
-        <!-- Right Ergonomic Action & Settings Buttons -->
-        <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+        <!-- Right Ergonomic Action & Settings Buttons (iOS SF Symbols Style) -->
+        <div class="flex items-center gap-2 shrink-0">
           <button
             id="btnToggleThemeHeader"
             type="button"
             aria-label="Ganti Mode Siang / Malam"
             title="Ganti Mode Siang / Malam"
-            class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full text-[#8E9591] hover:text-[#22C55E] bg-[#181B19] border border-[#262B28] active:scale-95 transition shrink-0"
+            class="w-10 h-10 flex items-center justify-center rounded-full text-[#F3F4F6] hover:text-[#22C55E] bg-[#1C201E]/90 hover:bg-[#242A27] border border-white/[0.08] shadow-xs active:scale-90 transition-all duration-200 shrink-0"
           >
-            <!-- Sun Icon (shown in Dark Mode to switch to Light) -->
-            <svg id="themeIconSun" class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            <!-- iOS SF Symbol Sun Icon (shown in Dark Mode to switch to Light) -->
+            <svg id="themeIconSun" class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="4.2" fill="currentColor" fill-opacity="0.18" />
+              <path stroke-linecap="round" d="M12 2.75v2M12 19.25v2M4.75 12h-2M21.25 12h-2M18.54 5.46l-1.42 1.42M6.88 17.12l-1.42 1.42M18.54 18.54l-1.42-1.42M6.88 6.88L5.46 5.46" />
             </svg>
-            <!-- Moon Icon (shown in Light Mode to switch to Dark) -->
-            <svg id="themeIconMoon" class="hidden w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#111815]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            <!-- iOS SF Symbol Moon Stars Icon (shown in Light Mode to switch to Dark) -->
+            <svg id="themeIconMoon" class="hidden w-5 h-5 text-[#111815]" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" fill="currentColor" fill-opacity="0.12" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.5 4.5v2m-1-1h2M19.5 8.5v1.5m-.75-.75h1.5" />
             </svg>
           </button>
           <button
             id="btnOpenSettingsRight"
             type="button"
-            aria-label="Opsi Backup & Cloud Sync"
+            aria-label="Pengaturan"
             title="Pengaturan"
-            class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full text-[#D1D5DB] hover:text-[#22C55E] bg-[#181B19] border border-[#262B28] active:scale-95 transition shrink-0"
+            class="w-10 h-10 flex items-center justify-center rounded-full text-[#E5E7EB] hover:text-[#22C55E] bg-[#1C201E]/90 hover:bg-[#242A27] border border-white/[0.08] shadow-xs active:scale-90 transition-all duration-200 shrink-0"
           >
-            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            <!-- iOS SF Symbol Gearshape Icon -->
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.85" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <circle cx="12" cy="12" r="3" fill="currentColor" fill-opacity="0.14" />
             </svg>
           </button>
         </div>
@@ -2203,84 +2219,47 @@
           el.permanentScriptEndpointLabel.textContent = url.length > 42 ? `${url.slice(0, 32)}...${url.slice(-10)}` : url;
         }
         if (!url) {
-          el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#8E9591]';
-          el.headerCloudLabel.textContent = 'Local';
-          el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-[#8E9591]';
-          el.modalCloudStatusText.textContent = 'Belum terhubung';
-          el.modalCloudStatusText.className = 'text-[10px] text-[#8E9591]';
+          if (el.headerCloudDot) el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#8E9591]';
+          if (el.headerCloudLabel) el.headerCloudLabel.textContent = 'Local';
+          if (el.modalCloudDot) el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-[#8E9591]';
+          if (el.modalCloudStatusText) {
+            el.modalCloudStatusText.textContent = 'Belum terhubung';
+            el.modalCloudStatusText.className = 'text-[10px] text-[#8E9591]';
+          }
           return;
         }
 
         if (status === 'syncing') {
-          el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse';
-          el.headerCloudLabel.textContent = 'Syncing';
-          el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
-          el.modalCloudStatusText.textContent = customLabel || 'Menyinkronkan...';
-          el.modalCloudStatusText.className = 'text-[10px] text-amber-400';
-        } else if (status === 'synced') {
-          el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#22C55E]';
-          el.headerCloudLabel.textContent = 'Synced';
-          el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-[#22C55E]';
-          el.modalCloudStatusText.textContent = customLabel || 'Terhubung';
-          el.modalCloudStatusText.className = 'text-[10px] font-medium text-[#22C55E]';
-        } else if (status === 'error') {
-          el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#E05252]';
-          el.headerCloudLabel.textContent = 'Offline';
-          el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-[#E05252]';
-          el.modalCloudStatusText.textContent = customLabel || 'Gagal terhubung';
-          el.modalCloudStatusText.className = 'text-[10px] text-[#E05252]';
-        } else {
-          el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#22C55E]';
-          el.headerCloudLabel.textContent = 'Synced';
-          el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-[#22C55E]';
-          el.modalCloudStatusText.textContent = 'Terhubung';
-          el.modalCloudStatusText.className = 'text-[10px] font-medium text-[#22C55E]';
-        }
-      }
-
-      async function syncToGoogleSheets(silent = true) {
-        const url = getAppsScriptUrl();
-        if (!url) return;
-
-        updateCloudStatusUI('syncing', 'Mengirim ke Sheets...');
-        if (!silent) {
-          showToast({
-            type: 'loading',
-            title: 'Mengirim ke Google Sheets...',
-            subtitle: `Menyinkronkan ${state.entries.length} baris portofolio`,
-            actionLabel: 'Proses',
-            duration: 0
-          });
-        }
-        try {
-          await fetch(url, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({
-              currency: 'USD',
-              entries: state.entries
-            })
-          });
-          updateCloudStatusUI('synced', `Tersimpan (${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })})`);
-          if (!silent) {
-            showToast({
-              type: 'success',
-              title: 'Tersimpan di Google Sheets',
-              badge: `${state.entries.length} baris`,
-              subtitle: 'Cadangan cloud berhasil diperbarui',
-              duration: 3200
-            });
+          if (el.headerCloudDot) el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse';
+          if (el.headerCloudLabel) el.headerCloudLabel.textContent = 'Syncing';
+          if (el.modalCloudDot) el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
+          if (el.modalCloudStatusText) {
+            el.modalCloudStatusText.textContent = customLabel || 'Menyinkronkan...';
+            el.modalCloudStatusText.className = 'text-[10px] text-amber-400';
           }
-        } catch (err) {
-          updateCloudStatusUI('error', 'Gagal mengirim (cek koneksi)');
-          if (!silent) {
-            showToast({
-              type: 'error',
-              title: 'Gagal Mengirim ke Cloud',
-              subtitle: 'Periksa koneksi internet Anda lalu coba lagi',
-              duration: 3500
-            });
+        } else if (status === 'synced') {
+          if (el.headerCloudDot) el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#22C55E]';
+          if (el.headerCloudLabel) el.headerCloudLabel.textContent = 'Synced';
+          if (el.modalCloudDot) el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-[#22C55E]';
+          if (el.modalCloudStatusText) {
+            el.modalCloudStatusText.textContent = customLabel || 'Terhubung';
+            el.modalCloudStatusText.className = 'text-[10px] font-medium text-[#22C55E]';
+          }
+        } else if (status === 'error') {
+          if (el.headerCloudDot) el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#E05252]';
+          if (el.headerCloudLabel) el.headerCloudLabel.textContent = 'Offline';
+          if (el.modalCloudDot) el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-[#E05252]';
+          if (el.modalCloudStatusText) {
+            el.modalCloudStatusText.textContent = customLabel || 'Gagal terhubung';
+            el.modalCloudStatusText.className = 'text-[10px] text-[#E05252]';
+          }
+        } else {
+          if (el.headerCloudDot) el.headerCloudDot.className = 'w-1.5 h-1.5 rounded-full bg-[#22C55E]';
+          if (el.headerCloudLabel) el.headerCloudLabel.textContent = 'Synced';
+          if (el.modalCloudDot) el.modalCloudDot.className = 'w-2 h-2 rounded-full bg-[#22C55E]';
+          if (el.modalCloudStatusText) {
+            el.modalCloudStatusText.textContent = 'Terhubung';
+            el.modalCloudStatusText.className = 'text-[10px] font-medium text-[#22C55E]';
           }
         }
       }
