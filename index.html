@@ -194,6 +194,47 @@
       background-color: #EAF0ED !important;
       color: #16A34A !important;
     }
+    /* iOS Modals (Settings, Entry, Top-Up, PIN) Light Theme Support */
+    html.light-theme #settingsModalBackdrop > div,
+    html.light-theme #entryModalSheet,
+    html.light-theme #topupOnlyModalBackdrop > div,
+    html.light-theme #pinVerifyModalBackdrop > div {
+      background-color: rgba(247, 250, 248, 0.96) !important;
+      border-color: #DCE3DF !important;
+      box-shadow: 0 -12px 36px rgba(15, 23, 20, 0.14) !important;
+    }
+    html.light-theme .bg-\[\#1E2320\]\/85,
+    html.light-theme .bg-\[\#1E2320\]\/90,
+    html.light-theme .bg-\[\#141716\]\/90 {
+      background-color: #FFFFFF !important;
+      border-color: #DCE3DF !important;
+    }
+    html.light-theme .divide-white\/\[0\.06\] > :not([hidden]) ~ :not([hidden]) {
+      border-color: #E7ECE9 !important;
+    }
+    html.light-theme .border-white\/\[0\.07\],
+    html.light-theme .border-white\/\[0\.08\],
+    html.light-theme .border-white\/\[0\.06\],
+    html.light-theme .border-white\/\[0\.1\] {
+      border-color: #DCE3DF !important;
+    }
+    html.light-theme .bg-white\/\[0\.06\],
+    html.light-theme .bg-white\/\[0\.07\],
+    html.light-theme .bg-white\/\[0\.08\] {
+      background-color: #E6ECE9 !important;
+    }
+    html.light-theme .bg-white\/\[0\.02\] {
+      background-color: #F4F7F5 !important;
+    }
+    html.light-theme .bg-white\/20 {
+      background-color: #CBD5D0 !important;
+    }
+    html.light-theme .hover\:bg-white\/\[0\.03\]:hover,
+    html.light-theme .hover\:bg-white\/\[0\.12\]:hover,
+    html.light-theme .hover\:bg-white\/\[0\.13\]:hover,
+    html.light-theme .hover\:bg-white\/\[0\.14\]:hover {
+      background-color: #DFE7E3 !important;
+    }
     /* Smooth Currency Switch Morph Animation */
     @keyframes currencyMorphFade {
       0% {
